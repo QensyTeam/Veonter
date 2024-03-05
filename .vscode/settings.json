@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "vga.h": "c",
+        "stdint.h": "c",
+        "tty.h": "c",
+        "ports.h": "c",
+        "stdio.h": "c"
+    }
+}

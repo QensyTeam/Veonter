@@ -1,58 +1,40 @@
 #ifndef PAGING_H
 #define PAGING_H
 
-#include <kernel/sys/ports.h>
-#include <kernel/sys/isr.h>
-#include <kernel/panic.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-/* Represents a page entry. */
-typedef struct page {
-  u32int present    : 1;   // Page present in memory
-  u32int rw         : 1;   // Read-only if clear, readwrite if set
-  u32int user       : 1;   // Supervisor level only if clear
-  u32int accessed   : 1;   // Has the page been accessed since last refresh?
-  u32int dirty      : 1;   // Has the page been written to since last refresh?
-  u32int unused     : 7;   // Amalgamation of unused and reserved bits
-  u32int frame      : 20;  // Frame address (shifted right 12 bits)
-} page_t;
+#define PAGE_DIRECTORY_SIZE 1024
+#define PAGE_TABLE_SIZE 1024
 
-/* Represents a page table. */
-typedef struct page_table {
-  page_t pages[1024];
+typedef struct {
+    uint32_t present    : 1;   // Page present in memory
+    uint32_t rw         : 1;   // Read-only if clear, readwrite if set
+    uint32_t user       : 1;   // Supervisor level only if clear
+    uint32_t accessed   : 1;   // Has the page been accessed since last refresh?
+    uint32_t dirty      : 1;   // Has the page been written to since last refresh?
+    uint32_t unused     : 7;   // Amalgamation of unused and reserved bits
+    uint32_t frame      : 20;  // Frame address (shifted right 12 bits)
+} page_table_entry_t;
+
+typedef struct {
+    page_table_entry_t pages[PAGE_TABLE_SIZE];
 } page_table_t;
 
-/* Represents a page directory. */
-typedef struct page_directory{
-  page_table_t *tables[1024];
-    
-  u32int tablesPhysical[1024];
-
-  u32int physicalAddr;
+typedef struct {
+    page_table_t* tables[PAGE_DIRECTORY_SIZE];
+    uint32_t tablesPhysical[PAGE_DIRECTORY_SIZE]; // The physical addresses of tablesPhysical
+    uint32_t physicalAddr; // The physical address of tablesPhysical
 } page_directory_t;
 
-/* Sets up the environment, page directories etc and
-   enables paging. */
-void paging_initialize();
+page_directory_t* paging_create_page_directory();
 
-/* Causes the specified page directory to be loaded into the
-   CR3 register. */
-void switch_page_directory(page_directory_t *new);
+page_table_t* paging_create_page_table();
 
-/* Retrieves a pointer to the page required.
-   If make == 1, if the page-table in which this page should
-   reside isn't created, create it! */
-page_t *get_page(u32int address, int make, page_directory_t *dir);
+void paging_map_page(page_directory_t* directory, uint32_t virtualAddr, uint32_t physicalAddr, bool isUser, bool isWritable);
 
-/* Handler for page faults. */
-void page_fault(registers_t regs);
+void paging_switch_page_directory(page_directory_t* directory);
 
-/* Deallocates a previously allocated frame. */
-void free_frame(page_t*);
+void paging_init();
 
-/* Allocate a new frame. */
-void alloc_frame(page_t*, int, int);
-
-/* Makes a copy of a page directory. */
-page_directory_t *clone_directory(page_directory_t *src);
-
-#endif
+#endif /* PAGING_H */

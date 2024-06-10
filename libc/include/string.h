@@ -18,13 +18,26 @@ void* memmove(void*, const void*, size_t);
 void* memset(void*, int, size_t);
 size_t strlen(const char*);
 
-void substr(char*, const char*, int, int);
+void substr(char* dest, const char* src, int start, int length);
 char *strncpy(char*, const char*, size_t);
 int strcpy(char*, const char*);
 char *strcat(char*, const char*);
 void* calloc(size_t, size_t);
 int strcmp(const char*, const char*);
 bool strcmpn(const char*, const char*);
+long strtol(const char *str, char **endptr, int base);
+long long strtoll(const char *str, char **endptr, int base);
+double strtod(const char *str, char **endptr);
+long double strtold(const char *str, char **endptr);
+float strtof(const char *str, char **endptr);
+const char* strchr(const char* str, int c);
+
+void lftoa(long double value, char *str, int precision);
+void ftoa(double value, char *str, int precision);
+void lltoa(long long value, char *str, int base);
+void ltoa(long value, char *str, int base);
+void itoa(int value, char* str, int base);
+void dtoa(double num, char* buffer, size_t precision);
 #ifdef __cplusplus
 }
 #endif

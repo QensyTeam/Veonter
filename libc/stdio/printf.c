@@ -7,21 +7,19 @@
 
 void putint(const size_t i) {
     char res[32];
-
-    /*if (i < 0) {
-        //terminal_putchar('-');
-    }*/
-
     itoa(i, res, 0);
     puts(res);
 }
+
+
+
 
 int printf(const char* format, ...) {
     va_list args;
     va_start(args, format);
 
     size_t count = 0;
-    char buffer[32];
+    char buffer[64];  // Увеличен размер буфера для больших чисел и строк
 
     while (*format) {
         if (*format == '%') {
@@ -57,6 +55,121 @@ int printf(const char* format, ...) {
                         char c = va_arg(args, int);
                         terminal_putchar(c);
                         count++;
+                    }
+                    break;
+                    case 'p': // Вывод указателя
+                    {
+                        void* ptr = va_arg(args, void*);
+                        itoa((size_t)ptr, buffer, 16); // Преобразуем указатель в строку в шестнадцатеричном формате
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            terminal_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'x': // Вывод целого числа в шестнадцатеричном формате
+                    {
+                        int value = va_arg(args, int);
+                        itoa(value, buffer, 16);
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            terminal_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'z': // Вывод size_t
+                    {
+                        format++;
+                        if (*format == 'u') {
+                            size_t value = va_arg(args, size_t);
+                            itoa(value, buffer, 10);
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                terminal_putchar(buffer[i]);
+                                count++;
+                            }
+                        } else {
+                            terminal_putchar('%');
+                            terminal_putchar('z');
+                            terminal_putchar(*format);
+                            count += 3;
+                        }
+                    }
+                    break;
+                    case 'f': // Вывод числа с плавающей запятой
+                    {
+                        double value = va_arg(args, double);
+                        ftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            terminal_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'l': // Вывод long и long long
+                    {
+                        format++;
+                        if (*format == 'd') { // long
+                            long value = va_arg(args, long);
+                            ltoa(value, buffer, 10);
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                terminal_putchar(buffer[i]);
+                                count++;
+                            }
+                        } else if (*format == 'l') { // long long
+                            format++;
+                            if (*format == 'd') {
+                                long long value = va_arg(args, long long);
+                                lltoa(value, buffer, 10);
+                                size_t len = strlen(buffer);
+                                for (size_t i = 0; i < len; i++) {
+                                    terminal_putchar(buffer[i]);
+                                    count++;
+                                }
+                            } else {
+                                terminal_putchar('%');
+                                terminal_putchar('l');
+                                terminal_putchar('l');
+                                terminal_putchar(*format);
+                                count += 4;
+                            }
+                        } else if (*format == 'f') { // long double
+                            long double value = va_arg(args, long double);
+                            lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                terminal_putchar(buffer[i]);
+                                count++;
+                            }
+                        } else {
+                            terminal_putchar('%');
+                            terminal_putchar('l');
+                            terminal_putchar(*format);
+                            count += 3;
+                        }
+                    }
+                    break;
+                    case 'L': // Вывод long double
+                    {
+                        format++;
+                        if (*format == 'f') {
+                            long double value = va_arg(args, long double);
+                            lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                terminal_putchar(buffer[i]);
+                                count++;
+                            }
+                        } else {
+                            terminal_putchar('%');
+                            terminal_putchar('L');
+                            terminal_putchar(*format);
+                            count += 3;
+                        }
                     }
                     break;
                     default:

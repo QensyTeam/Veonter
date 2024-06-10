@@ -2,6 +2,9 @@
 #define _STDIO_H 1
 
 #include <sys/cdefs.h>
+#include <kernel/kernel.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #define EOF (-1)
 
@@ -9,6 +12,7 @@
 extern "C" {
 #endif
 
+int scanf(const char* format, ...);
 int printf(const char* __restrict, ...);
 int putchar(int);
 int puts(const char*);

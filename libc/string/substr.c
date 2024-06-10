@@ -1,14 +1,11 @@
 #include <string.h>
 
-/**
- * @brief Вырезает и возвращает подстроку из строки
- *
- * @param char* dest - Указатель куда будет записана строка
- * @param char* source - Указатель на исходную строку
- * @param int source - Откуда копируем
- * @param size_t source - Количество копируемых строк
- */
-void substr(char *dest, const char *source, int from, int length){
-    strncpy(dest, source + from, length);
-    dest[length] = 0;
-} 
+void substr(char* dest, const char* src, int start, int length) {
+    size_t src_length = strlen(src);
+    if (start < 0 || (size_t)start + length > src_length) {
+        dest[0] = '\0';
+        return;
+    }
+    strncpy(dest, src + start, length);
+    dest[length] = '\0';
+}

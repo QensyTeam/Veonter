@@ -1,5 +1,7 @@
 #!/bin/sh
 set -e
+
+export PATH="$HOME/opt/cross/bin:$PATH"  # Добавляем эту команду для обновления переменной PATH
 . ./build.sh
 
 mkdir -p isodir

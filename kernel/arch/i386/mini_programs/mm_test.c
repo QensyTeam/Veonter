@@ -297,6 +297,7 @@ void test_lftoa() {
 void mm_test() {
     printf("\t[MEMORY TEST PROGRAM]\n");
     test_kheap();
+    sleep(2000);
     test_paging();
     test_memcmp();
     test_memcpy();

@@ -12,8 +12,11 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     idt_init(GDT_CODE_SEL_1);
     pic_init();
     timer_init();
-    kheap_init((void*)HEAP_START_ADDRESS, sizeof(100000));
+    // Рассчитываем размер кучи
+    size_t heap_size = calculate_heap_size(multiboot_info);
 
+    // Инициализируем кучу
+    kheap_init((void*)HEAP_START_ADDRESS, heap_size);
 
     irq_enable();
     return 0;

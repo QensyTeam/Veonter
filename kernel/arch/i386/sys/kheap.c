@@ -4,6 +4,7 @@
 
 #define HEAP_MAGIC 0x12345678
 #define HEAP_MIN_SIZE 0x70000
+#define HEAP_SIZE_PERCENTAGE 75
 
 typedef struct header {
     size_t size;
@@ -19,6 +20,20 @@ typedef struct {
 static void* heap_start;
 static size_t heap_size;
 static header_t* free_list;
+
+size_t calculate_heap_size(multiboot_info_t* multiboot_info) {
+    // Рассчитываем доступную физическую память в килобайтах
+    size_t mem_lower_kb = multiboot_info->mem_lower;
+    size_t mem_upper_kb = multiboot_info->mem_upper;
+
+    // Общий объем памяти в килобайтах
+    size_t total_memory_kb = mem_lower_kb + mem_upper_kb;
+
+    // Рассчитываем размер кучи в килобайтах
+    size_t heap_size_kb = (HEAP_SIZE_PERCENTAGE * total_memory_kb) / 100;
+
+    return heap_size_kb;
+}
 
 void kheap_init(void* start, size_t size) {
     heap_start = start;

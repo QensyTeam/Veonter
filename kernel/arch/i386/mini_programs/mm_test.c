@@ -4,6 +4,13 @@
 #include <string.h>
 #include <stdio.h>
 
+int total_tests = 0;
+int passed_tests = 0;
+int failed_tests = 0;
+const char* failed_test_names[100];
+int failed_test_count = 0;
+
+
 void test_paging() {
     const char* content[] = {
         " ",
@@ -11,7 +18,7 @@ void test_paging() {
         " "
     };
     int content_lines = sizeof(content) / sizeof(content[0]);
-    print_frame("PAGING TEST", content, content_lines, 23);
+    print_frame("PAGING TEST", content, content_lines, 25);
 
     // Создаем директорию страниц
     page_directory_t* pd = paging_create_page_directory();
@@ -59,7 +66,7 @@ void test_kheap() {
         " "
     };
     int content_lines = sizeof(content) / sizeof(content[0]);
-    print_frame("KHEAP TEST", content, content_lines, 22);
+    print_frame("KHEAP TEST", content, content_lines, 24);
 
     void *a = kmalloc(8);
     void *b = kmalloc(16);
@@ -97,10 +104,14 @@ void reset_text_color() {
 
 // Функция для тестирования, выводит результат
 void test_result(const char* func_name, int result) {
+    total_tests++;
     if (result) {
+        passed_tests++;
         set_text_color(10); // Зелёный цвет для PASSED
     } else {
+        failed_tests++;
         set_text_color(4); // Красный цвет для FAILED
+        failed_test_names[failed_test_count++] = func_name; // Сохраняем имя проваленного теста
     }
     printf("%s: %s\n", func_name, result ? "PASSED" : "FAILED");
     reset_text_color(); // Возвращаем стандартный цвет текста
@@ -323,4 +334,23 @@ void mm_test() {
     test_lltoa();
     test_ftoa();
     test_lftoa();
+
+    // Вывод итоговых результатов
+    printf("Total tests: %d\n", total_tests);
+    printf("Passed tests: %d\n", passed_tests);
+    printf("Failed tests: %d\n", failed_tests);
+
+    if (failed_tests > 0) {
+        set_text_color(4); // Красный цвет для Failed test details
+        printf("Failed test details:\n");
+        for (int i = 0; i < failed_test_count; i++) {
+            printf(" - %s\n", failed_test_names[i]);
+        }
+        printf("[TEST FAILED]\n");
+    } else {
+        set_text_color(10); // Зелёный цвет для успешного теста
+        printf("[TEST PASSED]\n");
+    }
+
+    reset_text_color(); // Возвращаем стандартный цвет текста
 }

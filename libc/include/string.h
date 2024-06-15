@@ -38,6 +38,7 @@ void lltoa(long long value, char *str, int base);
 void ltoa(long value, char *str, int base);
 void itoa(int value, char* str, int base);
 void dtoa(double num, char* buffer, size_t precision);
+void* malloc(size_t size);
 #ifdef __cplusplus
 }
 #endif

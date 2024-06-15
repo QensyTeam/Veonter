@@ -1,8 +1,11 @@
-#include <kernel/sys/pic.h>
+#include <kernel/kernel.h>
 #include <kernel/sys/isr.h>
 #include <kernel/drv/keyboard.h>
 #include <kernel/drv/tty.h>
 #define KEYBOARD_BUFFER_SIZE 128
+
+#define KEY_UP 0x48
+#define KEY_DOWN 0x50
 // Определяем английскую раскладку клавиатуры
 static const char keyboard_layout[128] = {
     0,   27,  '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
@@ -73,6 +76,18 @@ void keyboard_handler() {
         shift_flag = 0;
     } else if (scancode == 0x3A) {
         caps_lock_flag = !caps_lock_flag;
+    } else if (scancode == 0xE0) {
+        // Следующий байт будет указывать на код стрелки
+        uint8_t arrow_key = inb(0x60);
+        if (arrow_key == KEY_UP) {
+            keyboard_add_to_buffer('\x1B'); // Используем ESC в качестве специального символа
+            keyboard_add_to_buffer('[');
+            keyboard_add_to_buffer('A'); // Обозначение для стрелки вверх
+        } else if (arrow_key == KEY_DOWN) {
+            keyboard_add_to_buffer('\x1B');
+            keyboard_add_to_buffer('[');
+            keyboard_add_to_buffer('B'); // Обозначение для стрелки вниз
+        }
     } else if (scancode < 128) {
         char c;
 
@@ -94,6 +109,7 @@ void keyboard_handler() {
 
     pic_eoi(KEYBOARD_IRQ); // Отправляем сигнал "конец прерывания"
 }
+
 
 // Функция для получения символа из буфера
 char keyboard_get_char() {

@@ -1,6 +1,10 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 #define COMMAND_BUFFER_SIZE 256
+#define PROMPT_STRING "csl> "
+#define PROMPT_LENGTH 4  // Длина строки приглашения с учётом '\0'
+static char command_buffer[COMMAND_BUFFER_SIZE];
+static size_t command_length = 0;
 void console_initialize();
 void console_input_loop();
 void console_clear();

@@ -57,6 +57,7 @@ string/strtod.o \
 string/strtof.o \
 string/strtol.o \
 string/strchr.o \
+string/malloc.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

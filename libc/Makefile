@@ -29,6 +29,7 @@ LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
+string/calloc.o \
 stdio/scanf.o \
 stdio/printf.o \
 stdio/putchar.o \
@@ -36,6 +37,8 @@ stdio/puts.o \
 stdlib/abort.o \
 stdlib/reverseString.o \
 string/itoa.o \
+string/free.o \
+string/realloc.o \
 string/ftoa.o \
 string/lftoa.o \
 string/lltoa.o \
@@ -58,6 +61,7 @@ string/strtof.o \
 string/strtol.o \
 string/strchr.o \
 string/malloc.o \
+string/strncmp.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

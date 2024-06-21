@@ -13,6 +13,10 @@ cat > isodir/boot/grub/grub.cfg << EOF
 
 set timeout=0
 
+insmod vbe
+insmod vga
+set gfxpayload=keep
+
 # Установить цвета текста и фона
 set menu_color_normal=magenta/white
 set menu_color_highlight=white/magenta

@@ -31,6 +31,7 @@ double strtod(const char *str, char **endptr);
 long double strtold(const char *str, char **endptr);
 float strtof(const char *str, char **endptr);
 const char* strchr(const char* str, int c);
+void free(void* ptr);
 
 void lftoa(long double value, char *str, int precision);
 void ftoa(double value, char *str, int precision);
@@ -39,6 +40,9 @@ void ltoa(long value, char *str, int base);
 void itoa(int value, char* str, int base);
 void dtoa(double num, char* buffer, size_t precision);
 void* malloc(size_t size);
+void* realloc(void* ptr, size_t old_size, size_t new_size);
+int strncmp(const char *s1, const char *s2, size_t n);
+void* calloc(size_t num, size_t size);
 #ifdef __cplusplus
 }
 #endif

@@ -49,9 +49,9 @@ void test_paging() {
     // Печатаем значения, чтобы убедиться, что они записаны в правильные физические адреса
     printf("Value at virtual address 0x%x: 0x%x\n", virt_addr1, *ptr1);
     printf("Value at virtual address 0x%x: 0x%x\n", virt_addr2, *ptr2);
-    terminal_set_color(10);
+    shell_text_color(RGB(0, 255, 0));
     printf("paging test complete.\n");
-    terminal_set_color(15);
+    shell_text_color(RGB(255, 255, 255));
 
     // Очищаем директорию страниц (необязательно)
     kfree(pd);
@@ -87,19 +87,9 @@ void test_kheap() {
 
     kfree(d);
     printf("Freed d\n");
-    terminal_set_color(10);
+    shell_text_color(RGB(0, 255, 0));
     printf("kheap test complete.\n\n");
-    terminal_set_color(15);
-}
-
-// Установка цвета текста
-void set_text_color(int color) {
-    terminal_set_color(color);
-}
-
-// Возврат к стандартному цвету текста
-void reset_text_color() {
-    terminal_set_color(15);
+    shell_text_color(RGB(255, 255, 255));
 }
 
 // Функция для тестирования, выводит результат
@@ -107,14 +97,14 @@ void test_result(const char* func_name, int result) {
     total_tests++;
     if (result) {
         passed_tests++;
-        set_text_color(10); // Зелёный цвет для PASSED
+        shell_text_color(RGB(0, 255, 0));
     } else {
         failed_tests++;
-        set_text_color(4); // Красный цвет для FAILED
+        shell_text_color(RGB(255, 0, 0));
         failed_test_names[failed_test_count++] = func_name; // Сохраняем имя проваленного теста
     }
     printf("%s: %s\n", func_name, result ? "PASSED" : "FAILED");
-    reset_text_color(); // Возвращаем стандартный цвет текста
+    shell_text_color(RGB(255, 255, 255));
 }
 
 // Тест для memcmp
@@ -341,16 +331,17 @@ void mm_test() {
     printf("Failed tests: %d\n", failed_tests);
 
     if (failed_tests > 0) {
-        set_text_color(4); // Красный цвет для Failed test details
+        shell_text_color(RGB(255, 0, 0));
         printf("Failed test details:\n");
         for (int i = 0; i < failed_test_count; i++) {
             printf(" - %s\n", failed_test_names[i]);
         }
         printf("[TEST FAILED]\n");
     } else {
-        set_text_color(10); // Зелёный цвет для успешного теста
+        shell_text_color(RGB(0, 255, 0));
         printf("[TEST PASSED]\n");
     }
 
-    reset_text_color(); // Возвращаем стандартный цвет текста
+    shell_text_color(RGB(255, 255, 255));
 }
+

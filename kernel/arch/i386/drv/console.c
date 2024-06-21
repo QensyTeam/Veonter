@@ -3,8 +3,8 @@
 #include <stdio.h>  // Для printf и других стандартных функций
 #include <string.h> // Для strcmp и других строковых функций
 
-#define SCREEN_WIDTH 80
 #define HISTORY_SIZE 10  // Максимальное количество команд в истории
+#define SCREEN_WIDTH 80
 
 #define BORDER_TOP_LEFT 218
 #define BORDER_TOP_RIGHT 191
@@ -61,7 +61,7 @@ const char* get_next_command() {
 
 void console_initialize() {
     keyboard_init();
-    terminal_clearscreen();
+    vbe_clear_screen(RGB(0,0,0));
     printf(PROMPT_STRING);
 }
 
@@ -155,7 +155,7 @@ void show_help_menu() {
 
 void console_process_command(const char* command) {
     if (strcmp(command, "clear") == 0) {
-        terminal_clearscreen();
+        vbe_clear_screen(RGB(0,0,0));
     } else if (strcmp(command, "help") == 0) {
         printf("\n");
         show_help_menu();
@@ -170,7 +170,7 @@ void console_process_command(const char* command) {
         printf("\n");
     } else if (strcmp(command, "logo") == 0) {
         printf("\n");
-        terminal_clearscreen();
+        vbe_clear_screen(RGB(0,0,0));
         terminal_startscreen();
         printf("\n");
     } else if (strcmp(command, "off") == 0) {
@@ -180,7 +180,7 @@ void console_process_command(const char* command) {
     } else {
         printf("Unknown command: ");
         printf(command);
-        terminal_putchar('\n');
+        shell_putchar('\n');
     }
     add_command_to_history(command); // Добавление команды в историю
     printf(PROMPT_STRING);
@@ -201,7 +201,7 @@ void console_input_loop() {
             }
         } else if (c == '\b') {
             if (command_length > 0) {
-                if (terminal_getcolumn() > PROMPT_LENGTH) {
+                if (shell_getcolumn() > PROMPT_LENGTH) {
                     command_length--;
                 }
             }

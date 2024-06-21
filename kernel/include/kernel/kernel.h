@@ -18,6 +18,7 @@
 #include <kernel/drv/console.h>
 
 #include <kernel/drv/tty.h>
+#include <kernel/drv/graph_mode.h>
 #include <kernel/drv/cursor.h>
 #include <kernel/drv/keyboard.h>
 #include <kernel/drv/speaker.h>

@@ -102,7 +102,7 @@ void keyboard_handler() {
         }
 
         if (c != 0) {
-            terminal_putchar(c); // Выводим символ на экран
+            shell_putchar(c); // Выводим символ на экран
             keyboard_add_to_buffer(c); // Добавляем символ в буфер
         }
     }

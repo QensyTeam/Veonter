@@ -3,16 +3,13 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <kernel/drv/tty.h>
+#include <kernel/kernel.h>
 
 void putint(const size_t i) {
     char res[32];
     itoa(i, res, 0);
     puts(res);
 }
-
-
-
 
 int printf(const char* format, ...) {
     va_list args;
@@ -25,7 +22,7 @@ int printf(const char* format, ...) {
         if (*format == '%') {
             format++;
             if (*format == '%') {
-                terminal_putchar('%');
+                shell_putchar('%');
                 count++;
             } else {
                 switch (*format) {
@@ -35,7 +32,7 @@ int printf(const char* format, ...) {
                         itoa(value, buffer, 10);
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
-                            terminal_putchar(buffer[i]);
+                            shell_putchar(buffer[i]);
                             count++;
                         }
                     }
@@ -45,7 +42,7 @@ int printf(const char* format, ...) {
                         char* str = va_arg(args, char*);
                         size_t len = strlen(str);
                         for (size_t i = 0; i < len; i++) {
-                            terminal_putchar(str[i]);
+                            shell_putchar(str[i]);
                             count++;
                         }
                     }
@@ -53,7 +50,7 @@ int printf(const char* format, ...) {
                     case 'c': // Вывод символа
                     {
                         char c = va_arg(args, int);
-                        terminal_putchar(c);
+                        shell_putchar(c);
                         count++;
                     }
                     break;
@@ -63,7 +60,7 @@ int printf(const char* format, ...) {
                         itoa((size_t)ptr, buffer, 16); // Преобразуем указатель в строку в шестнадцатеричном формате
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
-                            terminal_putchar(buffer[i]);
+                            shell_putchar(buffer[i]);
                             count++;
                         }
                     }
@@ -74,7 +71,7 @@ int printf(const char* format, ...) {
                         itoa(value, buffer, 16);
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
-                            terminal_putchar(buffer[i]);
+                            shell_putchar(buffer[i]);
                             count++;
                         }
                     }
@@ -87,13 +84,13 @@ int printf(const char* format, ...) {
                             itoa(value, buffer, 10);
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
-                                terminal_putchar(buffer[i]);
+                                shell_putchar(buffer[i]);
                                 count++;
                             }
                         } else {
-                            terminal_putchar('%');
-                            terminal_putchar('z');
-                            terminal_putchar(*format);
+                            shell_putchar('%');
+                            shell_putchar('z');
+                            shell_putchar(*format);
                             count += 3;
                         }
                     }
@@ -104,7 +101,7 @@ int printf(const char* format, ...) {
                         ftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
-                            terminal_putchar(buffer[i]);
+                            shell_putchar(buffer[i]);
                             count++;
                         }
                     }
@@ -117,7 +114,7 @@ int printf(const char* format, ...) {
                             ltoa(value, buffer, 10);
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
-                                terminal_putchar(buffer[i]);
+                                shell_putchar(buffer[i]);
                                 count++;
                             }
                         } else if (*format == 'l') { // long long
@@ -127,14 +124,14 @@ int printf(const char* format, ...) {
                                 lltoa(value, buffer, 10);
                                 size_t len = strlen(buffer);
                                 for (size_t i = 0; i < len; i++) {
-                                    terminal_putchar(buffer[i]);
+                                    shell_putchar(buffer[i]);
                                     count++;
                                 }
                             } else {
-                                terminal_putchar('%');
-                                terminal_putchar('l');
-                                terminal_putchar('l');
-                                terminal_putchar(*format);
+                                shell_putchar('%');
+                                shell_putchar('l');
+                                shell_putchar('l');
+                                shell_putchar(*format);
                                 count += 4;
                             }
                         } else if (*format == 'f') { // long double
@@ -142,13 +139,13 @@ int printf(const char* format, ...) {
                             lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
-                                terminal_putchar(buffer[i]);
+                                shell_putchar(buffer[i]);
                                 count++;
                             }
                         } else {
-                            terminal_putchar('%');
-                            terminal_putchar('l');
-                            terminal_putchar(*format);
+                            shell_putchar('%');
+                            shell_putchar('l');
+                            shell_putchar(*format);
                             count += 3;
                         }
                     }
@@ -161,26 +158,26 @@ int printf(const char* format, ...) {
                             lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
-                                terminal_putchar(buffer[i]);
+                                shell_putchar(buffer[i]);
                                 count++;
                             }
                         } else {
-                            terminal_putchar('%');
-                            terminal_putchar('L');
-                            terminal_putchar(*format);
+                            shell_putchar('%');
+                            shell_putchar('L');
+                            shell_putchar(*format);
                             count += 3;
                         }
                     }
                     break;
                     default:
-                        terminal_putchar('%');
-                        terminal_putchar(*format);
+                        shell_putchar('%');
+                        shell_putchar(*format);
                         count += 2;
                         break;
                 }
             }
         } else {
-            terminal_putchar(*format);
+            shell_putchar(*format);
             count++;
         }
         format++;

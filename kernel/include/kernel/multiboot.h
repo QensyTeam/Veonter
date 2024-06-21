@@ -16,6 +16,7 @@
 
 /* The size of our stack (16KB). */
 #define STACK_SIZE                      0x4000
+#define MULTIBOOT_FLAG_VBE     0x400
 
 /* C symbol format. HAVE_ASM_USCORE is defined by configure. */
 #ifdef HAVE_ASM_USCORE
@@ -41,6 +42,33 @@ typedef struct multiboot_header
     unsigned long bss_end_addr;
     unsigned long entry_addr;
 } multiboot_header_t;
+
+typedef struct {
+    uint16_t attributes;
+    uint8_t winA, winB;
+    uint16_t granularity;
+    uint16_t winsize;
+    uint16_t segmentA, segmentB;
+    uint32_t realFctPtr;
+    uint16_t pitch; // Bytes per scanline
+
+    uint16_t Xres, Yres;
+    uint8_t Wchar, Ychar, planes, bpp, banks;
+    uint8_t memory_model, bank_size, image_pages;
+    uint8_t reserved0;
+
+    uint8_t red_mask, red_position;
+    uint8_t green_mask, green_position;
+    uint8_t blue_mask, blue_position;
+    uint8_t rsv_mask, rsv_position;
+    uint8_t directcolor_attributes;
+
+    uint32_t physbase;  // Your LFB (framebuffer) address
+    uint32_t reserved1;
+    uint16_t reserved2;
+} vbe_mode_info_t;
+
+
 
 /* The symbol table for a.out. */
 typedef struct aout_symbol_table
@@ -75,10 +103,23 @@ typedef struct multiboot_info
         aout_symbol_table_t aout_sym;
         elf_section_header_table_t elf_sec;
     } u;
-        unsigned long mmap_length;
-        unsigned long mmap_addr;
+    unsigned long mmap_length;
+    unsigned long mmap_addr;
+    unsigned long drives_length;
+    unsigned long drives_addr;
+    unsigned long config_table;
+    unsigned long boot_loader_name;
+    unsigned long apm_table;
+    unsigned long vbe_control_info;
+    unsigned long vbe_mode_info;
+    unsigned short vbe_mode;
+    unsigned short vbe_interface_seg;
+    unsigned short vbe_interface_off;
+    unsigned short vbe_interface_len;
+    unsigned short framebuffer_pitch;
+    unsigned short framebuffer_width;
+    unsigned short framebuffer_height;
 } multiboot_info_t;
-
 /* The module structure. */
 typedef struct module
 {

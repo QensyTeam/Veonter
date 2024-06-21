@@ -2,7 +2,10 @@
 multiboot_info_t* multiboot;
 
 void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((unused)) unsigned int magic) {
-    terminal_initialize(); 
+    //set_video_mode(800, 600, 32);
+    
+    
+    //terminal_initialize(); 
     init_hal(mbd);
     multiboot = mbd;
     check();
@@ -11,7 +14,6 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
     terminal_startscreen();
     printf("csl> ");
     keyboard_init();
-
 }
 
 void kernel_main(void) {

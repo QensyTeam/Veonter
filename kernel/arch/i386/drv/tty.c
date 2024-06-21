@@ -15,13 +15,13 @@ char* title =
 char* Version = "\t\t\t\t\t\t\t\t\t\t\t\tVersion: 0.0.1 Wolf(Pre-Alpha)\n\n";
 
 void terminal_startscreen() {
-    terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_MAGENTA, VGA_COLOR_BLACK));
+    shell_text_color(RGB(140, 0, 255));
     printf(title);
-    terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK));
+    shell_text_color(RGB(0, 252, 29));
 	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome\n");
-	terminal_set_color(vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
+	shell_text_color(RGB(112, 112, 112));
 	printf(Version);
-	terminal_set_color(vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
+	shell_text_color(RGB(255, 255, 255));
 }
 
 
@@ -44,11 +44,11 @@ void terminal_initialize(void) {
 }
 
 void check(void) {
-	terminal_set_color(vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
+	shell_text_color(RGB(255, 255, 255));
 	printf("[ ");
-	terminal_set_color(vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK));
+	shell_text_color(RGB(0, 255, 0));
 	printf("OK");
-	terminal_set_color(vga_entry_color(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
+	shell_text_color(RGB(255, 255, 255));
 	printf(" ] - ");
 }
 
@@ -73,10 +73,10 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
+
 void terminal_update(void) {
 	memcpy(VGA_MEMORY, terminal_buffer, VGA_WIDTH * VGA_HEIGHT * sizeof(uint16_t));
 }
-
 
 void terminal_clear_line(size_t y)
 { 

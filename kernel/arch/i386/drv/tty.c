@@ -5,27 +5,6 @@ static size_t terminal_column;
 static uint8_t terminal_color;
 static uint16_t* terminal_buffer;
 
-char* title = 
-"\n\t\t\t\t##  ## #####  ####  ##  ## ###### ##### ##### \n\
-\t\t\t\t##  ## ##    ##  ## ### ##   ##   ##    ##  ##\n\
-\t\t\t\t##  ## ####  ##  ## ## ###   ##   ####  ##### \n\
-\t\t\t\t ####  ##    ##  ## ##  ##   ##   ##    ##  ##\n\
-\t\t\t\t  ##   #####  ####  ##  ##   ##   ##### ##  ##\n\n";
-
-char* Version = "\t\t\t\t\t\t\t\t\t\t\t\tVersion: 0.0.1 Wolf(Pre-Alpha)\n\n";
-
-void terminal_startscreen() {
-    shell_text_color(RGB(140, 0, 255));
-    printf(title);
-    shell_text_color(RGB(0, 252, 29));
-	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome\n");
-	shell_text_color(RGB(112, 112, 112));
-	printf(Version);
-	shell_text_color(RGB(255, 255, 255));
-}
-
-
-
 void terminal_initialize(void) {
 	terminal_row = 0;
 	terminal_column = 0;

@@ -20,6 +20,5 @@ void terminal_clearscreen(void);
 void terminal_scroll(void);
 void check(void);
 char terminal_getchar(void);
-void terminal_startscreen();
 
 #endif

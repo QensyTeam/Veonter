@@ -2,7 +2,6 @@
 #define _STDIO_H 1
 
 #include <sys/cdefs.h>
-#include <kernel/kernel.h>
 #include <stddef.h>
 #include <stdbool.h>
 

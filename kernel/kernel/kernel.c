@@ -11,7 +11,7 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
     check();
     printf("PC Speaker testing!\n\n");
     beep(6, 10);
-    terminal_startscreen();
+    logo();
     printf("csl> ");
     keyboard_init();
 }

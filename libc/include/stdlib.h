@@ -2,7 +2,6 @@
 #define _STDLIB_H 1
 
 #include <sys/cdefs.h>
-#include <kernel/kernel.h>
 
 #ifdef __cplusplus
 extern "C" {

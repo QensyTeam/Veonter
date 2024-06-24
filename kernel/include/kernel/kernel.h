@@ -18,7 +18,11 @@
 #include <kernel/drv/console.h>
 
 #include <kernel/drv/tty.h>
-#include <kernel/drv/graph_mode.h>
+#include <kernel/sys/gui/vbe.h>
+#include <kernel/sys/gui/gui.h>
+#include <kernel/sys/gui/geometry.h>
+#include <kernel/sys/gui/psf.h>
+#include <kernel/sys/gui/shell.h>
 #include <kernel/drv/cursor.h>
 #include <kernel/drv/keyboard.h>
 #include <kernel/drv/speaker.h>

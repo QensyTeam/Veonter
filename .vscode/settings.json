@@ -4,6 +4,13 @@
         "stdint.h": "c",
         "tty.h": "c",
         "ports.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdarg.h": "c",
+        "keyboard.h": "c",
+        "shell.h": "c",
+        "geometry.h": "c",
+        "kernel.h": "c",
+        "idt.h": "c",
+        "psf.h": "c"
     }
 }

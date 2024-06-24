@@ -26,6 +26,9 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
+static char command_buffer[COMMAND_BUFFER_SIZE];
+static size_t command_length = 0;
+
 void add_command_to_history(const char* command) {
     if (history.total_commands < HISTORY_SIZE) {
         strcpy(history.commands[history.total_commands++], command);
@@ -171,12 +174,15 @@ void console_process_command(const char* command) {
     } else if (strcmp(command, "logo") == 0) {
         printf("\n");
         vbe_clear_screen(RGB(0,0,0));
-        terminal_startscreen();
+        logo();
         printf("\n");
     } else if (strcmp(command, "off") == 0) {
         printf("Shutting down...\n");
         sleep(1000);
         outw(0x604, 0x2000);
+    } else if (strcmp(command, "window") == 0) {
+        printf("Showing Window...\n");
+        Window("My Program", 512, 10, 370, 250);
     } else {
         printf("Unknown command: ");
         printf(command);
@@ -201,8 +207,9 @@ void console_input_loop() {
             }
         } else if (c == '\b') {
             if (command_length > 0) {
-                if (shell_getcolumn() > PROMPT_LENGTH) {
+                if (vbe_getcolumn() > PROMPT_LENGTH) {
                     command_length--;
+                    putchar('\b'); // Удаление символа с экрана
                 }
             }
         } else if (c == '\x1B') {
@@ -215,7 +222,7 @@ void console_input_loop() {
                     if (previous_command) {
                         // Очистка текущей строки
                         while (command_length > 0) {
-                            putchar('\b');
+                            shell_putchar('\b');
                             command_length--;
                         }
                         printf("%s", previous_command);
@@ -226,7 +233,7 @@ void console_input_loop() {
                     const char* next_command = get_next_command();
                     if (next_command) {
                         while (command_length > 0) {
-                            putchar('\b');
+                            shell_putchar('\b');
                             command_length--;
                         }
                         printf("%s", next_command);
@@ -234,7 +241,7 @@ void console_input_loop() {
                         command_length = strlen(next_command);
                     } else {
                         while (command_length > 0) {
-                            putchar('\b');
+                            shell_putchar('\b');
                             command_length--;
                         }
                     }
@@ -243,6 +250,7 @@ void console_input_loop() {
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
                 command_buffer[command_length++] = c;
+                putchar(c); // Отображение символа на экране
             }
         }
     }

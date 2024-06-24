@@ -16,7 +16,6 @@
 #include <kernel/sys/kheap.h>
 #include <kernel/sys/paging.h>
 #include <kernel/drv/console.h>
-
 #include <kernel/drv/tty.h>
 #include <kernel/sys/gui/vbe.h>
 #include <kernel/sys/gui/gui.h>
@@ -29,3 +28,4 @@
 #include <kernel/sys/vga.h>
 #include <kernel/multiboot.h>
 #include <kernel/hal.h>
+#include <kernel/sys/fs/vfs.h>

@@ -11,6 +11,9 @@
         "geometry.h": "c",
         "kernel.h": "c",
         "idt.h": "c",
-        "psf.h": "c"
+        "psf.h": "c",
+        "hal.h": "c",
+        "vfs.h": "c",
+        "multiboot.h": "c"
     }
 }

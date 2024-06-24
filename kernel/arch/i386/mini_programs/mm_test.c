@@ -10,6 +10,28 @@ int failed_tests = 0;
 const char* failed_test_names[100];
 int failed_test_count = 0;
 
+void bzero_test(){
+    int arr[5] = {1, 2, 3, 4, 5};
+    size_t arr_size = sizeof(arr);
+
+    // Выводим исходный массив
+    printf("Original array:\n");
+    for (size_t i = 0; i < arr_size / sizeof(int); ++i) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    // Обнуляем содержимое массива с помощью bzero
+    bzero(arr, arr_size);
+
+    // Выводим обнуленный массив
+    printf("Array after bzero:\n");
+    for (size_t i = 0; i < arr_size / sizeof(int); ++i) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
 
 void test_paging() {
     const char* content[] = {
@@ -297,6 +319,7 @@ void test_lftoa() {
 
 void mm_test() {
     printf("\t[MEMORY TEST PROGRAM]\n");
+    bzero_test();
     test_kheap();
     sleep(2000);
     test_paging();

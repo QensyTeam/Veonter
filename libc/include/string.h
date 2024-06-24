@@ -43,6 +43,8 @@ void* malloc(size_t size);
 void* realloc(void* ptr, size_t old_size, size_t new_size);
 int strncmp(const char *s1, const char *s2, size_t n);
 void* calloc(size_t num, size_t size);
+void bzero(void *s, size_t n);
+
 #ifdef __cplusplus
 }
 #endif

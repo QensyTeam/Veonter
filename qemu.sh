@@ -2,4 +2,4 @@
 set -e
 
 . ./iso.sh
-cmd.exe /C "qemu-system-i386 -cdrom Veonter.iso -serial mon:stdio -m 128M -vga std"
+qemu-system-i386 -m 2024 -cdrom Veonter.iso -monitor stdio 

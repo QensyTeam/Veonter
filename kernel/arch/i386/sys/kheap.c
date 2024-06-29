@@ -40,7 +40,6 @@ void kheap_init(void* start, size_t size) {
     heap_size = size;
     free_list = (header_t*)heap_start;
 
-    // Initial block
     free_list->size = heap_size - sizeof(header_t) - sizeof(footer_t);
     free_list->magic = HEAP_MAGIC;
     free_list->next = NULL;
@@ -55,7 +54,6 @@ void kheap_init(void* start, size_t size) {
 void* kmalloc(size_t size) {
     if (size == 0) return NULL;
 
-    // Find a free block
     header_t* current = free_list;
     while (current) {
         if (current->magic != HEAP_MAGIC) {
@@ -64,9 +62,7 @@ void* kmalloc(size_t size) {
         }
 
         if (current->size >= size) {
-            // Allocate from this block
             if (current->size > size + sizeof(header_t) + sizeof(footer_t)) {
-                // Split the block
                 header_t* new_block = (header_t*)((char*)current + sizeof(header_t) + size);
                 new_block->size = current->size - size - sizeof(header_t) - sizeof(footer_t);
                 new_block->magic = HEAP_MAGIC;
@@ -80,7 +76,6 @@ void* kmalloc(size_t size) {
                 current->next = new_block;
             }
 
-            // Remove current from free list
             if (current == free_list) {
                 free_list = current->next;
             } else {
@@ -97,7 +92,7 @@ void* kmalloc(size_t size) {
         current = current->next;
     }
 
-    return NULL; // Out of memory
+    return NULL; 
 }
 
 void kfree(void* ptr) {
@@ -110,7 +105,6 @@ void kfree(void* ptr) {
         panic("Heap corruption detected!", "kheap.c", 92);
     }
 
-    // Add the block back to the free list
     header->next = free_list;
     free_list = header;
 }

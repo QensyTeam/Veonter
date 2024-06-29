@@ -4,10 +4,10 @@
 __attribute__((__noreturn__))
 void abort(void) {
 #if defined(__is_libk)
-	// TODO: Add proper kernel panic.
+	// TODO: kernel panic.
 	printf("kernel: panic: abort()\n");
 #else
-	// TODO: Abnormally terminate the process as if by SIGABRT.
+	// TODO: SIGABRT.
 	printf("abort()\n");
 #endif
 	while (1) { }

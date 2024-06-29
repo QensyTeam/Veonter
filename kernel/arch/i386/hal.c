@@ -1,7 +1,6 @@
 #include <kernel/kernel.h>
 
 #define HEAP_START_ADDRESS 0x70000
-#define YOUR_HEAP_SIZE 0x100000 
 
 void irq_disable();
 void irq_enable();
@@ -33,8 +32,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     logo();
     printf("\n");
     shell_text_color(RGB(150, 150, 150));
-	detect_cpu();
-	shell_text_color(fg_color);
+    detect_cpu();
+    shell_text_color(fg_color);
     printf("\n");
     printf("csl> ");
     keyboard_init();

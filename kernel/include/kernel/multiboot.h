@@ -1,24 +1,19 @@
 #ifndef _KERNEL_MULTIBOOT_H
 #define _KERNEL_MULTIBOOT_H
 
-/* The magic number for the Multiboot header. */
 #define MULTIBOOT_HEADER_MAGIC          0x1BADB002
 
-/* The flags for the Multiboot header. */
 #ifdef __ELF__
 # define MULTIBOOT_HEADER_FLAGS         0x00000003
 #else
 # define MULTIBOOT_HEADER_FLAGS         0x00010003
 #endif
 
-/* The magic number passed by a Multiboot-compliant boot loader. */
 #define MULTIBOOT_BOOTLOADER_MAGIC      0x2BADB002
 
-/* The size of our stack (16KB). */
 #define STACK_SIZE                      0x4000
 #define MULTIBOOT_FLAG_VBE     0x400
 
-/* C symbol format. HAVE_ASM_USCORE is defined by configure. */
 #ifdef HAVE_ASM_USCORE
 # define EXT_C(sym)                     _ ## sym
 #else
@@ -26,11 +21,7 @@
 #endif
 
 #ifndef ASM
-/* Do not include here in boot.S. */
 
-/* Types. */
-
-/* The Multiboot header. */
 typedef struct multiboot_header
 {
     unsigned long magic;
@@ -50,7 +41,7 @@ typedef struct {
     uint16_t winsize;
     uint16_t segmentA, segmentB;
     uint32_t realFctPtr;
-    uint16_t pitch; // Bytes per scanline
+    uint16_t pitch; 
 
     uint16_t Xres, Yres;
     uint8_t Wchar, Ychar, planes, bpp, banks;
@@ -63,14 +54,11 @@ typedef struct {
     uint8_t rsv_mask, rsv_position;
     uint8_t directcolor_attributes;
 
-    uint32_t physbase;  // Your LFB (framebuffer) address
+    uint32_t physbase;  
     uint32_t reserved1;
     uint16_t reserved2;
 } vbe_mode_info_t;
 
-
-
-/* The symbol table for a.out. */
 typedef struct aout_symbol_table
 {
     unsigned long tabsize;
@@ -79,7 +67,6 @@ typedef struct aout_symbol_table
     unsigned long reserved;
 } aout_symbol_table_t;
 
-/* The section header table for ELF. */
 typedef struct elf_section_header_table
 {
     unsigned long num;
@@ -88,7 +75,6 @@ typedef struct elf_section_header_table
     unsigned long shndx;
 } elf_section_header_table_t;
 
-/* The Multiboot information. */
 typedef struct multiboot_info
 {
     unsigned long flags;
@@ -120,7 +106,7 @@ typedef struct multiboot_info
     unsigned short framebuffer_width;
     unsigned short framebuffer_height;
 } multiboot_info_t;
-/* The module structure. */
+
 typedef struct module
 {
     unsigned long mod_start;
@@ -129,8 +115,6 @@ typedef struct module
     unsigned long reserved;
 } module_t;
 
-/* The memory map. Be careful that the offset 0 is base_addr_low
-  but no size. */
 typedef struct memory_map
 {
     unsigned long size;

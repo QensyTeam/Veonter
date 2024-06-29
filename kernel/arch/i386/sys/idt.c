@@ -8,26 +8,12 @@
 #include <kernel/sys/ports.h>
 #include <kernel/panic.h>
 
-// The PIC has less interrupts available than MAX_INTERRUPTS (since that's for x86 in general)
-// It shouldn't be an issue, we will just have too big an IDT array for now
 static struct idt_descriptor	_idt[MAX_INTERRUPTS];
 static struct idtr				_idtr;
 
-// Installs the ISR into the idt array
 void idt_set_entry (uint32_t i, uint16_t flags, uint16_t sel, void (*irq)()) {
- 
-	/*if(i >= MAX_INTERRUPTS) {
-        kpanic("MAX_INTERRUPTS exceded");
-    }
- 
-	if(irq == NULL) {
-        kpanic("irq == NULL");
-    }*/
- 
-	//get base address of interrupt handler
 	uint32_t uiBase     = (uint32_t)&(*irq);
  
-	// store base address into idt
 	_idt[i].offset_low	=	uiBase & 0xffff;
 	_idt[i].offset_high	=	(uiBase >> 16) & 0xffff;
 	_idt[i].reserved	=	0;
@@ -35,10 +21,6 @@ void idt_set_entry (uint32_t i, uint16_t flags, uint16_t sel, void (*irq)()) {
     _idt[i].sel		    =	sel;
 }
 
-/* 
- * All the declarations for the ASM functions and the set_isrs function
- * Down here to cut down on clutter, very repetitive
- */
 void _isr0();
 void _isr1();
 void _isr2();
@@ -146,15 +128,12 @@ void set_isrs(uint16_t code_selector) {
 void set_isrs(uint16_t codeSel);
 
 void idt_init(uint16_t code_selector) {
-
-	//set up idtr for processor
 	_idtr.limit = sizeof (struct idt_descriptor) * MAX_INTERRUPTS-1;
 	_idtr.base	= (uint32_t)&_idt[0];
 	memset((void*)&_idt[0], 0, sizeof(struct idt_descriptor) * MAX_INTERRUPTS-1);
 
     set_isrs(code_selector);
  
-	//install idt
 	__asm__( "lidt (%0)" :: "m" (_idtr) );
 
     check();

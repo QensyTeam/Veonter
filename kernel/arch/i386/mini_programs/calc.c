@@ -1,6 +1,6 @@
 #include <kernel/kernel.h>
-#define COMMANDS_BUFFER_SIZE 256
 #include <stdio.h>
+#define COMMANDS_BUFFER_SIZE 256
 
 void calculator() {
     printf("\t[CALCULATOR]\n\n");

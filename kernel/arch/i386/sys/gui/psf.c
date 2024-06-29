@@ -8,14 +8,14 @@ uint16_t *unicode;
 extern char *fb;
 extern char _binary_font_start[];
 
-#define PIXEL uint32_t   /* pixel pointer */
+#define PIXEL uint32_t  
 
 #define PSF1_FONT_MAGIC 0x0436
 
 typedef struct {
-    uint16_t magic; // Magic bytes for identification.
-    uint8_t fontMode; // PSF font mode.
-    uint8_t characterSize; // PSF character size.
+    uint16_t magic; 
+    uint8_t fontMode; 
+    uint8_t characterSize; 
 } PSF1_Header;
 
 #define PSF_FONT_MAGIC 0x864ab572
@@ -91,21 +91,18 @@ void display_all_characters() {
     PSF_font *font = (PSF_font*)&_binary_font_psf_start;
 
     int num_glyphs = font->numglyph;
-    int max_cols = 16; // Example: display 16 characters per row
+    int max_cols = 16; 
 
-    // Clear the screen
     for (int y = 0; y < screen_height; y++) {
         for (int x = 0; x < screen_width; x++) {
-            putpixel(x, y, (rgb_color_t){0, 0, 0}); // Set background color
+            putpixel(x, y, (rgb_color_t){0, 0, 0}); 
         }
     }
 
-    // Render each glyph in a grid
     for (int i = 0; i < num_glyphs; i++) {
-        int cx = i % max_cols; // Column index
-        int cy = i / max_cols; // Row index
-        // Render the character glyph
-        fb_putchar(i, cx, cy, (rgb_color_t){255, 255, 255}, (rgb_color_t){0, 0, 0}); // White text on black background
+        int cx = i % max_cols; 
+        int cy = i / max_cols; 
+        fb_putchar(i, cx, cy, (rgb_color_t){255, 255, 255}, (rgb_color_t){0, 0, 0}); 
     }
 }
 

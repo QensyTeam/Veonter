@@ -77,21 +77,14 @@ void terminal_clearscreen(void)
 	terminal_column = 0;
 }
 
-/* Scrolls the terminal based on where the cursor is. */
 void terminal_scroll(void){
 	uint16_t temp;
 	
-	/* Row 25 is the end, this means we need to scroll up */
 	if(terminal_row >= 25)
 	{
-		
-		/* Move the current text chunk that makes up the screen
-		back in the buffer by a line */
 		temp = terminal_row - 25 + 1;
 		memcpy (VGA_MEMORY, VGA_MEMORY + temp * 80, (25 - temp) * 80 * 2);
 
-		/* Finally, we set the chunk of memory that occupies
-		the last line of text to our 'blank' character */
 		for(int i = 0; i < 80; i++)
 		{
 			terminal_putentryat(' ', terminal_color, i, 24);

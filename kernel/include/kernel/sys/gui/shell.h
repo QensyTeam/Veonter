@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <kernel/kernel.h>
 
-// Define default colors using RGB macro
 #define DEFAULT_FG_COLOR RGB(255, 255, 255)  // Цвет текста по умолчанию
 #define DEFAULT_BG_COLOR RGB(0, 0, 0)    // Фон по умолчанию
 

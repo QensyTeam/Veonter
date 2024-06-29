@@ -51,7 +51,7 @@ void paging_switch_page_directory(page_directory_t* directory) {
     asm volatile("mov %0, %%cr3" : : "r"(directory->physicalAddr));
     uint32_t cr0;
     asm volatile("mov %%cr0, %0" : "=r"(cr0));
-    cr0 |= 0x80000000; // Set the paging bit in CR0 to enable paging
+    cr0 |= 0x80000000; 
     asm volatile("mov %0, %%cr0" : : "r"(cr0));
 }
 

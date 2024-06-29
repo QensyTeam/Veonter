@@ -9,7 +9,7 @@ typedef enum {
     INITRD
 } fs_type_t;
 
-typedef int mode_t; ///< File permission bits.
+typedef int mode_t; 
 
 struct vfs_s {
     int (*open)(const char *pathname, int flags);
@@ -34,9 +34,9 @@ struct vfs_adapter_s {
 typedef struct vfs_adapter_s vfs_adapter_t;
 
 struct file_s {
-    char name[MAX_PATH_SIZE]; ///< Absolute file name.
-    char *data; ///< File content.
-    u32int  size;  ///< Size of the file in bytes.
+    char name[MAX_PATH_SIZE]; 
+    char *data; 
+    u32int  size;  
 };
 
 typedef struct file_s file_t;

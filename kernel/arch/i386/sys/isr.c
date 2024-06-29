@@ -25,7 +25,7 @@ void irq_server(registers_t* r) {
     irq_handler = irq_handlers[irq_num];
 
     if (irq_handler != NULL) {
-        irq_handler(*r); // Dereference the pointer before passing it
+        irq_handler(*r); 
     }
 
     pic_eoi(r->int_no);

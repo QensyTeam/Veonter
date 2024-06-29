@@ -100,6 +100,7 @@ void console_process_command(const char* command) {
         printf("\n");
         vbe_clear_screen(RGB(0,0,0));
         logo();
+        shell_text_color(fg_color);
         printf("\n");
     } else if (strcmp(command, "off") == 0) {
         printf("Shutting down...\n");

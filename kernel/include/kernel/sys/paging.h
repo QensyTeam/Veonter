@@ -8,13 +8,13 @@
 #define PAGE_TABLE_SIZE 1024
 
 typedef struct {
-    uint32_t present    : 1;   // Page present in memory
-    uint32_t rw         : 1;   // Read-only if clear, readwrite if set
-    uint32_t user       : 1;   // Supervisor level only if clear
-    uint32_t accessed   : 1;   // Has the page been accessed since last refresh?
-    uint32_t dirty      : 1;   // Has the page been written to since last refresh?
-    uint32_t unused     : 7;   // Amalgamation of unused and reserved bits
-    uint32_t frame      : 20;  // Frame address (shifted right 12 bits)
+    uint32_t present    : 1;  
+    uint32_t rw         : 1;   
+    uint32_t user       : 1;   
+    uint32_t accessed   : 1;   
+    uint32_t dirty      : 1;   
+    uint32_t unused     : 7;   
+    uint32_t frame      : 20;  
 } page_table_entry_t;
 
 typedef struct {
@@ -23,8 +23,8 @@ typedef struct {
 
 typedef struct {
     page_table_t* tables[PAGE_DIRECTORY_SIZE];
-    uint32_t tablesPhysical[PAGE_DIRECTORY_SIZE]; // The physical addresses of tablesPhysical
-    uint32_t physicalAddr; // The physical address of tablesPhysical
+    uint32_t tablesPhysical[PAGE_DIRECTORY_SIZE]; 
+    uint32_t physicalAddr; 
 } page_directory_t;
 
 page_directory_t* paging_create_page_directory();

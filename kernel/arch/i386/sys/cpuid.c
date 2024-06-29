@@ -1,16 +1,15 @@
 #include <kernel/kernel.h>
 
-//The source code for determining the CPU is taken from EOS, their GitHub repository: https://github.com/rgimad/EOS
+//Данных исходный код был взят с EOS, их GitHub репозиторий: https://github.com/rgimad/EOS
 
-/* Simply call this function detect_cpu(); */
-int detect_cpu(void) { /* or main() if your trying to port this as an independant application */
+int detect_cpu(void) { 
     unsigned long ebx, unused;
     cpuid(0, unused, ebx, unused, unused);
     switch (ebx) {
-    case 0x756e6547: /* Intel Magic Code */
+    case 0x756e6547: 
         do_intel();
         break;
-    case 0x68747541: /* AMD Magic Code */
+    case 0x68747541: 
         do_amd();
         break;
     default:
@@ -20,7 +19,6 @@ int detect_cpu(void) { /* or main() if your trying to port this as an independan
     return 0;
 }
 
-/* Intel Specific brand list */
 char *Intel[] = {
     "Brand ID Not Supported.", 
     "Intel(R) Celeron(R) processor", 
@@ -48,7 +46,6 @@ char *Intel[] = {
     "Mobile Intel(R) Celeron(R) processor"
 };
 
-/* This table is for those brand strings that have two values depending on the processor signature. It should have the same number of entries as the above table. */
 char *Intel_Other[] = {
     "Reserved", 
     "Reserved", 
@@ -76,7 +73,6 @@ char *Intel_Other[] = {
     "Reserved"
 };
 
-/* Intel-specific information */
 int do_intel(void) {
     printf("Intel CPU:\n");
     unsigned long eax, ebx, ecx, edx, max_eax, signature, unused;
@@ -244,7 +240,6 @@ int do_intel(void) {
     return 0;
 }
 
-/* Print Registers */
 void printregs(int eax, int ebx, int ecx, int edx) {
     int j;
     char string[17];
@@ -258,7 +253,6 @@ void printregs(int eax, int ebx, int ecx, int edx) {
     printf("%s", string);
 }
 
-/* AMD-specific information */
 int do_amd(void) {
     printf("AMD CPU:\n");
     unsigned long extended, eax, ebx, ecx, edx, unused;

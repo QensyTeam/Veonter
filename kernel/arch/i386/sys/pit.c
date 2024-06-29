@@ -21,7 +21,7 @@ void sleep_ticks(uint32_t delay_ticks) {
     size_t start_ticks = ticks;
 
     while (ticks - start_ticks < delay_ticks) {
-        // Busy wait until the required number of ticks have elapsed
+        //занят
     }
 }
 
@@ -32,7 +32,6 @@ void sleep(uint32_t milliseconds) {
 }
 
 void usleep(uint32_t microseconds) {
-    // Convert microseconds to ticks
     uint32_t delay_ticks = (microseconds * TIMER_FREQUENCY) / 1000000;
     sleep_ticks(delay_ticks);
 }

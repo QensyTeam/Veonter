@@ -1,8 +1,6 @@
 #ifndef _CPUID_H_
 #define _CPUID_H_
 
-//#include <stdint.h>
-
 int do_intel(void);
 int do_amd(void);
 

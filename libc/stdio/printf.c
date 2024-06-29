@@ -37,6 +37,17 @@ int printf(const char* format, ...) {
                         }
                     }
                     break;
+                    case 'u': // Вывод unsigned int
+                    {
+                        unsigned int value = va_arg(args, unsigned int);
+                        utoa(value, buffer, 10);
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            shell_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
                     case 's': // Вывод строки
                     {
                         char* str = va_arg(args, char*);

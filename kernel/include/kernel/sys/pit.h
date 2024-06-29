@@ -16,6 +16,7 @@ void timer_init();
 unsigned int timer_get_uptime();
 void sleep_ticks(uint32_t delay);
 void sleep(uint32_t milliseconds);
+void usleep(uint32_t microseconds);
 
 #define BOOL char
 #define TRUE 1

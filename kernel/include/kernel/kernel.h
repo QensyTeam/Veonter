@@ -17,6 +17,7 @@
 #include <kernel/sys/paging.h>
 #include <kernel/drv/console.h>
 #include <kernel/drv/tty.h>
+#include <kernel/sys/cpuid.h>
 #include <kernel/sys/gui/vbe.h>
 #include <kernel/sys/gui/gui.h>
 #include <kernel/sys/gui/geometry.h>

@@ -3,9 +3,6 @@
 #include <stdbool.h>
 #include <kernel/kernel.h>
 
-rgb_color_t fg_color = RGB(255, 255, 255);  // Белый цвет текста по умолчанию
-rgb_color_t bg_color = RGB(0, 0, 0);        // Черный фон по умолчанию
-
 static int cursor_x = 0;  // Текущая x-координата курсора
 static int cursor_y = 0;  // Текущая y-координата курсора
 
@@ -29,7 +26,7 @@ void logo() {
 	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome!\n");
 	shell_text_color(RGB(112, 112, 112));
 	printf(Version);
-	shell_text_color(RGB(255, 255, 255));
+	shell_text_color(fg_color);
 }
 
 void shell_text_color(rgb_color_t color) {
@@ -113,6 +110,8 @@ void vbe_clear_screen(rgb_color_t color) {
 void initialize_screen() {
     max_cols = screen_width / CHAR_WIDTH;
     max_rows = screen_height / CHAR_HEIGHT;
+    check();
+	printf("VBE initialization completed successfully!\n");
 }
 
 

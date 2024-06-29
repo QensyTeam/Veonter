@@ -1,21 +1,22 @@
+#include <stdlib.h>
 #include <string.h>
 
-void lftoa(long double value, char *str, int precision) {
+void ftoa(double value, char *str, int precision) {
     int is_negative = 0;
     if (value < 0) {
         is_negative = 1;
         value = -value;
     }
-
-    long long int_part = (long long)value;
-    long double frac_part = value - int_part;
+    
+    int int_part = (int)value;
+    double frac_part = value - int_part;
     char *ptr = str;
 
     if (is_negative) {
         *ptr++ = '-';
     }
 
-    lltoa(int_part, ptr, 10);
+    ltoa(int_part, ptr, 10);
     ptr += strlen(ptr);
 
     if (precision > 0) {

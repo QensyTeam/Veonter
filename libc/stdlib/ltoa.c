@@ -1,4 +1,4 @@
-#include <string.h>
+#include <stdlib.h>
 
 void ltoa(long value, char *str, int base) {
     char *ptr = str, *ptr1 = str, tmp_char;

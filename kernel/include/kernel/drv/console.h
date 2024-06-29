@@ -8,6 +8,5 @@ void console_initialize();
 void console_input_loop();
 void console_clear();
 void console_process_command(const char* command);
-void print_frame(const char* title, const char* content[], int content_lines, int frame_width);
 
 #endif // CONSOLE_H

@@ -9,52 +9,32 @@
 #define PIT_REG_COUNTER_0   0x40
 #define PIT_REG_COMMAND     0x43
 #define TIMER_FREQUENCY     100  // Частота таймера в Гц
-#define SECONDS_TO_RUN      10   // Количество секунд, в течение которых будет выводиться сообщение
 
 unsigned int ticks = 0;
 BOOL should_run = TRUE;
 
 void timer_irq_handler(__attribute__ ((unused)) registers_t r) {
     ticks++;
-    /*static uint32_t milliseconds = 0;
-    static uint32_t seconds = 0;
-    static uint32_t minutes = 0;
-
-    
-    milliseconds += 10; // Увеличиваем количество миллисекунд на 10 при каждом прерывании
-
-    if (milliseconds >= 1000) {
-        milliseconds = 0;
-        seconds++;
-
-        if (seconds >= 60) {
-            seconds = 0;
-            minutes++;
-        }
-    }
-
-    printf("Time: %d:%d:%d\n", minutes, seconds, milliseconds);
-    
-    if (minutes >= 0 && seconds >= SECONDS_TO_RUN) {
-        should_run = FALSE;
-    }*/
 }
 
-void sleep_ticks(uint32_t delay){
-	size_t current_ticks = ticks;
+void sleep_ticks(uint32_t delay_ticks) {
+    size_t start_ticks = ticks;
 
-	while(1) {
-		if (current_ticks + delay < ticks){
-			break;
-		}
-	}
-
+    while (ticks - start_ticks < delay_ticks) {
+        // Busy wait until the required number of ticks have elapsed
+    }
 }
 
 void sleep(uint32_t milliseconds) {
 	uint32_t needticks = milliseconds * TIMER_FREQUENCY;
 
 	sleep_ticks(needticks / 1000);
+}
+
+void usleep(uint32_t microseconds) {
+    // Convert microseconds to ticks
+    uint32_t delay_ticks = (microseconds * TIMER_FREQUENCY) / 1000000;
+    sleep_ticks(delay_ticks);
 }
 
 unsigned int timer_get_uptime() {

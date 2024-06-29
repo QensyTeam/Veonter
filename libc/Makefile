@@ -29,21 +29,23 @@ LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
-string/calloc.o \
 stdio/scanf.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
+stdlib/calloc.o \
 stdlib/abort.o \
 stdlib/reverseString.o \
-string/itoa.o \
-string/free.o \
-string/realloc.o \
-string/ftoa.o \
-string/lftoa.o \
-string/lltoa.o \
-string/ltoa.o \
-string/dtoa.o \
+stdlib/itoa.o \
+stdlib/free.o \
+stdlib/realloc.o \
+stdlib/ftoa.o \
+stdlib/lftoa.o \
+stdlib/lltoa.o \
+stdlib/ltoa.o \
+stdlib/dtoa.o \
+stdlib/utoa.o \
+stdlib/malloc.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \
@@ -60,7 +62,6 @@ string/strtod.o \
 string/strtof.o \
 string/strtol.o \
 string/strchr.o \
-string/malloc.o \
 string/strncmp.o \
 string/bzero.o \
 

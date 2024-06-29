@@ -29,18 +29,39 @@ void bzero_test(){
     for (size_t i = 0; i < arr_size / sizeof(int); ++i) {
         printf("%d ", arr[i]);
     }
-    printf("\n");
+    printf("\n\n");
+}
+
+void test_kheap() {
+    printf("\tKHEAP TEST\n\n");
+
+    void *a = kmalloc(8);
+    void *b = kmalloc(16);
+    void *c = kmalloc(32);
+
+    printf("Allocated a: %p\n", a);
+    printf("Allocated b: %p\n", b);
+    printf("Allocated c: %p\n", c);
+
+    kfree(a);
+    kfree(b);
+    kfree(c);
+
+    printf("Freed a, b, c: %p, %p, %p\n", a, b, c);
+
+    void *d = kmalloc(64);
+    printf("Allocated d: %p\n", d);
+
+    kfree(d);
+    printf("Freed d\n");
+    shell_text_color(RGB(0, 255, 0));
+    printf("kheap test complete.\n\n");
+    shell_text_color(fg_color);
 }
 
 
 void test_paging() {
-    const char* content[] = {
-        " ",
-        "Testing paging...",
-        " "
-    };
-    int content_lines = sizeof(content) / sizeof(content[0]);
-    print_frame("PAGING TEST", content, content_lines, 25);
+    printf("\tPAGING TEST\n\n");
 
     // Создаем директорию страниц
     page_directory_t* pd = paging_create_page_directory();
@@ -73,45 +94,12 @@ void test_paging() {
     printf("Value at virtual address 0x%x: 0x%x\n", virt_addr2, *ptr2);
     shell_text_color(RGB(0, 255, 0));
     printf("paging test complete.\n");
-    shell_text_color(RGB(255, 255, 255));
+    shell_text_color(fg_color);
 
     // Очищаем директорию страниц (необязательно)
     kfree(pd);
     kfree(pt1);
     kfree(pt2);
-}
-
-void test_kheap() {
-    const char* content[] = {
-        " ",
-        "Testing Kheap...",
-        " "
-    };
-    int content_lines = sizeof(content) / sizeof(content[0]);
-    print_frame("KHEAP TEST", content, content_lines, 24);
-
-    void *a = kmalloc(8);
-    void *b = kmalloc(16);
-    void *c = kmalloc(32);
-
-    printf("Allocated a: %p\n", a);
-    printf("Allocated b: %p\n", b);
-    printf("Allocated c: %p\n", c);
-
-    kfree(a);
-    kfree(b);
-    kfree(c);
-
-    printf("Freed a, b, c: %p, %p, %p\n", a, b, c);
-
-    void *d = kmalloc(64);
-    printf("Allocated d: %p\n", d);
-
-    kfree(d);
-    printf("Freed d\n");
-    shell_text_color(RGB(0, 255, 0));
-    printf("kheap test complete.\n\n");
-    shell_text_color(RGB(255, 255, 255));
 }
 
 // Функция для тестирования, выводит результат
@@ -126,7 +114,7 @@ void test_result(const char* func_name, int result) {
         failed_test_names[failed_test_count++] = func_name; // Сохраняем имя проваленного теста
     }
     printf("%s: %s\n", func_name, result ? "PASSED" : "FAILED");
-    shell_text_color(RGB(255, 255, 255));
+    shell_text_color(fg_color);
 }
 
 // Тест для memcmp
@@ -200,7 +188,7 @@ void test_strtod() {
     const char* str = "123.456";
     char* endptr;
     double val = strtod(str, &endptr);
-    printf("strtod result: %f (expected 123.456) endptr: %c\n", val, *endptr);
+    printf("strtod result: %f (expected 123.456)\n", val);
     test_result("strtod", val == 123.456 && *endptr == '\0');
 }
 
@@ -209,7 +197,7 @@ void test_strtof() {
     const char* str = "123.456";
     char* endptr;
     float val = strtof(str, &endptr);
-    printf("strtof result: %f (expected 123.456) endptr: %c\n", val, *endptr);
+    printf("strtof result: %f (expected 123.456)\n", val);
     test_result("strtof", val == 123.456f && *endptr == '\0');
 }
 
@@ -218,7 +206,7 @@ void test_strtol() {
     const char* str = "123456";
     char* endptr;
     long val = strtol(str, &endptr, 10);
-    printf("strtol result: %ld (expected 123456) endptr: %c\n", val, *endptr);
+    printf("strtol result: %ld (expected 123456)\n", val);
     test_result("strtol", val == 123456 && *endptr == '\0');
 }
 
@@ -227,7 +215,7 @@ void test_strtold() {
     const char* str = "123.456";
     char* endptr;
     long double val = strtold(str, &endptr);
-    printf("strtold result: %Lf (expected 123.456) endptr: %c\n", val, *endptr);
+    printf("strtold result: %Lf (expected 123.456)\n", val);
     test_result("strtold", val == 123.456L && *endptr == '\0');
 }
 
@@ -236,7 +224,7 @@ void test_strtoll() {
     const char* str = "123456789012345";
     char* endptr;
     long long val = strtoll(str, &endptr, 10);
-    printf("strtoll result: %lld (expected 123456789012345) endptr: %c\n", val, *endptr);
+    printf("strtoll result: %lld (expected 123456789012345)\n", val);
     test_result("strtoll", val == 123456789012345LL && *endptr == '\0');
 }
 
@@ -318,7 +306,7 @@ void test_lftoa() {
 }
 
 void mm_test() {
-    printf("\t[MEMORY TEST PROGRAM]\n");
+    printf("\tMEMORY TEST PROGRAM\n\n");
     bzero_test();
     test_kheap();
     sleep(2000);
@@ -365,6 +353,6 @@ void mm_test() {
         printf("[TEST PASSED]\n");
     }
 
-    shell_text_color(RGB(255, 255, 255));
+    shell_text_color(fg_color);
 }
 

@@ -23,11 +23,11 @@ void terminal_initialize(void) {
 }
 
 void check(void) {
-	shell_text_color(RGB(255, 255, 255));
+	shell_text_color(fg_color);
 	printf("[ ");
 	shell_text_color(RGB(0, 255, 0));
 	printf("OK");
-	shell_text_color(RGB(255, 255, 255));
+	shell_text_color(fg_color);
 	printf(" ] - ");
 }
 

@@ -1,9 +1,11 @@
 #!/bin/sh
 set -e
-cd kernel/arch/i386/
-objcopy -I binary -O elf32-i386 -B i386 font.psf font.o
-cd ../../../
-  # Добавляем эту команду для обновления переменной PATH
+
+#cd kernel/arch/i386/
+#objcopy -I binary -O elf32-i386 -B i386 font.psf font.o
+#cd ../../../
+
+# Добавляем эту команду для обновления переменной PATH
 . ./build.sh
 
 mkdir -p isodir

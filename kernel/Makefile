@@ -58,6 +58,9 @@ Veonter.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot Veonter.kernel || grub2-file --is-x86-multiboot Veonter.kernel
 
+$(ARCHDIR)/font.o: $(ARCHDIR)/font.psf
+	cd $(ARCHDIR) && objcopy -I binary -O elf32-i386 -B i386 font.psf font.o
+
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 

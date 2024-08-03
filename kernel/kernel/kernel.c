@@ -1,3 +1,4 @@
+#include "kernel/drv/speaker.h"
 #include <kernel/kernel.h>
 multiboot_info_t* multiboot;
 

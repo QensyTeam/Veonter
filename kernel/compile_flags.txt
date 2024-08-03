@@ -1,0 +1,5 @@
+-nostdlib
+-Wall
+-Wextra
+-I../libc/include/
+-Iinclude

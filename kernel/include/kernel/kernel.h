@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -28,4 +30,4 @@
 #include <kernel/sys/vga.h>
 #include <kernel/multiboot.h>
 #include <kernel/hal.h>
-#include <kernel/sys/fs/vfs.h>
+//#include <kernel/sys/fs/vfs.h>

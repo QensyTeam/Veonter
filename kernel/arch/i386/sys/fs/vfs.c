@@ -1,7 +1,7 @@
 #include <string.h>
 #include <kernel/kernel.h>
 #include <stdint.h>
-
+#include <kernel/sys/fs/vfs.h>
 
 static vfs_t vfs;
 

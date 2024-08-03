@@ -1,7 +1,7 @@
 #include <kernel/sys/ports.h>
 #include <kernel/drv/speaker.h>
 #include <kernel/sys/pit.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 void play_sound(uint32_t nFrequence) {
     uint32_t Div;
@@ -23,12 +23,8 @@ void nosound() {
     outb(0x61, tmp);
 }
 
-void sleep_s(int duration) {
-    for (volatile int i = 0; i < duration * 1000; i++); 
-}
-
 void beep(int frequency, int duration) {
     play_sound(frequency);
-    sleep_s(duration);
+    sleep(duration);
     nosound();
 }

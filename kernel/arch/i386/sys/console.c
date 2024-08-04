@@ -2,6 +2,7 @@
 #include <kernel/mini_programs/mini_programs.h>
 #include <stdio.h>  // Для printf и других стандартных функций
 #include <string.h> // Для strcmp и других строковых функций
+#include <stdlib.h> // Для strtol
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -73,8 +74,9 @@ void show_help_menu() {
         "off - Shutdown PC.",
         "reboot - Rebooting PC.",
         "cpu - Shows CPU information.",
-        "colors - Allows you to color your terminal in the colors you want",
-        "echo <text> - Displays the text you enter"
+        "colors - Allows you to color your terminal in the colors you want.",
+        "echo <text> - Displays the text you enter.",
+        "beep <frequency> - Allows you to hear a beep with the specified frequency."
     };
     int content_lines = sizeof(content) / sizeof(content[0]);
 
@@ -84,14 +86,20 @@ void show_help_menu() {
     }
 }
 
-
 void console_process_command(const char* command) {
     if (strncmp(command, "echo ", 5) == 0) {  // Проверяем команду echo
         printf("%s\n", command + 5);  // Выводим текст после echo
     } else if (strcmp(command, "clear") == 0) {
         vbe_clear_screen(bg_color);
-    } else if (strcmp(command, "beep") == 0) {
-        beep(1000, 1000); // Частота 1000 Гц, продолжительность 1000 мс
+    } else if (strncmp(command, "beep ", 5) == 0) {
+        const char* freq_str = command + 5;
+        char* endptr;
+        unsigned int frequency = strtol(freq_str, &endptr, 10);
+        if (*endptr == '\0') {
+            beep(frequency, 100);  // Используем указанную частоту
+        } else {
+            printf("Invalid frequency: %s\n", freq_str);
+        }
     } else if (strcmp(command, "help") == 0) {
         printf("\n");
         show_help_menu();
@@ -138,7 +146,6 @@ void console_process_command(const char* command) {
     add_command_to_history(command); // Добавление команды в историю
     printf(PROMPT_STRING);
 }
-
 
 void console_input_loop() {
     char c;

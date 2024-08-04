@@ -31,7 +31,7 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
 
     check();
     printf("PC Speaker testing!\n\n");
-    beep(6, 10);
+    beep(6, 100);
     logo();
     printf("\n");
     shell_text_color(RGB(150, 150, 150));

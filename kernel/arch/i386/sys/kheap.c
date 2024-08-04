@@ -47,8 +47,8 @@ void kheap_init(void* start, size_t size) {
     footer_t* initial_footer = (footer_t*)((char*)heap_start + heap_size - sizeof(footer_t));
     initial_footer->size = free_list->size;
     initial_footer->magic = HEAP_MAGIC;
-    check();
-    printf("KHEAP initialization completed successfully!\n");
+    //check();
+    //printf("KHEAP initialization completed successfully!\n");
 }
 
 void* kmalloc(size_t size) {

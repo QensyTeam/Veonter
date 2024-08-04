@@ -148,8 +148,8 @@ void console_process_command(const char* command) {
 }
 
 void console_input_loop() {
-    char c;
-    while (1) {
+	char c;
+	while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
         disable_cursor(); // скрываем курсор перед изменением экрана

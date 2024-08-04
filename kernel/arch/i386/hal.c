@@ -1,3 +1,4 @@
+#include "kernel/sys/gui/psf.h"
 #include <kernel/kernel.h>
 
 extern rgb_color_t fg_color;
@@ -12,8 +13,15 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     vbe_mode_info_t* vbe_mode_info = (vbe_mode_info_t*) multiboot_info->vbe_mode_info;
     uint32_t framebuffer_address = vbe_mode_info->physbase;
 
+// Рассчитываем размер кучи
+    size_t heap_size = calculate_heap_size(multiboot_info);
+
+    // Инициализируем кучу
+    kheap_init((void*)HEAP_START_ADDRESS, heap_size);
+
     set_video_mode(1024, 768, 32, (uint32_t*)framebuffer_address); 
-    psf_init();
+    //psf_init();
+    psf_v1_init();
 
     irq_disable();
     initialize_screen();  // Инициализируем экранные параметры
@@ -21,12 +29,6 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     idt_init(GDT_CODE_SEL_1);
     pic_init();
     timer_init();
-    // Рассчитываем размер кучи
-    size_t heap_size = calculate_heap_size(multiboot_info);
-
-    // Инициализируем кучу
-    kheap_init((void*)HEAP_START_ADDRESS, heap_size);
-
     irq_enable();
 
     check();

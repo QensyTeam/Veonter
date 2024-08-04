@@ -1,3 +1,4 @@
+#include "kernel/sys/gui/shell.h"
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -50,10 +51,33 @@ int printf(const char* format, ...) {
                     break;
                     case 's': // Вывод строки
                     {
-                        char* str = va_arg(args, char*);
-                        size_t len = strlen(str);
+                        uint8_t* str = va_arg(args, uint8_t*);
+                        /*size_t len = strlen(str);
                         for (size_t i = 0; i < len; i++) {
-                            shell_putchar(str[i]);
+                            uint16_t ch = str[i];
+
+                            if(ch == 0xd0 || ch == 0xd1) {
+                                ch = (ch << 8) | str[++i];
+                                count++;
+                            }
+
+                            shell_putchar(ch);
+
+                            count++;
+                        }*/
+                        while(*str) {
+                            uint16_t ch = *str;
+
+                            if(ch == 0xd0 || ch == 0xd1) {
+                                ch <<= 8;
+                                ch |= *++str;
+                                
+                                count++;
+                            }
+
+                            shell_putchar(ch);
+
+                            str++;
                             count++;
                         }
                     }
@@ -188,7 +212,16 @@ int printf(const char* format, ...) {
                 }
             }
         } else {
-            shell_putchar(*format);
+            uint16_t ch = (uint16_t)(*(uint8_t*)format);
+
+            if(ch == 0xd0 || ch == 0xd1) {
+                ch <<= 8;
+                ch |= *(uint8_t*)(++format);
+            
+                count++;
+            }
+
+            shell_putchar(ch);
             count++;
         }
         format++;

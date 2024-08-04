@@ -1,5 +1,5 @@
 *.iso
 *.vscode
 sysroot
-Veonter.kernel
+**/Veonter.kernel
 

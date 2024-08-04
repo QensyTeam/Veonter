@@ -39,28 +39,42 @@ typedef struct {
 extern char _binary_font_psf_start;
 extern char _binary_font_psf_end;
 
-void psf_init() {
-    PSF_font *font = (PSF_font*)&_binary_font_psf_start;
-    if (font->magic != PSF_FONT_MAGIC) {
-	unicode = NULL;
-        return;
-    }
+void* psf_glyphs;
 
-    // Определяем количество символов в шрифте (512)
-    int num_glyphs = 512;
+void psf_v1_init() {
+	PSF1_Header* hdr = (PSF1_Header*)&_binary_font_psf_start;
+	if(hdr->magic != PSF1_FONT_MAGIC) {
+		return;
+	}
 
-    unicode = calloc(USHRT_MAX, 2);
-    unsigned char *glyph_ptr = (unsigned char *)&_binary_font_psf_start + font->headersize;
+	psf_glyphs = (unsigned char*)(hdr + 1);
 
-    // Пробегаем по каждому символу в шрифте
-    for (int i = 0; i < num_glyphs; i++) {
-        unicode[i] = i;
-        glyph_ptr += font->bytesperglyph;
-    }
+	//fb_putchar_v1('T', 0, 0, RGB(0xff, 0, 0), RGB(0x00, 0x00, 0x00));
+}
+
+void fb_putchar(unsigned short c, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
+	PSF1_Header* hdr = (PSF1_Header*)&_binary_font_psf_start;
+	
+	unsigned int size = hdr->characterSize;
+
+	unsigned char* glyph = (unsigned char*)(psf_glyphs + (c * size));
+
+	cx *= 8;
+	cy *= 16;
+
+	for(unsigned int y = 0; y < size; y++) {
+		for(int x = 0; x < 8; x++) {
+			if(glyph[y] & (1 << (7 - x))) {
+				putpixel(cx + x, cy + y, fg);
+			} else {
+				putpixel(cx + x, cy + y, bg);
+			}	
+		}
+	}
 }
 
 int scanline = 2048;
-
+/*
 void fb_putchar(unsigned short int c, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
     PSF_font *font = (PSF_font*)&_binary_font_psf_start;
     int bytesperline = (font->width + 7) / 8; // Ширина символа в байтах
@@ -91,8 +105,9 @@ void fb_putchar(unsigned short int c, int cx, int cy, rgb_color_t fg, rgb_color_
         offs += screen_width;
     }
 }
-
-void display_all_characters() {
+*/
+/*
+ * void display_all_characters() {
     PSF_font *font = (PSF_font*)&_binary_font_psf_start;
 
     int num_glyphs = font->numglyph;
@@ -110,7 +125,7 @@ void display_all_characters() {
         fb_putchar(i, cx, cy, fg_color, bg_color); 
     }
 }
-
+*/
 void fb_puts(const char* str, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
     while (*str) {
         fb_putchar((unsigned short int)*str, cx, cy, fg, bg);

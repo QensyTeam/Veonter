@@ -1,3 +1,4 @@
+#include "kernel/sys/gui/psf.h"
 #include <kernel/kernel.h>
 
 extern rgb_color_t fg_color;
@@ -19,7 +20,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     kheap_init((void*)HEAP_START_ADDRESS, heap_size);
 
     set_video_mode(1024, 768, 32, (uint32_t*)framebuffer_address); 
-    psf_init();
+    //psf_init();
+    psf_v1_init();
 
     irq_disable();
     initialize_screen();  // Инициализируем экранные параметры

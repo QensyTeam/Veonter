@@ -1,3 +1,5 @@
+#include "kernel/sys/gui/psf.h"
+#include "kernel/drv/vbe.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -40,7 +42,7 @@ extern char _binary_font_psf_end;
 void psf_init() {
     PSF_font *font = (PSF_font*)&_binary_font_psf_start;
     if (font->magic != PSF_FONT_MAGIC) {
-        unicode = NULL;
+	unicode = NULL;
         return;
     }
 
@@ -94,7 +96,7 @@ void display_all_characters() {
     PSF_font *font = (PSF_font*)&_binary_font_psf_start;
 
     int num_glyphs = font->numglyph;
-    int max_cols = 16; 
+    int max_cols = 16;
 
     for (int y = 0; y < screen_height; y++) {
         for (int x = 0; x < screen_width; x++) {

@@ -48,19 +48,38 @@ void psf_v1_init() {
 	}
 
 	psf_glyphs = (unsigned char*)(hdr + 1);
-
-	//fb_putchar_v1('T', 0, 0, RGB(0xff, 0, 0), RGB(0x00, 0x00, 0x00));
 }
 
 void fb_putchar(unsigned short c, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
 	PSF1_Header* hdr = (PSF1_Header*)&_binary_font_psf_start;
 	
 	unsigned int size = hdr->characterSize;
+    
+    uint8_t hi = (uint8_t)(c >> 8);
+    uint8_t lo = (uint8_t)(c & 0xff);
+    
+    if(hi == 0xd0 || hi == 0xd1) {
+        uint16_t sym = lo & 0x3f;
+
+        if(sym == 0) {
+            c = 224;
+        } else if(sym == 1) {
+            c = hi == 0xd0 ? 240 : 225;
+        } else if(sym >= 2 && sym <= 15) {
+            c = 224 + sym;
+        } else if(sym == 16) {
+            c = 128;
+        } else if(sym >= 18 && sym <= 63) {
+            c = 128 + (sym - 16);
+        } else if(sym == 17) {
+            c = hi == 0xd1 ? 241 : 129;
+        }
+    }
 
 	unsigned char* glyph = (unsigned char*)(psf_glyphs + (c * size));
 
 	cx *= 8;
-	cy *= 16;
+	cy *= size;
 
 	for(unsigned int y = 0; y < size; y++) {
 		for(int x = 0; x < 8; x++) {
@@ -73,62 +92,16 @@ void fb_putchar(unsigned short c, int cx, int cy, rgb_color_t fg, rgb_color_t bg
 	}
 }
 
-int scanline = 2048;
-/*
-void fb_putchar(unsigned short int c, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
-    PSF_font *font = (PSF_font*)&_binary_font_psf_start;
-    int bytesperline = (font->width + 7) / 8; // Ширина символа в байтах
-    if (unicode != NULL) {
-        c = unicode[c];
-    }
-    unsigned char *glyph = (unsigned char*)&_binary_font_psf_start +
-                           font->headersize +
-                           (c > 0 && c < font->numglyph ? c : 0) * font->bytesperglyph;
-    
-    // Рассчитываем смещение в пикселях, без лишнего пространства между символами
-    int offs = (cy * font->height * screen_width) + (cx * font->width);
-    unsigned int x, y, line, mask;
-    for (y = 0; y < font->height; y++) {
-        line = offs;
-        mask = 1 << (font->width - 1);
-        for (x = 0; x < font->width; x++) {
-            // Определяем, отрисовывать ли пиксель из символа или оставить фоновый цвет
-            if (*((unsigned int*)glyph) & mask) {
-                putpixel(line % screen_width, line / screen_width, fg);
-            } else {
-                putpixel(line % screen_width, line / screen_width, bg);
-            }
-            mask >>= 1;
-            line++;
-        }
-        glyph += bytesperline;
-        offs += screen_width;
-    }
-}
-*/
-/*
- * void display_all_characters() {
-    PSF_font *font = (PSF_font*)&_binary_font_psf_start;
-
-    int num_glyphs = font->numglyph;
-    int max_cols = 16;
-
-    for (int y = 0; y < screen_height; y++) {
-        for (int x = 0; x < screen_width; x++) {
-            putpixel(x, y, bg_color); 
-        }
-    }
-
-    for (int i = 0; i < num_glyphs; i++) {
-        int cx = i % max_cols; 
-        int cy = i / max_cols; 
-        fb_putchar(i, cx, cy, fg_color, bg_color); 
-    }
-}
-*/
 void fb_puts(const char* str, int cx, int cy, rgb_color_t fg, rgb_color_t bg) {
     while (*str) {
-        fb_putchar((unsigned short int)*str, cx, cy, fg, bg);
+        uint16_t ch = *str;
+
+        if(ch == 0xd0 || ch == 0xd1) {
+            ch <<= 8;
+            ch |= *str++;
+        }
+
+        fb_putchar((unsigned short int)ch, cx, cy, fg, bg);
         cx++;
         str++;
     }

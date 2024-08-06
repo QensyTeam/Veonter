@@ -40,6 +40,14 @@ static const char caps_locked_shifted_keyboard_layout[128] = {
     0,   0
 };
 
+static const uint16_t keyboard_layout_ru[128] = {
+    0,   27,  L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'-', L'=', '\b', '\t',
+    L'й', L'ц', L'у', L'к', L'е', L'н', L'г', L'ш', L'щ', L'з', L'х', L'ъ', '\n', 0,
+    L'ф', L'ы', L'в', L'а', L'п', L'р', L'о', L'л', L'д', L'ж', L'э', L'ё', 0,   '\\',
+    L'я', L'ч', L'с', L'м', L'и', L'т', L'ь', L'б', L'ю', '.', 0,   '*', 0, ' ', 0,   0,   0,   0,   0,   0,   0,
+    0,   0
+};
+
 void keyboard_handler();
 void keyboard_init();
 uint16_t keyboard_get_char();

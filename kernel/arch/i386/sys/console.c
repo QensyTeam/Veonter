@@ -1,5 +1,6 @@
 #include <kernel/kernel.h>
 #include <kernel/mini_programs/mini_programs.h>
+#include <stdint.h>
 #include <stdio.h>  // Для printf и других стандартных функций
 #include <string.h> // Для strcmp и других строковых функций
 #include <stdlib.h> // Для strtol
@@ -13,7 +14,7 @@ extern rgb_color_t main_color;
 
 // Структура для истории команд
 typedef struct {
-    char commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
+    uint16_t commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
     int current_index;
     int total_commands;
     int history_index;  // Индекс для навигации по истории
@@ -21,7 +22,7 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
-static char command_buffer[COMMAND_BUFFER_SIZE];
+static uint16_t command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
 
 void add_command_to_history(const char* command) {
@@ -140,7 +141,7 @@ void console_process_command(const char* command) {
         printf("\n");
     } else {
         printf("Unknown command: ");
-        printf(command);
+        printf("%s", command);
         shell_putchar('\n');
     }
     add_command_to_history(command); // Добавление команды в историю
@@ -148,7 +149,7 @@ void console_process_command(const char* command) {
 }
 
 void console_input_loop() {
-	char c;
+	uint16_t c;
 	while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
@@ -158,7 +159,7 @@ void console_input_loop() {
             if (command_length == 0) {
                 printf(PROMPT_STRING);
             } else {
-                command_buffer[command_length] = '\0';
+                command_buffer[command_length] = 0;
                 console_process_command(command_buffer);
                 command_length = 0;
             }

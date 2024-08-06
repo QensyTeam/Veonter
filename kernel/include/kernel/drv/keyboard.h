@@ -48,6 +48,14 @@ static const uint16_t keyboard_layout_ru[128] = {
     0,   0
 };
 
+static const uint16_t shifted_keyboard_layout_ru[128] = {
+    0,   27,  L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'-', L'=', '\b', '\t',
+    L'Й', L'Ц', L'У', L'К', L'Е', L'Н', L'Г', L'Ш', L'Щ', L'З', L'Х', L'Ъ', '\n', 0,
+    L'Ф', L'Ы', L'В', L'А', L'П', L'Р', L'О', L'Л', L'Д', L'Ж', L'Э', L'Ё', 0,   '\\',
+    L'Я', L'Ч', L'С', L'М', L'И', L'Т', L'Ь', L'Б', L'Ю', '.', 0,   '*', 0, ' ', 0,   0,   0,   0,   0,   0,   0,
+    0,   0
+};
+
 void keyboard_handler();
 void keyboard_init();
 uint16_t keyboard_get_char();

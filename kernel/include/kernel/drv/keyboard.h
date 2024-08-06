@@ -42,6 +42,6 @@ static const char caps_locked_shifted_keyboard_layout[128] = {
 
 void keyboard_handler();
 void keyboard_init();
-char keyboard_get_char();
+uint16_t keyboard_get_char();
 
 #endif 

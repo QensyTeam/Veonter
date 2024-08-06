@@ -2,6 +2,7 @@
 #include <kernel/sys/isr.h>
 #include <kernel/drv/keyboard.h>
 #include <kernel/drv/tty.h>
+#include <stdint.h>
 #define KEYBOARD_BUFFER_SIZE 128
 
 #define KEY_UP 0x48
@@ -15,8 +16,8 @@ static size_t keyboard_buffer_start = 0;
 static size_t keyboard_buffer_end = 0;
 
 // Добавляем символ в буфер клавиатуры
-void keyboard_add_to_buffer(char c) {
-    size_t next = (keyboard_buffer_end + 1) % KEYBOARD_BUFFER_SIZE;
+void keyboard_add_to_buffer(uint16_t c) {
+    size_t next = (keyboard_buffer_end + 2) % KEYBOARD_BUFFER_SIZE;
     if (next != keyboard_buffer_start) { // Проверка на переполнение буфера
         keyboard_buffer[keyboard_buffer_end] = c;
         keyboard_buffer_end = next;
@@ -24,12 +25,12 @@ void keyboard_add_to_buffer(char c) {
 }
 
 // Получаем символ из буфера клавиатуры
-char keyboard_get_from_buffer() {
+uint16_t keyboard_get_from_buffer() {
     if (keyboard_buffer_start == keyboard_buffer_end) {
         return '\0'; // Если буфер пуст, возвращаем нулевой символ
     } else {
-        char c = keyboard_buffer[keyboard_buffer_start];
-        keyboard_buffer_start = (keyboard_buffer_start + 1) % KEYBOARD_BUFFER_SIZE;
+        uint16_t c = keyboard_buffer[keyboard_buffer_start];
+        keyboard_buffer_start = (keyboard_buffer_start + 2) % KEYBOARD_BUFFER_SIZE;
         return c;
     }
 }
@@ -79,8 +80,8 @@ void keyboard_handler() {
 
 
 // Функция для получения символа из буфера
-char keyboard_get_char() {
-    char c;
+uint16_t keyboard_get_char() {
+    uint16_t c;
     // Ждем, пока буфер не будет пуст
     while ((c = keyboard_get_from_buffer()) == '\0') {
         // Здесь может быть добавлено ожидание (idle), чтобы не нагружать процессор

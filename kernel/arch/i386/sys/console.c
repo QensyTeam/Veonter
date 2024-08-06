@@ -14,7 +14,7 @@ extern rgb_color_t main_color;
 
 // Структура для истории команд
 typedef struct {
-    uint16_t commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
+    char commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
     int current_index;
     int total_commands;
     int history_index;  // Индекс для навигации по истории
@@ -22,7 +22,7 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
-static uint16_t command_buffer[COMMAND_BUFFER_SIZE];
+static uint8_t command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
 
 void add_command_to_history(const char* command) {
@@ -160,12 +160,15 @@ void console_input_loop() {
                 printf(PROMPT_STRING);
             } else {
                 command_buffer[command_length] = 0;
-                console_process_command(command_buffer);
+                console_process_command((char*)command_buffer);
                 command_length = 0;
             }
         } else if (c == '\b') {
             if (command_length > 0) {
                 if (vbe_getcolumn() > PROMPT_LENGTH) {
+                    if(command_buffer[command_length - 1] & 0b10000000) {
+                        command_length--;
+                    }
                     command_length--;
                     putchar('\b'); // Удаление символа с экрана
                 }
@@ -207,7 +210,12 @@ void console_input_loop() {
             }
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
-                command_buffer[command_length++] = c;
+                if(c <= 0xff) {
+                    command_buffer[command_length++] = (char)c;
+                } else {
+                    command_buffer[command_length++] = (char)(c & 0xff);
+                    command_buffer[command_length++] = (char)(c >> 8);
+                }
                 putchar(c); // Отображение символа на экране
             }
         }

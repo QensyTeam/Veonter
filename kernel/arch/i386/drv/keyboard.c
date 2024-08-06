@@ -58,7 +58,7 @@ void keyboard_handler() {
     if (((scancode & ~0x80) == 0x2A) || ((scancode & ~0x80) == 0x36)) {
         shift_flag = !(scancode & 0x80);
 
-        if(alt_flag) {
+        if(alt_flag && !(scancode & 0x80)) {
             keyboard_ru = !keyboard_ru;
         }
     } else if((scancode & ~0x80) == 0x38) {

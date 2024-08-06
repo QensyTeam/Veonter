@@ -55,8 +55,8 @@ void fb_putchar(unsigned short c, int cx, int cy, rgb_color_t fg, rgb_color_t bg
 	
 	unsigned int size = hdr->characterSize;
     
-    uint8_t hi = (uint8_t)(c >> 8);
-    uint8_t lo = (uint8_t)(c & 0xff);
+    uint8_t lo = (uint8_t)(c >> 8);
+    uint8_t hi = (uint8_t)(c & 0xff);
     
     if(hi == 0xd0 || hi == 0xd1) {
         uint16_t sym = lo & 0x3f;

@@ -52,26 +52,13 @@ int printf(const char* format, ...) {
                     case 's': // Вывод строки
                     {
                         uint8_t* str = va_arg(args, uint8_t*);
-                        /*size_t len = strlen(str);
-                        for (size_t i = 0; i < len; i++) {
-                            uint16_t ch = str[i];
-
-                            if(ch == 0xd0 || ch == 0xd1) {
-                                ch = (ch << 8) | str[++i];
-                                count++;
-                            }
-
-                            shell_putchar(ch);
-
-                            count++;
-                        }*/
+                        
                         while(*str) {
-                            uint16_t ch = *str;
+                            uint16_t ch = (uint16_t)*str;
 
                             if(ch == 0xd0 || ch == 0xd1) {
-                                ch <<= 8;
-                                ch |= *++str;
-                                
+                                ch |= (*++str) << 8;
+
                                 count++;
                             }
 
@@ -215,9 +202,8 @@ int printf(const char* format, ...) {
             uint16_t ch = (uint16_t)(*(uint8_t*)format);
 
             if(ch == 0xd0 || ch == 0xd1) {
-                ch <<= 8;
-                ch |= *(uint8_t*)(++format);
-            
+                ch |= (*(uint8_t*)(++format)) << 8;
+
                 count++;
             }
 

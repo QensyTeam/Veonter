@@ -1,5 +1,6 @@
 #include <kernel/kernel.h>
 #include <kernel/mini_programs/mini_programs.h>
+#include <stdint.h>
 #include <stdio.h>  // Для printf и других стандартных функций
 #include <string.h> // Для strcmp и других строковых функций
 #include <stdlib.h> // Для strtol
@@ -21,7 +22,7 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
-static char command_buffer[COMMAND_BUFFER_SIZE];
+static uint8_t command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
 
 void add_command_to_history(const char* command) {
@@ -140,7 +141,7 @@ void console_process_command(const char* command) {
         printf("\n");
     } else {
         printf("Unknown command: ");
-        printf(command);
+        printf("%s", command);
         shell_putchar('\n');
     }
     add_command_to_history(command); // Добавление команды в историю
@@ -148,7 +149,7 @@ void console_process_command(const char* command) {
 }
 
 void console_input_loop() {
-	char c;
+	uint16_t c;
 	while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
@@ -158,13 +159,16 @@ void console_input_loop() {
             if (command_length == 0) {
                 printf(PROMPT_STRING);
             } else {
-                command_buffer[command_length] = '\0';
-                console_process_command(command_buffer);
+                command_buffer[command_length] = 0;
+                console_process_command((char*)command_buffer);
                 command_length = 0;
             }
         } else if (c == '\b') {
             if (command_length > 0) {
                 if (vbe_getcolumn() > PROMPT_LENGTH) {
+                    if(command_buffer[command_length - 1] & 0b10000000) {
+                        command_length--;
+                    }
                     command_length--;
                     putchar('\b'); // Удаление символа с экрана
                 }
@@ -206,7 +210,12 @@ void console_input_loop() {
             }
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
-                command_buffer[command_length++] = c;
+                if(c <= 0xff) {
+                    command_buffer[command_length++] = (char)c;
+                } else {
+                    command_buffer[command_length++] = (char)(c & 0xff);
+                    command_buffer[command_length++] = (char)(c >> 8);
+                }
                 putchar(c); // Отображение символа на экране
             }
         }

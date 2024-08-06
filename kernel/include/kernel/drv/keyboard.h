@@ -36,7 +36,7 @@ static const char caps_locked_shifted_keyboard_layout[128] = {
     0,   27,  '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b', '\t',
     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '{', '}', '\n', 0,   'a', 's',
     'd', 'f', 'g', 'h', 'j', 'k', 'l', ':', '"', '~', 0,   '|', 'z', 'x', 'c', 'v',
-    'b', 'n', 'm', '<', '>', '?', 0,   '*', 0, ' ', 0,   0,   0,   0,   0,   0,   0,
+    'b', 'n', 'm', '<', '>', '?', 0,   '*', 0, ' ', 0,   0,    0,   0,   0,   0,   0,
     0,   0
 };
 
@@ -49,6 +49,14 @@ static const uint16_t keyboard_layout_ru[128] = {
 };
 
 static const uint16_t shifted_keyboard_layout_ru[128] = {
+    0,   27,  L'!', L'\"', L'№', L';', L'%', L':', L'?', L'*', L'(', L')', L'_', L'+', '\b', '\t',
+    L'Й', L'Ц', L'У', L'К', L'Е', L'Н', L'Г', L'Ш', L'Щ', L'З', L'Х', L'Ъ', '\n', 0,
+    L'Ф', L'Ы', L'В', L'А', L'П', L'Р', L'О', L'Л', L'Д', L'Ж', L'Э', L'Ё', 0,   '\\',
+    L'Я', L'Ч', L'С', L'М', L'И', L'Т', L'Ь', L'Б', L'Ю', ',', 0,   '*', 0, ' ', 0,   0,   0,   0,   0,   0,   0,
+    0,   0
+};
+
+static const uint16_t caps_locked_keyboard_layout_ru[128] = {
     0,   27,  L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9', L'0', L'-', L'=', '\b', '\t',
     L'Й', L'Ц', L'У', L'К', L'Е', L'Н', L'Г', L'Ш', L'Щ', L'З', L'Х', L'Ъ', '\n', 0,
     L'Ф', L'Ы', L'В', L'А', L'П', L'Р', L'О', L'Л', L'Д', L'Ж', L'Э', L'Ё', 0,   '\\',
@@ -56,8 +64,16 @@ static const uint16_t shifted_keyboard_layout_ru[128] = {
     0,   0
 };
 
+static const uint16_t caps_locked_shifted_keyboard_layout_ru[128] = {
+    0,   27,  L'!', L'\"', L'№', L';', L'%', L':', L'?', L'*', L'(', L')', L'_', L'+', '\b', '\t',
+    L'й', L'ц', L'у', L'к', L'е', L'н', L'г', L'ш', L'щ', L'з', L'х', L'ъ', '\n', 0,
+    L'ф', L'ы', L'в', L'а', L'п', L'р', L'о', L'л', L'д', L'ж', L'э', L'ё', 0,   '\\',
+    L'я', L'ч', L'с', L'м', L'и', L'т', L'ь', L'б', L'ю', ',', 0,   '*', 0, ' ', 0,   0,   0,   0,   0,   0,   0,
+    0,   0
+};
+
 void keyboard_handler();
 void keyboard_init();
 uint16_t keyboard_get_char();
 
-#endif 
+#endif

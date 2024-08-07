@@ -81,12 +81,8 @@ void keyboard_handler() {
         uint16_t c;
         if (keyboard_ru) {
             uint16_t raw_c;
-            if (shift_flag && caps_lock_flag) {
-                raw_c = caps_locked_shifted_keyboard_layout_ru[scancode];
-            } else if (shift_flag) {
+            if (caps_lock_flag ^ shift_flag) {
                 raw_c = shifted_keyboard_layout_ru[scancode];
-            } else if (caps_lock_flag) {
-                raw_c = caps_locked_keyboard_layout_ru[scancode];
             } else {
                 raw_c = keyboard_layout_ru[scancode];
             }
@@ -96,12 +92,8 @@ void keyboard_handler() {
                 c = codepoint_to_utf8_short(raw_c);
             }
         } else {
-            if (shift_flag && caps_lock_flag) {
-                c = caps_locked_shifted_keyboard_layout[scancode];
-            } else if (shift_flag) {
+            if (caps_lock_flag ^ shift_flag) {
                 c = shifted_keyboard_layout[scancode];
-            } else if (caps_lock_flag) {
-                c = caps_locked_keyboard_layout[scancode];
             } else {
                 c = keyboard_layout[scancode];
             }

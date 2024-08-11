@@ -40,7 +40,6 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     detect_cpu();
     shell_text_color(RGB(255, 255, 255));
     printf("\n");
-    printf("csl> ");
     keyboard_init();
  
     return 0;

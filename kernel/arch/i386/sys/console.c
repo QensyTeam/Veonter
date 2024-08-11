@@ -64,8 +64,7 @@ void console_initialize() {
     printf(PROMPT_STRING);
 }
 
-void show_help_menu() {
-    const char* content[] = {
+const char* console_help_content_en[] = {
         "help - Displays help about all possible commands",
         "clear - Clear the screen.",
         "mm_test - Runs a Memory test program.",
@@ -77,13 +76,47 @@ void show_help_menu() {
         "cpu - Shows CPU information.",
         "colors - Allows you to color your terminal in the colors you want.",
         "echo <text> - Displays the text you enter.",
-        "beep <frequency> - Allows you to hear a beep with the specified frequency."
-    };
-    int content_lines = sizeof(content) / sizeof(content[0]);
+        "beep <frequency> - Allows you to hear a beep with the specified frequency.",
+        0
+};
+ 
+const char* console_help_content_ru[] = {
+        "help - Показывает справку по всем доступным командам",
+        "clear - Очищает экран",
+        "mm_test - Тест памяти",
+        "window - Тестовое окно",
+        "calc - Калькулятор",
+        "logo - Показывает логотип",
+        "off - Выключает компьютер",
+        "reboot - Перезагрузка компьютера",
+        "cpu - Показывает информацию о процессоре",
+        "colors - Раскрашивает терминал в выбранный цвет",
+        "echo <text> - Выводит введеный текст",
+        "beep <frequency> - Включает встроенную пищалку на выбранной частоте.",
+        0
+};
 
-    printf("\tHELP MENU\n\n");
+extern int LANGUAGE;
+
+void show_help_menu() {
+    int content_lines = 0;
+
+    const char** real_content = LANGUAGE == 1 ? console_help_content_ru : console_help_content_en;
+    char** backup_pointer = (char**)real_content;
+
+    while(*backup_pointer) {
+        content_lines++;
+        backup_pointer++;
+    }
+
+    if(LANGUAGE == 1) {
+        printf("\tСправка\n\n");
+    } else {
+        printf("\tHELP MENU\n\n");
+    }
+
     for (int i = 0; i < content_lines; ++i) {
-        printf("\t\t%s\n", content[i]);
+        printf("\t\t%s\n", real_content[i]);
     }
 }
 

@@ -22,7 +22,7 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
-static uint8_t command_buffer[COMMAND_BUFFER_SIZE];
+static char command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
 
 void add_command_to_history(const char* command) {
@@ -65,7 +65,7 @@ void console_initialize() {
 }
 
 const char* console_help_content_en[] = {
-        "help - Displays help about all possible commands",
+        "help - Displays help about all possible commands.",
         "clear - Clear the screen.",
         "mm_test - Runs a Memory test program.",
         "window - Displays a test window.",
@@ -81,18 +81,18 @@ const char* console_help_content_en[] = {
 };
  
 const char* console_help_content_ru[] = {
-        "help - Показывает справку по всем доступным командам",
-        "clear - Очищает экран",
-        "mm_test - Тест памяти",
-        "window - Тестовое окно",
-        "calc - Калькулятор",
-        "logo - Показывает логотип",
-        "off - Выключает компьютер",
-        "reboot - Перезагрузка компьютера",
-        "cpu - Показывает информацию о процессоре",
-        "colors - Раскрашивает терминал в выбранный цвет",
-        "echo <text> - Выводит введеный текст",
-        "beep <frequency> - Включает встроенную пищалку на выбранной частоте.",
+        "help - Показывает справку по всем доступным командам.",
+        "clear - Очищает экран.",
+        "mm_test - Тест памяти.",
+        "window - Тестовое окно.",
+        "calc - Калькулятор.",
+        "logo - Показывает логотип.",
+        "off - Выключает компьютер.",
+        "reboot - Перезагрузка компьютера.",
+        "cpu - Показывает информацию о процессоре.",
+        "colors - Раскрашивает терминал в выбранный цвет.",
+        "echo <текст> - Выводит введеный текст.",
+        "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
         0
 };
 
@@ -109,11 +109,8 @@ void show_help_menu() {
         backup_pointer++;
     }
 
-    if(LANGUAGE == 1) {
-        printf("\tСправка\n\n");
-    } else {
-        printf("\tHELP MENU\n\n");
-    }
+    printf("\tHELP MENU\n\n");
+    
 
     for (int i = 0; i < content_lines; ++i) {
         printf("\t\t%s\n", real_content[i]);

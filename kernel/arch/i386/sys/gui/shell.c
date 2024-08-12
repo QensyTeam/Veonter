@@ -96,8 +96,8 @@ void colors_program() {
     }
 }
 
-static int cursor_x = -1;  // Текущая x-координата курсора
-static int cursor_y = -1;  // Текущая y-координата курсора
+int cursor_x = -1;  // Текущая x-координата курсора
+int cursor_y = -1;  // Текущая y-координата курсора
 bool cursor_visible = true; // Видимость курсора
 
 uint16_t max_cols; // Максимальное количество символов в строке

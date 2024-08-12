@@ -77,6 +77,7 @@ const char* console_help_content_en[] = {
         "colors - Allows you to color your terminal in the colors you want.",
         "echo <text> - Displays the text you enter.",
         "beep <frequency> - Allows you to hear a beep with the specified frequency.",
+        "vbe_test - Checking the operation of VBE graphics mode.",
         0
 };
  
@@ -93,6 +94,7 @@ const char* console_help_content_ru[] = {
         "colors - Раскрашивает терминал в выбранный цвет.",
         "echo <текст> - Выводит введеный текст.",
         "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
+        "vbe_test - Проверка работы графического режима VBE.",
         0
 };
 
@@ -160,6 +162,13 @@ void console_process_command(const char* command) {
         printf("Rebooting...\n");
         sleep(1000);
         outb(0x64, 0xFE);
+    } else if (strcmp(command, "vbe_test") == 0) {
+        vbe_clear_screen(bg_color);
+        vbe_test();
+        vbe_clear_screen(bg_color);
+        // Сообщаем об окончании теста
+        printf("VBE Test completed successfully!\n");
+
     } else if (strcmp(command, "colors") == 0) {
         colors_program();
     } else if (strcmp(command, "cpu") == 0) {

@@ -28,13 +28,13 @@ void dhv_program() {
         return;
     }
 
-    char* buffer = calloc(512, 1);
+    char* buffer = calloc(1024, 1);
 
-    diskmgr_read(disk, 0, 512, buffer);
+    diskmgr_read(disk, 0, 1024, buffer);
 
     const char* alphabet = "0123456789ABCDEF";
 
-    for(int i = 0; i < 512; i++) {
+    for(int i = 0; i < 1024; i++) {
         if(i % 24 == 0) {
             printf("\n");
         }

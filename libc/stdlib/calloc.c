@@ -9,10 +9,11 @@ void* calloc(size_t num, size_t size) {
 
     if (ptr != NULL) {
         // очищаем выделенную память нулевыми байтами
-        uint8_t* byte_ptr = (uint8_t*)ptr;
+        /*uint8_t* byte_ptr = (uint8_t*)ptr;
         for (size_t i = 0; i < total_size; ++i) {
             byte_ptr[i] = 0;
-        }
+        }*/
+        memset(ptr, 0, total_size);
     }
 
     return ptr;  // возвращаем указатель на выделенную и очищенную память

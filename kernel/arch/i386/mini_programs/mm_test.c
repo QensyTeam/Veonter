@@ -59,6 +59,46 @@ void test_kheap() {
 
     kfree(d);
     printf("Freed d\n");
+
+    ///////
+    printf("calloc() test:\n");
+
+    char* data = calloc(1024, 1);
+
+    printf("Data at: %p\n", data);
+
+    for(int i = 0; i < 1024; i++) {
+        if(data[i] != 0) {
+            printf("Test failed!\n");
+            goto next;
+        }
+    }
+
+    printf("Test passed!\n");
+
+next:
+    kfree(data);
+    
+    /////////
+    printf("big size calloc() test:\n");
+
+    data = calloc(512 << 10, 1);   // 512 KB
+
+    printf("Data at: %p\n", data);
+
+    for(int i = 0; i < 1024; i++) {
+        if(data[i] != 0) {
+            printf("Test failed!\n");
+            goto next2;
+        }
+    }
+
+    printf("Test passed!\n");
+
+next2:
+
+    kfree(data);
+
     shell_text_color(RGB(0, 255, 0));
     printf("kheap test complete.\n\n");
     shell_text_color(main_color);

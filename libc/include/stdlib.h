@@ -17,6 +17,8 @@ void free(void* ptr);
 void lftoa(long double value, char *str, int precision);
 void ftoa(double value, char *str, int precision);
 void lltoa(long long value, char *str, int base);
+void lutoa(unsigned long value, char *str, int base);
+void llutoa(unsigned long long value, char *str, int base);
 void ltoa(long value, char *str, int base);
 void itoa(int value, char* str, int base);
 void dtoa(double num, char* buffer, size_t precision);

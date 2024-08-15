@@ -96,8 +96,8 @@ void test_paging() {
     *ptr2 = 0x8765432;
 
     // Печатаем значения, чтобы убедиться, что они записаны в правильные физические адреса
-    printf("Value at virtual address 0x%x: 0x%x\n", virt_addr1, *ptr1);
-    printf("Value at virtual address 0x%x: 0x%x\n", virt_addr2, *ptr2);
+    printf("Value at virtual address 0x%lx: 0x%lx\n", virt_addr1, *ptr1);
+    printf("Value at virtual address 0x%lx: 0x%lx\n", virt_addr2, *ptr2);
     shell_text_color(RGB(0, 255, 0));
     printf("paging test complete.\n");
     shell_text_color(main_color);

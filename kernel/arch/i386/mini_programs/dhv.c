@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <stdio.h>
+#include <kernel/kernel.h>
 #include <disk_manager.h>
 
 extern disk_t disks[DISK_COUNT];

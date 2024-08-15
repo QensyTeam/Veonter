@@ -1,8 +1,5 @@
 #include <kernel/drv/memdisk.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <kernel/sys/kheap.h>
+#include <kernel/kernel.h>
 
 void memdisk_attach(disk_t disk) {
     struct memdisk_info_t* info = disk.priv_data;

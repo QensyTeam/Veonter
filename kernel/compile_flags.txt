@@ -3,3 +3,4 @@
 -Wextra
 -I../libc/include/
 -Iinclude
+-ffreestanding

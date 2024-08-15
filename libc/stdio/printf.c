@@ -17,7 +17,7 @@ int printf(const char* format, ...) {
     va_start(args, format);
 
     size_t count = 0;
-    char buffer[64];  // Увеличен размер буфера для больших чисел и строк
+    char buffer[96] = {0};  // Увеличен размер буфера для больших чисел и строк
 
     while (*format) {
         if (*format == '%') {
@@ -149,6 +149,16 @@ int printf(const char* format, ...) {
                                     shell_putchar(buffer[i]);
                                     count++;
                                 }
+                            } else if(*format == 'u') {
+                                unsigned long long value = va_arg(args, unsigned long long);
+
+                                llutoa(value, buffer, 10);
+
+                                size_t len = strlen(buffer);
+                                for (size_t i = 0; i < len; i++) {
+                                    shell_putchar(buffer[i]);
+                                    count++;
+                                } 
                             } else {
                                 shell_putchar('%');
                                 shell_putchar('l');
@@ -164,6 +174,15 @@ int printf(const char* format, ...) {
                                 shell_putchar(buffer[i]);
                                 count++;
                             }
+                        } else if(*format == 'u') {
+                            unsigned long value = va_arg(args, unsigned long);
+                            lutoa(value, buffer, 10);
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                shell_putchar(buffer[i]);
+                                count++;
+                            }
+
                         } else {
                             shell_putchar('%');
                             shell_putchar('l');

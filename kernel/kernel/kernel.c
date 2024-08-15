@@ -1,7 +1,9 @@
 #include "kernel/drv/speaker.h"
 #include "kernel/sys/console.h"
+#include "kernel/drv/memdisk.h"
 #include <kernel/kernel.h>
-multiboot_info_t* multiboot;
+
+multiboot_info_t* multiboot = 0;
 
 int LANGUAGE = 2;   // English by fallback.
                     //
@@ -10,6 +12,9 @@ int LANGUAGE = 2;   // English by fallback.
 
 void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((unused)) unsigned int magic) {
     init_hal(mbd);
+
+    memdisk_init(1 << 20);
+
     multiboot = mbd;
 
 

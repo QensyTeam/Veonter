@@ -1,5 +1,7 @@
 #include "kernel/sys/gui/psf.h"
 #include <kernel/kernel.h>
+#include <kernel/drv/memdisk.h>
+#include <kernel/drv/ata_pio.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -31,6 +33,10 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     timer_init();
     irq_enable();
 
+    memdisk_init(1 << 17);
+
+    ata_init();
+
     check();
     printf("PC Speaker testing!\n\n");
     beep(6, 100);
@@ -41,6 +47,6 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     shell_text_color(RGB(255, 255, 255));
     printf("\n");
     keyboard_init();
- 
+
     return 0;
 }

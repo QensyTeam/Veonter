@@ -13,8 +13,6 @@ int LANGUAGE = 2;   // English by fallback.
 void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((unused)) unsigned int magic) {
     init_hal(mbd);
 
-    memdisk_init(1 << 20);
-
     multiboot = mbd;
 
 

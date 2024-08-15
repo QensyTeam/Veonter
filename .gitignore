@@ -2,4 +2,4 @@
 *.vscode
 sysroot
 **/Veonter.kernel
-
+*.img

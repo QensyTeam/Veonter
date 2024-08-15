@@ -5,5 +5,6 @@
 #include <kernel/mini_programs/calc.h>
 #include <kernel/mini_programs/vbe_test.h>
 #include <kernel/mini_programs/disks.h>
+#include <kernel/mini_programs/dhv.h>
 
 #endif

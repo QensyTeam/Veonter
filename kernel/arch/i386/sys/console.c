@@ -79,6 +79,7 @@ const char* console_help_content_en[] = {
         "beep <frequency> - Allows you to hear a beep with the specified frequency.",
         "vbe_test - Checking the operation of VBE graphics mode.",
         "disks - Show disk list available in system",
+        "dhv - Disk Hex View (first 512 bytes)",
         0
 };
  
@@ -97,6 +98,7 @@ const char* console_help_content_ru[] = {
         "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
         "vbe_test - Проверка работы графического режима VBE.",
         "disks - Показывает список дисков доступных в системе.",
+        "dhv - Показывает первые 512 байт с диска",
         0
 };
 
@@ -182,6 +184,8 @@ void console_process_command(const char* command) {
         printf("\n");
     } else if(strcmp(command, "disks") == 0) {
         disk_list();
+    } else if(strcmp(command, "dhv") == 0) {
+        dhv_program();
     } else {
         printf("Unknown command: ");
         printf("%s", command);

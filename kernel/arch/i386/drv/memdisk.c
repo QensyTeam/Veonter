@@ -14,13 +14,13 @@ void memdisk_attach(disk_t disk) {
 void memdisk_read(disk_t disk, uint64_t offset, uint32_t size, void* out) {
     struct memdisk_info_t* info = disk.priv_data;
    
-    memcpy(out, info->memory + offset, size);
+    memcpy(out, ((char*)info->memory) + offset, size);
 }
 
 void memdisk_write(disk_t disk, uint64_t offset, uint32_t size, const void* out) {
     struct memdisk_info_t* info = disk.priv_data;
 
-    memcpy(info->memory + offset, out, size);
+    memcpy(((char*)info->memory) + offset, out, size);
 }
 
 uint64_t memdisk_get_capacity(disk_t disk) {

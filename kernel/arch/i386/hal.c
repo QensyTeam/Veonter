@@ -32,20 +32,17 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     pic_init();
     timer_init();
     irq_enable();
-
-    memdisk_init(1 << 17);
-
-    ata_init();
-
-    check();
-    printf("PC Speaker testing!\n\n");
     beep(6, 100);
-    logo();
+    check();
+    printf("PC Speaker testing!\n");
+    memdisk_init(1 << 17);
+    ata_init();
     printf("\n");
     shell_text_color(RGB(150, 150, 150));
     detect_cpu();
     shell_text_color(RGB(255, 255, 255));
     printf("\n");
+    logo();
     keyboard_init();
 
     return 0;

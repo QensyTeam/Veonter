@@ -334,7 +334,7 @@ bool ata_ide_identify(uint8_t bus, uint8_t drive) {
 
         check();
         printf("Found drive %d:%d\n", bus, drive);
-        printf("Model: %s\nSerial: %s\nFirmware version: %s\n", (char*)model_name, (char*)serial, (char*)fwver);
+        printf("\nModel: %s\nSerial: %s\nFirmware version: %s\n", (char*)model_name, (char*)serial, (char*)fwver);
 
         // REGISTER HERE
         

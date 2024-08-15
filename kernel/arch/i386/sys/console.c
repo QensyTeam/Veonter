@@ -78,6 +78,7 @@ const char* console_help_content_en[] = {
         "echo <text> - Displays the text you enter.",
         "beep <frequency> - Allows you to hear a beep with the specified frequency.",
         "vbe_test - Checking the operation of VBE graphics mode.",
+        "disks - Show disk list available in system",
         0
 };
  
@@ -95,6 +96,7 @@ const char* console_help_content_ru[] = {
         "echo <текст> - Выводит введеный текст.",
         "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
         "vbe_test - Проверка работы графического режима VBE.",
+        "disks - Показывает список дисков доступных в системе.",
         0
 };
 
@@ -178,6 +180,8 @@ void console_process_command(const char* command) {
         detect_cpu();
         shell_text_color(main_color);
         printf("\n");
+    } else if(strcmp(command, "disks") == 0) {
+        disk_list();
     } else {
         printf("Unknown command: ");
         printf("%s", command);

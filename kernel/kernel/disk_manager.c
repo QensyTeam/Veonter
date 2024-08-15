@@ -56,14 +56,14 @@ void diskmgr_write(int disk_nr, uint64_t offset, uint32_t size, const void* in_b
     disk.write(disk, offset, size, in_buffer);
 }
 
-void diskmgr_get_capacity(int disk_nr) {
+uint64_t diskmgr_get_capacity(int disk_nr) {
     if(disk_nr < 0 || disk_nr >= DISK_COUNT) {
-        return;
+        return 0;
     }
 
     disk_t disk = disks[disk_nr];
     
-    disk.get_capacity(disk);
+    return disk.get_capacity(disk);
 }
 
 void diskmgr_detach(int disk_nr) {

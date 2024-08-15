@@ -15,8 +15,6 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
 
     memdisk_init(1 << 20);
 
-    printf("Ionia\n");
-
     multiboot = mbd;
 
 

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #define HEAP_MAGIC 0x12345678
-#define HEAP_MIN_SIZE 0x70000
+#define HEAP_MIN_SIZE 0x200000
 #define HEAP_SIZE_PERCENTAGE 75
 
 typedef struct header {
@@ -18,19 +18,21 @@ typedef struct {
 } footer_t;
 
 static void* heap_start;
-static size_t heap_size;
+size_t heap_size;
 static header_t* free_list;
 
+size_t heap_used = 0;
+
 size_t calculate_heap_size(multiboot_info_t* multiboot_info) {
-    // Рассчитываем доступную физическую память в килобайтах
-    size_t mem_lower_kb = multiboot_info->mem_lower;
-    size_t mem_upper_kb = multiboot_info->mem_upper;
+    // Рассчитываем доступную физическую память
+    size_t mem_lower = multiboot_info->mem_lower;
+    size_t mem_upper = multiboot_info->mem_upper;
 
-    // Общий объем памяти в килобайтах
-    size_t total_memory_kb = mem_lower_kb + mem_upper_kb;
+    // Общий объем памяти в байтах
+    size_t total_memory_kb = mem_lower + mem_upper;
 
-    // Рассчитываем размер кучи в килобайтах
-    size_t heap_size_kb = (HEAP_SIZE_PERCENTAGE * total_memory_kb) / 100;
+    // Рассчитываем размер кучи
+    size_t heap_size_kb = HEAP_SIZE_PERCENTAGE * total_memory_kb;
 
     return heap_size_kb;
 }
@@ -57,7 +59,7 @@ void* kmalloc(size_t size) {
     header_t* current = free_list;
     while (current) {
         if (current->magic != HEAP_MAGIC) {
-            panic("Heap corruption detected!", "kheap.c", 42);
+            panic("Heap corruption detected!", "kheap.c", __LINE__);
             return NULL;
         }
 
@@ -86,6 +88,8 @@ void* kmalloc(size_t size) {
                 prev->next = current->next;
             }
 
+            heap_used += size;
+
             return (char*)current + sizeof(header_t);
         }
 
@@ -104,6 +108,8 @@ void kfree(void* ptr) {
     if (header->magic != HEAP_MAGIC || footer->magic != HEAP_MAGIC) {
         panic("Heap corruption detected!", "kheap.c", 92);
     }
+
+    heap_size -= header->size;
 
     header->next = free_list;
     free_list = header;

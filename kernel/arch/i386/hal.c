@@ -6,7 +6,7 @@
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
 
-#define HEAP_START_ADDRESS 0x70000
+#define HEAP_START_ADDRESS 0x1000000
 
 void irq_disable();
 void irq_enable();

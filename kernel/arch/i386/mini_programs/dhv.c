@@ -28,6 +28,11 @@ void dhv_program() {
         return;
     }
 
+    if(!disks[disk].valid) {
+        printf("No disk\n");
+        return;
+    }
+
     char* buffer = calloc(1024, 1);
 
     diskmgr_read(disk, 0, 1024, buffer);

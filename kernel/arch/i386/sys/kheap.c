@@ -24,15 +24,15 @@ static header_t* free_list;
 size_t heap_used = 0;
 
 size_t calculate_heap_size(multiboot_info_t* multiboot_info) {
-    // Рассчитываем доступную физическую память в килобайтах
-    size_t mem_lower_kb = multiboot_info->mem_lower;
-    size_t mem_upper_kb = multiboot_info->mem_upper;
+    // Рассчитываем доступную физическую память
+    size_t mem_lower = multiboot_info->mem_lower;
+    size_t mem_upper = multiboot_info->mem_upper;
 
-    // Общий объем памяти в килобайтах
-    size_t total_memory_kb = mem_lower_kb + mem_upper_kb;
+    // Общий объем памяти в байтах
+    size_t total_memory_kb = mem_lower + mem_upper;
 
-    // Рассчитываем размер кучи в килобайтах
-    size_t heap_size_kb = (HEAP_SIZE_PERCENTAGE * total_memory_kb) / 100;
+    // Рассчитываем размер кучи
+    size_t heap_size_kb = HEAP_SIZE_PERCENTAGE * total_memory_kb;
 
     return heap_size_kb;
 }

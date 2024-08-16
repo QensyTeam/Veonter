@@ -80,6 +80,7 @@ const char* console_help_content_en[] = {
         "vbe_test - Checking the operation of VBE graphics mode.",
         "disks - Show disk list available in system",
         "dhv - Disk Hex View (first 1024 bytes)",
+        "meminfo - Show memory info",
         0
 };
  
@@ -99,6 +100,7 @@ const char* console_help_content_ru[] = {
         "vbe_test - Проверка работы графического режима VBE.",
         "disks - Показывает список дисков доступных в системе.",
         "dhv - Показывает первые 1024 байт с диска",
+        "meminfo - Выводит информацию о памяти",
         0
 };
 

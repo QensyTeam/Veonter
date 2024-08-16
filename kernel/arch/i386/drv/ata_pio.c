@@ -1,10 +1,5 @@
 #include <kernel/drv/ata_pio.h>
-#include <kernel/sys/ports.h>
-#include <kernel/sys/kheap.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <kernel/kernel.h>
 #include <disk_manager.h>
 #include <bits.h>
 
@@ -334,7 +329,7 @@ bool ata_ide_identify(uint8_t bus, uint8_t drive) {
 
         check();
         printf("Found drive %d:%d\n", bus, drive);
-        printf("Model: %s\nSerial: %s\nFirmware version: %s\n", (char*)model_name, (char*)serial, (char*)fwver);
+        printf("\nModel: %s\nSerial: %s\nFirmware version: %s\n", (char*)model_name, (char*)serial, (char*)fwver);
 
         // REGISTER HERE
         

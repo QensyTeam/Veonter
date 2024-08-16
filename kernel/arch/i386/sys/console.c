@@ -186,6 +186,8 @@ void console_process_command(const char* command) {
         disk_list();
     } else if(strcmp(command, "dhv") == 0) {
         dhv_program();
+    } else if(strcmp(command, "meminfo") == 0) {
+        meminfo_program();
     } else {
         printf("Unknown command: ");
         printf("%s", command);

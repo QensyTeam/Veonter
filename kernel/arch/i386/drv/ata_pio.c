@@ -13,7 +13,7 @@ inline void ata_ide_select_drive(uint8_t bus, bool slave) {
 }
 
 __attribute__((always_inline))
-void ata_ide_400ns_delay(uint16_t io) {
+inline void ata_ide_400ns_delay(uint16_t io) {
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
@@ -211,11 +211,11 @@ uint64_t ata_get_capacity(disk_t disk) {
     return drive->capacity * drive->block_size;
 }
 
-void ata_attach(disk_t disk) {
+void ata_attach(__attribute__((unused)) disk_t disk) {
     // Nothing.
 }
 
-void ata_detach(disk_t disk) {
+void ata_detach(__attribute__((unused)) disk_t disk) {
     // Nothing.
 }
 

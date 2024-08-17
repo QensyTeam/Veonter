@@ -11,9 +11,9 @@
 
 bool keyboard_ru = false;
 
-static uint8_t alt_flag = 0;
-static uint8_t shift_flag = 0;
-static uint8_t caps_lock_flag = 0;
+static volatile uint8_t alt_flag = 0;
+static volatile uint8_t shift_flag = 0;
+static volatile uint8_t caps_lock_flag = 0;
 
 static uint16_t keyboard_buffer[KEYBOARD_BUFFER_SIZE] = {0};
 static size_t keyboard_buffer_start = 0;
@@ -100,7 +100,6 @@ void keyboard_handler() {
         }
 
         if (c != 0) {
-            shell_putchar(c); // Выводим символ на экран
             keyboard_add_to_buffer(c); // Добавляем символ в буфер
         }
     }

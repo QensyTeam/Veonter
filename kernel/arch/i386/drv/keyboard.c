@@ -4,6 +4,8 @@
 #include <kernel/drv/keyboard.h>
 #include <kernel/drv/tty.h>
 #include <stdint.h>
+#include <kernel/drv/ps2.h>
+
 #define KEYBOARD_BUFFER_SIZE 256
 
 #define KEY_UP 0x48
@@ -119,5 +121,56 @@ uint16_t keyboard_get_char() {
 }
 
 void keyboard_init() {
+    uint8_t stat;
+
+    ps2_in_wait_until_empty();
+
+    outb(PS2_DATA_PORT, 0xf4);
+    stat = ps2_read();
+
+    if(stat != 0xfa) {
+        return;
+    }
+
+    ps2_in_wait_until_empty();
+
+    outb(PS2_DATA_PORT, 0xf0);
+    stat = ps2_read();
+
+    if(stat != 0xfa) {
+        return;
+    }
+
+    ps2_in_wait_until_empty();
+
+    outb(PS2_DATA_PORT, 0);
+    stat = ps2_read();
+
+    if(stat != 0xfa) {
+        return;
+    }
+
+    ps2_in_wait_until_empty();
+
+    outb(PS2_DATA_PORT, 0xf3);
+    stat = ps2_read();
+
+    if(stat != 0xfa) {
+        return;
+    }
+
+    ps2_in_wait_until_empty();
+
+    outb(PS2_DATA_PORT, 0);
+    stat = ps2_read();
+
+    if(stat != 0xfa) {
+        return;
+    }
+
+    uint8_t conf = ps2_read_configuration_byte();
+
+    ps2_write_configuration_byte(conf | 0b1000001);
+
     install_irq_handler(KEYBOARD_IRQ, keyboard_handler);
 }

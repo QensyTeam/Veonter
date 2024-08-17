@@ -25,7 +25,8 @@
 #include <kernel/sys/gui/geometry.h>
 #include <kernel/sys/gui/psf.h>
 #include <kernel/sys/gui/shell.h>
-#include <kernel/drv/keyboard.h>
+#include <kernel/drv/ps2_keyboard.h>
+#include <kernel/drv/keyboard_buffer.h>
 #include <kernel/drv/speaker.h>
 #include <kernel/sys/vga.h>
 #include <kernel/multiboot.h>

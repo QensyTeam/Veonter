@@ -201,12 +201,14 @@ void console_process_command(const char* command) {
 
 void console_input_loop() {
 	uint16_t c;
+
 	while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
         disable_cursor(); // скрываем курсор перед изменением экрана
 
         if (c == '\n') {
+            putchar('\n');
             if (command_length == 0) {
                 printf(PROMPT_STRING);
             } else {

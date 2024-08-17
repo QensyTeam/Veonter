@@ -1,3 +1,4 @@
+#include "kernel/sys/pit.h"
 #include <stdio.h>
 #include <kernel/kernel.h>
 #include <stdarg.h>  // Для va_list и связанных функций
@@ -15,6 +16,7 @@ int scanf(const char* format, ...) {
     // Считывание строки с консоли
     while (1) {
         c = keyboard_get_char();
+        putchar(c);
 
         if (c == '\n' || c == '\r') {
             if (length < COMMAND_BUFFER_SIZE) {

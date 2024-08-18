@@ -71,7 +71,7 @@ void keyboard_handler() {
 }
 
 
-void keyboard_init() {
+void ps2_keyboard_preinit() {
     uint8_t stat;
 
     ps2_in_wait_until_empty();
@@ -122,6 +122,8 @@ void keyboard_init() {
     uint8_t conf = ps2_read_configuration_byte();
 
     ps2_write_configuration_byte(conf | 0b1000001);
+}
 
+void ps2_keyboard_init() {
     install_irq_handler(KEYBOARD_IRQ, keyboard_handler);
 }

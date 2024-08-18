@@ -4,6 +4,7 @@
 #include <stdio.h>  // Для printf и других стандартных функций
 #include <string.h> // Для strcmp и других строковых функций
 #include <stdlib.h> // Для strtol
+#include <kernel/drv/ps2_mouse.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -59,7 +60,6 @@ const char* get_next_command() {
 }
 
 void console_initialize() {
-    keyboard_init();
     vbe_clear_screen(bg_color);
     printf(PROMPT_STRING);
 }
@@ -190,6 +190,10 @@ void console_process_command(const char* command) {
         dhv_program();
     } else if(strcmp(command, "meminfo") == 0) {
         meminfo_program();
+    } else if(strcmp(command, "mousetest") == 0) {
+        while(true) {
+            printf("Buttons: %x; X: %lu; Y: %lu   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y());
+        }
     } else {
         printf("Unknown command: ");
         printf("%s", command);

@@ -10,7 +10,7 @@
 #define PIT_REG_COMMAND     0x43
 #define TIMER_FREQUENCY     100  // Частота таймера в Гц
 
-unsigned int ticks = 0;
+volatile unsigned int ticks = 0;
 BOOL should_run = TRUE;
 extern bool cursor_visible;
 

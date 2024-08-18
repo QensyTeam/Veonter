@@ -1,4 +1,3 @@
-#include "kernel/sys/gui/shell.h"
 #include <kernel/kernel.h>
 #include <kernel/sys/isr.h>
 #include <kernel/drv/ps2_keyboard.h>
@@ -80,6 +79,7 @@ void ps2_keyboard_preinit() {
     stat = ps2_read();
 
     if(stat != 0xfa) {
+        printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
 
@@ -89,6 +89,7 @@ void ps2_keyboard_preinit() {
     stat = ps2_read();
 
     if(stat != 0xfa) {
+        printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
 
@@ -98,15 +99,15 @@ void ps2_keyboard_preinit() {
     stat = ps2_read();
 
     if(stat != 0xfa) {
+        printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0xf3);
+    ps2_write(0xf3);
     stat = ps2_read();
 
     if(stat != 0xfa) {
+        printf("Kbd error: LN %u (rpt = %u)\n", __LINE__, stat);
         return;
     }
 
@@ -116,6 +117,7 @@ void ps2_keyboard_preinit() {
     stat = ps2_read();
 
     if(stat != 0xfa) {
+        printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
 

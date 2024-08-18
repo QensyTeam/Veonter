@@ -14,3 +14,5 @@ typedef enum {
 void serial_write_char(serial_port_t port, char ch);
 void serial_write_string(serial_port_t port, const char* str);
 void serial_port_init(serial_port_t port);
+void serial_printf(serial_port_t port, char *text, ...);
+

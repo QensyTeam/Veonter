@@ -1,6 +1,10 @@
+#!/bin/bash
+
+./build.sh
+
 if [ -f /boot/grub/grub.cfg ]; then
     echo "Copying kernel..."
-    sudo cp isodir/boot/Veonter.kernel /boot/
+    sudo cp kernel/Veonter.kernel /boot/
     echo "Copying grub configuration..."
     sudo cp 49_veonter /etc/grub.d/
     echo "Updating configuration"

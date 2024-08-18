@@ -2,7 +2,7 @@
 
 double strtod(const char *str, char **endptr) {
     double result = 0.0;
-    int sign = 1;
+    double sign = 1.0;
     double factor = 1.0;
 
     // Пропустить начальные пробелы
@@ -12,7 +12,7 @@ double strtod(const char *str, char **endptr) {
 
     // Проверка знака числа
     if (*str == '-') {
-        sign = -1;
+        sign = -1.0;
         str++;
     } else if (*str == '+') {
         str++;

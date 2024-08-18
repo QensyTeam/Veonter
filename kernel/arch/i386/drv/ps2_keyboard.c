@@ -8,11 +8,13 @@
 #define KEY_UP 0x48
 #define KEY_DOWN 0x50
 
-bool keyboard_ru = false;
+static volatile bool keyboard_ru = false;
 
 static volatile uint8_t alt_flag = 0;
 static volatile uint8_t shift_flag = 0;
 static volatile uint8_t caps_lock_flag = 0;
+
+
 
 void keyboard_handler() {
     uint8_t scancode = inb(0x60);
@@ -41,9 +43,29 @@ void keyboard_handler() {
         }
     } else if (scancode < 128) {
         uint16_t c;
+        uint16_t base = keyboard_layout[scancode];
+
+        bool is_letter = (base >= 'a' && base <= 'z');
+        
+        bool shift_letters = caps_lock_flag ^ shift_flag;
+        bool shift_numbers = shift_flag;
+
+        bool shift = is_letter ? shift_letters : shift_numbers;
+
+        // Caps Shift Key Shifted
+        // 0    0     L   0
+        // 1    0     L   1
+        // 0    1     L   1
+        // 1    1     L   0
+        
+        // 0    0     S   0
+        // 1    0     S   0
+        // 0    1     S   1
+        // 1    1     S   1
+
         if (keyboard_ru) {
             uint16_t raw_c;
-            if (caps_lock_flag ^ shift_flag) {
+            if (shift) {
                 raw_c = shifted_keyboard_layout_ru[scancode];
             } else {
                 raw_c = keyboard_layout_ru[scancode];
@@ -54,7 +76,7 @@ void keyboard_handler() {
                 c = codepoint_to_utf8_short(raw_c);
             }
         } else {
-            if (caps_lock_flag ^ shift_flag) {
+            if (shift) {
                 c = shifted_keyboard_layout[scancode];
             } else {
                 c = keyboard_layout[scancode];
@@ -65,17 +87,14 @@ void keyboard_handler() {
             keyboard_add_to_buffer(c); // Добавляем символ в буфер
         }
     }
-
-    pic_eoi(KEYBOARD_IRQ); // Отправляем сигнал "конец прерывания"
 }
 
 
 void ps2_keyboard_preinit() {
     uint8_t stat;
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0xf4);
+    // Enable keyboard
+    ps2_write(0xf4);
     stat = ps2_read();
 
     if(stat != 0xfa) {
@@ -83,9 +102,8 @@ void ps2_keyboard_preinit() {
         return;
     }
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0xf0);
+    // Set scancode
+    ps2_write(0xf0);
     stat = ps2_read();
 
     if(stat != 0xfa) {
@@ -93,15 +111,18 @@ void ps2_keyboard_preinit() {
         return;
     }
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0);
+    // Scancode number 0! (IDK what does it mean)
+    ps2_write(0);
     stat = ps2_read();
 
     if(stat != 0xfa) {
         printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
+
+    // With error code PS/2 controller wants to send us scancode set number! Awwwwwww
+    uint8_t scancode = ps2_read();
+    (void)scancode;  // Consume it 
 
     ps2_write(0xf3);
     stat = ps2_read();

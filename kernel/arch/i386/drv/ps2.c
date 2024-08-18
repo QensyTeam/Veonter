@@ -5,8 +5,8 @@
 #include <kernel/sys/ports.h>
 #include <kernel/drv/ps2.h>
 
-bool ps2_channel1_okay = false;
-bool ps2_channel2_okay = false;
+static bool ps2_channel1_okay = false;
+static bool ps2_channel2_okay = false;
 
 uint8_t ps2_read_configuration_byte() {
     ps2_in_wait_until_empty();

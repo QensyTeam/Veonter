@@ -59,7 +59,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     ps2_mouse_init();
 
     serial_port_init(COM1);
-    serial_write_string(COM1, "Pika-pika-pikachu!");
+    serial_write_string(COM1, "Pika-pika-pikachu!\n");
+    qemu_log("KERNEL RUNNING");
 
     return 0;
 }

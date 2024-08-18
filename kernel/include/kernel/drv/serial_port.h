@@ -1,5 +1,7 @@
 #pragma once
 
+#define qemu_log(M, ...) serial_printf(0x3f8,"[LOG] (%s:%s:%d) " M "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
 typedef enum {
     COM1 = 0x3f8,
 	COM2 = 0x2F8,

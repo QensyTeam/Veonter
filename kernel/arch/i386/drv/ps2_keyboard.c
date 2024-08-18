@@ -8,7 +8,7 @@
 #define KEY_UP 0x48
 #define KEY_DOWN 0x50
 
-bool keyboard_ru = false;
+static volatile bool keyboard_ru = false;
 
 static volatile uint8_t alt_flag = 0;
 static volatile uint8_t shift_flag = 0;
@@ -65,17 +65,14 @@ void keyboard_handler() {
             keyboard_add_to_buffer(c); // Добавляем символ в буфер
         }
     }
-
-    pic_eoi(KEYBOARD_IRQ); // Отправляем сигнал "конец прерывания"
 }
 
 
 void ps2_keyboard_preinit() {
     uint8_t stat;
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0xf4);
+    // Enable keyboard
+    ps2_write(0xf4);
     stat = ps2_read();
 
     if(stat != 0xfa) {
@@ -83,9 +80,8 @@ void ps2_keyboard_preinit() {
         return;
     }
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0xf0);
+    // Set scancode
+    ps2_write(0xf0);
     stat = ps2_read();
 
     if(stat != 0xfa) {
@@ -93,15 +89,18 @@ void ps2_keyboard_preinit() {
         return;
     }
 
-    ps2_in_wait_until_empty();
-
-    outb(PS2_DATA_PORT, 0);
+    // Scancode number 0! (IDK what does it mean)
+    ps2_write(0);
     stat = ps2_read();
 
     if(stat != 0xfa) {
         printf("Kbd error: LN %u\n", __LINE__);
         return;
     }
+
+    // With error code PS/2 controller wants to send us scancode set number! Awwwwwww
+    uint8_t scancode = ps2_read();
+    (void)scancode;  // Consume it 
 
     ps2_write(0xf3);
     stat = ps2_read();

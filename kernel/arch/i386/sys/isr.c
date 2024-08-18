@@ -28,5 +28,5 @@ void irq_server(registers_t* r) {
         irq_handler(*r); 
     }
 
-    pic_eoi(r->int_no);
+    pic_eoi(r->int_no);  // Отправляем сигнал "конец прерывания"
 }

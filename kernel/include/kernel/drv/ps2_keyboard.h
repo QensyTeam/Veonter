@@ -73,6 +73,7 @@ static const uint16_t caps_locked_shifted_keyboard_layout_ru[128] = {
 };
 
 void keyboard_handler();
-void keyboard_init();
+void ps2_keyboard_preinit();
+void ps2_keyboard_init();
 
 #endif

@@ -1,8 +1,11 @@
+#include "kernel/drv/ps2_keyboard.h"
 #include "kernel/sys/gui/psf.h"
 #include <kernel/kernel.h>
 #include <kernel/drv/memdisk.h>
 #include <kernel/drv/ata_pio.h>
 #include <kernel/drv/ps2.h>
+#include <kernel/drv/ps2_mouse.h>
+#include <kernel/drv/serial_port.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -46,7 +49,17 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     logo();
 
     ps2_init();
-    keyboard_init();
+    ps2_keyboard_preinit();
+    ps2_mouse_preinit();
+
+    // Limit mouse coordinates to screend bounds
+    ps2_mouse_set_bounds(1024, 768);
+
+    ps2_keyboard_init();
+    ps2_mouse_init();
+
+    serial_port_init(COM1);
+    serial_write_string(COM1, "Pika-pika-pikachu!");
 
     return 0;
 }

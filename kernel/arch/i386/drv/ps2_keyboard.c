@@ -14,6 +14,8 @@ static volatile uint8_t alt_flag = 0;
 static volatile uint8_t shift_flag = 0;
 static volatile uint8_t caps_lock_flag = 0;
 
+
+
 void keyboard_handler() {
     uint8_t scancode = inb(0x60);
 
@@ -41,9 +43,29 @@ void keyboard_handler() {
         }
     } else if (scancode < 128) {
         uint16_t c;
+        uint16_t base = keyboard_layout[scancode];
+
+        bool is_letter = (base >= 'a' && base <= 'z');
+        
+        bool shift_letters = caps_lock_flag ^ shift_flag;
+        bool shift_numbers = shift_flag;
+
+        bool shift = is_letter ? shift_letters : shift_numbers;
+
+        // Caps Shift Key Shifted
+        // 0    0     L   0
+        // 1    0     L   1
+        // 0    1     L   1
+        // 1    1     L   0
+        
+        // 0    0     S   0
+        // 1    0     S   0
+        // 0    1     S   1
+        // 1    1     S   1
+
         if (keyboard_ru) {
             uint16_t raw_c;
-            if (caps_lock_flag ^ shift_flag) {
+            if (shift) {
                 raw_c = shifted_keyboard_layout_ru[scancode];
             } else {
                 raw_c = keyboard_layout_ru[scancode];
@@ -54,7 +76,7 @@ void keyboard_handler() {
                 c = codepoint_to_utf8_short(raw_c);
             }
         } else {
-            if (caps_lock_flag ^ shift_flag) {
+            if (shift) {
                 c = shifted_keyboard_layout[scancode];
             } else {
                 c = keyboard_layout[scancode];

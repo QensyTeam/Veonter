@@ -16,7 +16,10 @@ int scanf(const char* format, ...) {
     // Считывание строки с консоли
     while (1) {
         c = keyboard_get_char();
-        putchar(c);
+        
+        if (c != '\b') {
+            putchar(c);
+        }
 
         if (c == '\n' || c == '\r') {
             if (length < COMMAND_BUFFER_SIZE) {
@@ -26,6 +29,7 @@ int scanf(const char* format, ...) {
         } else if (c == '\b') {
             if (length > 0) {
                 length--;
+                putchar('\b');
             }
         } else {
             if (length < COMMAND_BUFFER_SIZE - 1) {

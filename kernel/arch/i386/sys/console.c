@@ -198,10 +198,11 @@ void console_process_command(const char* command) {
             uint16_t sym = keyboard_get_from_buffer();
 
             if(sym == 'q') {
+                printf("\n");
                 break;
             }
 
-            printf("Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
+            printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else {
         printf("Unknown command: ");

@@ -5,6 +5,7 @@
 #include <kernel/drv/ata_pio.h>
 #include <kernel/drv/ps2.h>
 #include <kernel/drv/ps2_mouse.h>
+#include <kernel/drv/serial_port.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -56,6 +57,9 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
 
     ps2_keyboard_init();
     ps2_mouse_init();
+
+    serial_port_init(COM1);
+    serial_write_string(COM1, "Pika-pika-pikachu!");
 
     return 0;
 }

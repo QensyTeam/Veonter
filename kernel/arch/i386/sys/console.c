@@ -1,3 +1,4 @@
+#include "kernel/drv/keyboard_buffer.h"
 #include <kernel/kernel.h>
 #include <kernel/mini_programs/mini_programs.h>
 #include <stdint.h>
@@ -194,6 +195,12 @@ void console_process_command(const char* command) {
         meminfo_program();
     } else if(strcmp(command, "mousetest") == 0) {
         while(true) {
+            uint16_t sym = keyboard_get_from_buffer();
+
+            if(sym == 'q') {
+                break;
+            }
+
             printf("Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else {

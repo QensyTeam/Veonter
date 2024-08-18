@@ -73,7 +73,7 @@ void mouse_handler(__attribute__((unused)) struct registers r) {
     if (recbyte == 3 /* + has_wheel */) {
         recbyte = 0;
 
-        mouse_parse_packet(mousebuf, 0, 0);
+        mouse_parse_packet(mousebuf, 1, 0);
 
         // Bounds
         if (mouse_x > mouse_max_x) {
@@ -144,4 +144,4 @@ void ps2_mouse_init() {
 uint32_t mouse_get_x() {return mouse_x;}
 uint32_t mouse_get_y() {return mouse_y;}
 uint8_t  mouse_get_buttons() {return mouse_buttons;}
-
+int      mouse_get_wheel() {return mouse_wheel;}

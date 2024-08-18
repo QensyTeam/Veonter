@@ -50,6 +50,7 @@ typedef struct mouse_flags_byte {
 uint32_t mouse_get_x();
 uint32_t mouse_get_y();
 uint8_t  mouse_get_buttons();
+int      mouse_get_wheel();
 
 void ps2_mouse_set_bounds(uint32_t x, uint32_t y);
 

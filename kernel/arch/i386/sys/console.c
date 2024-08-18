@@ -78,9 +78,10 @@ const char* console_help_content_en[] = {
         "echo <text> - Displays the text you enter.",
         "beep <frequency> - Allows you to hear a beep with the specified frequency.",
         "vbe_test - Checking the operation of VBE graphics mode.",
-        "disks - Show disk list available in system",
-        "dhv - Disk Hex View (first 1024 bytes)",
-        "meminfo - Show memory info",
+        "disks - Show disk list available in system.",
+        "dhv - Disk Hex View (first 1024 bytes).",
+        "meminfo - Show memory info.",
+        "mousetest - Show button flags and coordinates.",
         0
 };
  
@@ -99,8 +100,9 @@ const char* console_help_content_ru[] = {
         "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
         "vbe_test - Проверка работы графического режима VBE.",
         "disks - Показывает список дисков доступных в системе.",
-        "dhv - Показывает первые 1024 байт с диска",
-        "meminfo - Выводит информацию о памяти",
+        "dhv - Показывает первые 1024 байт с диска.",
+        "meminfo - Выводит информацию о памяти.",
+        "mousetest - Показывает координаты и флаги кнопок мыши.",
         0
 };
 
@@ -192,7 +194,7 @@ void console_process_command(const char* command) {
         meminfo_program();
     } else if(strcmp(command, "mousetest") == 0) {
         while(true) {
-            printf("Buttons: %x; X: %lu; Y: %lu   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y());
+            printf("Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else {
         printf("Unknown command: ");

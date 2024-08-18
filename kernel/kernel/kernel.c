@@ -15,7 +15,6 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
 
     multiboot = mbd;
 
-
     int choice = -1;
 
     while(choice != 1 && choice != 2) {

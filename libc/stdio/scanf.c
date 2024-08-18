@@ -9,7 +9,7 @@ int scanf(const char* format, ...) {
     va_list args;
     va_start(args, format);
 
-    char input_buffer[COMMAND_BUFFER_SIZE];
+    char input_buffer[COMMAND_BUFFER_SIZE] = {0};
     size_t length = 0;
     char c;
 
@@ -68,16 +68,15 @@ int scanf(const char* format, ...) {
                     *long_long_arg = strtoll(input, (char**)&input, 10);
                     matched++;
                     p++;
+                } else if(*p == 'f') {
+                    double* double_arg = va_arg(args, double*);
+                    *double_arg = strtod(input, (char**)&input);
+                    matched++;
                 }
             } else if (*p == 'f') {
                 float* float_arg = va_arg(args, float*);
                 *float_arg = strtof(input, (char**)&input);
                 matched++;
-            } else if (*p == 'l' && *(p + 1) == 'f') {
-                double* double_arg = va_arg(args, double*);
-                *double_arg = strtod(input, (char**)&input);
-                matched++;
-                p++;
             } else if (*p == 'L' && *(p + 1) == 'f') {
                 long double* long_double_arg = va_arg(args, long double*);
                 *long_double_arg = strtold(input, (char**)&input);

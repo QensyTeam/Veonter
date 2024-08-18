@@ -23,6 +23,12 @@ stack_top:
 .global _start
 .type _start, @function
 _start:
+    mov %cr4, %edx
+    orl $0x200, %edx
+    mov %edx, %cr4
+
+    fldcw (.fpu_controlword)
+
     movl $stack_top, %esp
     
     pushl %eax
@@ -37,4 +43,8 @@ _start:
 	hlt
 	jmp .Lhang
 	
+.fpu_controlword:
+    .short 0x37f
+
+
 .size _start, . - _start

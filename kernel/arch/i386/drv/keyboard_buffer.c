@@ -1,9 +1,9 @@
 #include <kernel/drv/keyboard_buffer.h>
 #include <stddef.h>
 
-static uint16_t keyboard_buffer[KEYBOARD_BUFFER_SIZE] = {0};
-static size_t keyboard_buffer_start = 0;
-static size_t keyboard_buffer_end = 0;
+static volatile uint16_t keyboard_buffer[KEYBOARD_BUFFER_SIZE] = {0};
+static volatile size_t keyboard_buffer_start = 0;
+static volatile size_t keyboard_buffer_end = 0;
 
 // TODO: Move it into unicode.c or make it static and move it into unicode.h
 uint16_t codepoint_to_utf8_short(uint16_t code) {

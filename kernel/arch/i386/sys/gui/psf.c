@@ -23,8 +23,6 @@ typedef struct {
     uint8_t characterSize; 
 } PSF1_Header;
 
-#define PSF_FONT_MAGIC 0x864ab572
-
 typedef struct {
     uint32_t magic;
     uint32_t version;
@@ -36,7 +34,7 @@ typedef struct {
     uint32_t width;
 } PSF_font;
 
-extern char _binary_font_psf_start;
+extern uint32_t _binary_font_psf_start;
 extern char _binary_font_psf_end;
 
 void* psf_glyphs;

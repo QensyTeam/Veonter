@@ -183,6 +183,14 @@ int printf(const char* format, ...) {
                                 count++;
                             }
 
+                        } else if (*format == 'x') { // %lx - unsigned long в шестнадцатеричном формате
+                            unsigned long value = va_arg(args, unsigned long);
+                            lutoa(value, buffer, 16);
+                            size_t len = strlen(buffer);
+                            for (size_t i = 0; i < len; i++) {
+                                shell_putchar(buffer[i]);
+                                count++;
+                            }
                         } else {
                             shell_putchar('%');
                             shell_putchar('l');

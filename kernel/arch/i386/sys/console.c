@@ -157,6 +157,7 @@ void console_process_command(const char* command) {
     } else if (strcmp(command, "logo") == 0) {
         printf("\n");
         vbe_clear_screen(bg_color);
+        printf("\n");
         logo();
         shell_text_color(fg_color);
         printf("\n");
@@ -194,14 +195,14 @@ void console_process_command(const char* command) {
     } else if(strcmp(command, "meminfo") == 0) {
         meminfo_program();
     } else if(strcmp(command, "mousetest") == 0) {
+        printf("\n  Press q to exit.\n");
         while(true) {
             uint16_t sym = keyboard_get_from_buffer();
 
             if(sym == 'q') {
-                printf("\n");
+                printf("\n\n");
                 break;
             }
-
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else {

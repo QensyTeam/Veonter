@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <disk_manager.h>
+#include <kernel/disk_manager.h>
 
 extern disk_t disks[128];
 

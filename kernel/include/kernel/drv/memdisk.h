@@ -1,6 +1,6 @@
 #pragma once
 
-#include <disk_manager.h>
+#include <kernel/disk_manager.h>
 #include <stdint.h>
 
 struct memdisk_info_t {

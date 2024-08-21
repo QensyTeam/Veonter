@@ -29,6 +29,7 @@
 #include <kernel/drv/keyboard_buffer.h>
 #include <kernel/drv/speaker.h>
 #include <kernel/sys/vga.h>
+#include <kernel/mini_programs/mini_programs.h>
 #include <kernel/multiboot.h>
 #include <kernel/hal.h>
 //#include <kernel/sys/fs/vfs.h>

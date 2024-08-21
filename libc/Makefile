@@ -36,6 +36,7 @@ stdio/puts.o \
 stdlib/calloc.o \
 stdlib/abort.o \
 stdlib/reverseString.o \
+stdlib/reverse.o \
 stdlib/itoa.o \
 stdlib/free.o \
 stdlib/realloc.o \
@@ -47,6 +48,9 @@ stdlib/llutoa.o \
 stdlib/ltoa.o \
 stdlib/dtoa.o \
 stdlib/utoa.o \
+stdlib/etoa.o \
+stdlib/gtoa.o \
+stdlib/intToStr.o \
 stdlib/malloc.o \
 string/memcmp.o \
 string/memcpy.o \

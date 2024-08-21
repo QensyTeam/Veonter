@@ -5,12 +5,14 @@
 #include <string.h>
 
 #include <kernel/vfs.h>
+#include <kernel/disk_manager.h>
+#include <kernel/drv/serial_port.h>  // Debug
 
 static filesystem_t registered_filesystems[FILESYSTEM_MAX_COUNT] = {0};
 static fs_object_t registered_mountpoints[MOUNTPOINTS_MAX_COUNT] = {0};
 
 int find_free_fs_nr() {
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < FILESYSTEM_MAX_COUNT; i++) {
         if (!registered_filesystems[i].valid) {
             return i;
         }
@@ -40,7 +42,7 @@ int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen
 }
 
 int find_free_mountpoint_nr() {
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
         if (!registered_mountpoints[i].valid) {
             return i;
         }
@@ -67,9 +69,9 @@ int register_mountpoint(size_t disk_nr, filesystem_t* fs, void* priv_data) {
 void vfs_scan() {
     // TODO: Really scan disks on filesystems, but it's a simple test, so we just add a mountpoint here
     
-    for(int disk = 0; disk < 32; disk++) {
+    for(int disk = 0; disk < DISK_COUNT; disk++) {
         // Probe every filesystem
-        for(int fsn = 0; fsn < 32; fsn++) {
+        for(int fsn = 0; fsn < FILESYSTEM_MAX_COUNT; fsn++) {
             if(!registered_filesystems[fsn].valid) {
                 continue;
             }
@@ -78,7 +80,7 @@ void vfs_scan() {
 
             if(result) {
                 register_mountpoint(disk, registered_filesystems + fsn, NULL);
-                printf("Filesystem %s registered on disk %d!\n", registered_filesystems[fsn].name, disk);
+                qemu_log("Filesystem %s registered on disk %d!\n", registered_filesystems[fsn].name, disk);
             }
         }
     }
@@ -107,20 +109,20 @@ direntry_t* diropen(const char* path) {
 
     vfs_parse_path(path, &disk_nr, &div_path);
 
-    if (disk_nr >= 32) {
+    if (disk_nr >= DISK_COUNT) {
         return NULL;
     }
 
     fs_object_t* mt;
     
-    for(int i = 0; i < 32; i++) {
+    for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
         if(registered_mountpoints[i].disk_nr == disk_nr) {
             mt = registered_mountpoints + i;
             break;
         }
     }
 
-    if(!mt) {
+    if(mt == NULL) {
         return NULL;
     }
 
@@ -149,7 +151,7 @@ NFILE* nfopen(const char* path) {
 
     vfs_parse_path(path, &disk_nr, &div_path);
 
-    if (disk_nr >= 32) {
+    if (disk_nr >= DISK_COUNT) {
         return NULL;
     }
 

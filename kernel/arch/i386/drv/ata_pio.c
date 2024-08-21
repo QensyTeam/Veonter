@@ -1,6 +1,6 @@
 #include <kernel/drv/ata_pio.h>
 #include <kernel/kernel.h>
-#include <disk_manager.h>
+#include <kernel/disk_manager.h>
 #include <bits.h>
 
 __attribute__((always_inline))

@@ -44,8 +44,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     printf("\n");
     shell_text_color(RGB(150, 150, 150));
     detect_cpu();
+    meminfo_program();
     shell_text_color(RGB(255, 255, 255));
-    printf("\n");
     logo();
 
     ps2_init();

@@ -65,7 +65,7 @@ void console_initialize() {
     printf(PROMPT_STRING);
 }
 
-const char* console_help_content_en[] = {
+const char* console_help_content[] = {
         "help - Displays help about all possible commands.",
         "clear - Clear the screen.",
         "mm_test - Runs a Memory test program.",
@@ -85,34 +85,11 @@ const char* console_help_content_en[] = {
         "mousetest - Show button flags and coordinates.",
         0
 };
- 
-const char* console_help_content_ru[] = {
-        "help - Показывает справку по всем доступным командам.",
-        "clear - Очищает экран.",
-        "mm_test - Тест памяти.",
-        "window - Тестовое окно.",
-        "calc - Калькулятор.",
-        "logo - Показывает логотип.",
-        "off - Выключает компьютер.",
-        "reboot - Перезагрузка компьютера.",
-        "cpu - Показывает информацию о процессоре.",
-        "colors - Раскрашивает терминал в выбранный цвет.",
-        "echo <текст> - Выводит введеный текст.",
-        "beep <частота> - Включает встроенную пищалку на выбранной частоте.",
-        "vbe_test - Проверка работы графического режима VBE.",
-        "disks - Показывает список дисков доступных в системе.",
-        "dhv - Показывает первые 1024 байт с диска.",
-        "meminfo - Выводит информацию о памяти.",
-        "mousetest - Показывает координаты и флаги кнопок мыши.",
-        0
-};
-
-extern int LANGUAGE;
 
 void show_help_menu() {
     int content_lines = 0;
 
-    const char** real_content = LANGUAGE == 1 ? console_help_content_ru : console_help_content_en;
+    const char** real_content = console_help_content;
     char** backup_pointer = (char**)real_content;
 
     while(*backup_pointer) {
@@ -122,7 +99,6 @@ void show_help_menu() {
 
     printf("\tHELP MENU\n\n");
     
-
     for (int i = 0; i < content_lines; ++i) {
         printf("\t\t%s\n", real_content[i]);
     }

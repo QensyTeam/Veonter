@@ -128,6 +128,28 @@ int printf(const char* format, ...) {
                         }
                     }
                     break;
+                    case 'e': // Вывод числа в экспоненциальном формате
+                    {
+                        double value = va_arg(args, double);
+                        etoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            shell_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'g': // Вывод числа в кратчайшем формате
+                    {
+                        double value = va_arg(args, double);
+                        gtoa(value, buffer, 6);  // Используем точность 6 цифр
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            shell_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
                     case 'l': // Вывод long и long long
                     {
                         format++;

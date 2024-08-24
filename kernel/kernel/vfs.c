@@ -21,7 +21,8 @@ int find_free_fs_nr() {
     return -1;
 }
 
-int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, fileopen_fn_t fileopen,
+int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
+                fileopen_fn_t fileopen,
                 fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose) {
     int fs_nr = find_free_fs_nr();
 
@@ -33,6 +34,7 @@ int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen
     registered_filesystems[fs_nr].name = name;
     registered_filesystems[fs_nr].probe = probe;
     registered_filesystems[fs_nr].diropen = diropen;
+    registered_filesystems[fs_nr].dirclose = dirclose;
     registered_filesystems[fs_nr].fileopen = fileopen;
     registered_filesystems[fs_nr].fileread = fileread;
     registered_filesystems[fs_nr].filewrite = filewrite;

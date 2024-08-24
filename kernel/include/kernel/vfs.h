@@ -33,6 +33,8 @@ typedef struct direntry {
     size_t size;
     datetime_t created;
     datetime_t modified;
+    
+    void* priv_data;
 
     struct direntry* next;
 } direntry_t;
@@ -65,13 +67,14 @@ typedef NFILE* (*fileopen_fn_t)(fs_object_t* fs, const char* path);
 typedef size_t (*fileread_fn_t)(fs_object_t* fs, void* data, size_t size, size_t count, NFILE* fp);
 typedef size_t (*filewrite_fn_t)(fs_object_t* fs, const void* data, size_t size, size_t count, NFILE* fp);
 typedef void (*fileclose_fn_t)(fs_object_t* fs, NFILE* file);
-//typedef void (*dirclose_fn_t)(fs_object_t* fs, direntry_t* entry);
+typedef void (*dirclose_fn_t)(fs_object_t* fs, direntry_t* entry);
 
 typedef struct filesystem {
     bool valid;
     const char* name;
     probe_fn_t probe;
     diropen_fn_t diropen;
+    dirclose_fn_t dirclose;
     fileopen_fn_t fileopen;
     fileread_fn_t fileread;
     filewrite_fn_t filewrite;
@@ -79,7 +82,8 @@ typedef struct filesystem {
 } filesystem_t;
 
 int find_free_fs_nr();
-int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, fileopen_fn_t fileopen,
+int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
+                fileopen_fn_t fileopen,
                 fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose);
 int find_free_mountpoint_nr();
 int register_mountpoint(size_t disk_nr, filesystem_t* fs, void* priv_data);

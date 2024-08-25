@@ -356,4 +356,3 @@ size_t fat32_get_file_size(fs_object_t* obj, fat_t* fat, const char* filename) {
 
     return sz;
 }
-

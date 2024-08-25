@@ -84,8 +84,8 @@ const char* console_help_content[] = {
         "dhv - Disk Hex View (first 1024 bytes).",
         "meminfo - Show memory info.",
         "mousetest - Show button flags and coordinates.",
-        "ls - List files",
-        "cat - View file",
+        "ls - List files.",
+        "cat - View file.",
         0
 };
 
@@ -187,7 +187,7 @@ void console_process_command(const char* command) {
     } else if(strncmp(command, "ls ", 3) == 0) {
         char* path = command + 3;
 
-        printf("Listing path `%s`\n", path);
+        printf("\nListing path `%s`\n", path);
 
 
         direntry_t* ent = diropen(path);
@@ -205,6 +205,7 @@ void console_process_command(const char* command) {
         } while(ent);
 
         dirclose(orig);
+        printf("\n");
     } else if(strncmp(command, "cat ", 4) == 0) {
         char* path = command + 3;
 
@@ -219,7 +220,7 @@ void console_process_command(const char* command) {
 
         nfread(data, 1, fp->size, fp);
 
-        printf("%s", data);        
+        printf("\n%s\n", data);        
 
         free(data);
 

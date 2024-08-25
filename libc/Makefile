@@ -42,6 +42,7 @@ stdlib/free.o \
 stdlib/realloc.o \
 stdlib/ftoa.o \
 stdlib/lftoa.o \
+stdlib/toupper.o \
 stdlib/lltoa.o \
 stdlib/lutoa.o \
 stdlib/llutoa.o \

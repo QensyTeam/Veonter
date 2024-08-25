@@ -21,7 +21,8 @@ int find_free_fs_nr() {
     return -1;
 }
 
-int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, fileopen_fn_t fileopen,
+int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
+                fileopen_fn_t fileopen,
                 fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose) {
     int fs_nr = find_free_fs_nr();
 
@@ -33,6 +34,7 @@ int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen
     registered_filesystems[fs_nr].name = name;
     registered_filesystems[fs_nr].probe = probe;
     registered_filesystems[fs_nr].diropen = diropen;
+    registered_filesystems[fs_nr].dirclose = dirclose;
     registered_filesystems[fs_nr].fileopen = fileopen;
     registered_filesystems[fs_nr].fileread = fileread;
     registered_filesystems[fs_nr].filewrite = filewrite;
@@ -51,7 +53,7 @@ int find_free_mountpoint_nr() {
     return -1;
 }
 
-int register_mountpoint(size_t disk_nr, filesystem_t* fs, void* priv_data) {
+int register_mountpoint(size_t disk_nr, filesystem_t* fs) {
     int mp_nr = find_free_mountpoint_nr();
 
     if (mp_nr == -1) {
@@ -61,7 +63,7 @@ int register_mountpoint(size_t disk_nr, filesystem_t* fs, void* priv_data) {
     registered_mountpoints[mp_nr].valid = true;
     registered_mountpoints[mp_nr].disk_nr = disk_nr;
     registered_mountpoints[mp_nr].filesystem = fs;
-    registered_mountpoints[mp_nr].priv_data = priv_data;
+    // Priv data will be registered on `probe()`
 
     return mp_nr;
 }
@@ -71,15 +73,21 @@ void vfs_scan() {
     
     for(int disk = 0; disk < DISK_COUNT; disk++) {
         // Probe every filesystem
+        
+        if(!disks[disk].valid) {
+            continue;
+        }
+
         for(int fsn = 0; fsn < FILESYSTEM_MAX_COUNT; fsn++) {
             if(!registered_filesystems[fsn].valid) {
                 continue;
             }
 
-            bool result = registered_filesystems[fsn].probe(disk, registered_mountpoints + disk);
+            int mp_nr = find_free_mountpoint_nr();
+            bool result = registered_filesystems[fsn].probe(disk, registered_mountpoints + mp_nr);
 
             if(result) {
-                register_mountpoint(disk, registered_filesystems + fsn, NULL);
+                register_mountpoint(disk, registered_filesystems + fsn);
                 qemu_log("Filesystem %s registered on disk %d!\n", registered_filesystems[fsn].name, disk);
             }
         }
@@ -114,13 +122,18 @@ direntry_t* diropen(const char* path) {
     }
 
     fs_object_t* mt;
-    
+
     for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
-        if(registered_mountpoints[i].disk_nr == disk_nr) {
+        qemu_log("[%d] Regged: %x", i, registered_mountpoints[i].disk_nr);
+        if(registered_mountpoints[i].disk_nr == disk_nr && registered_mountpoints[i].valid) {
             mt = registered_mountpoints + i;
+
+            qemu_log("Gotcha! MT is %x (priv: %x)", mt, mt->priv_data);
             break;
         }
     }
+
+    qemu_log("[%x] MT->priv_data: %x\n", mt, mt->priv_data);
 
     if(mt == NULL) {
         return NULL;

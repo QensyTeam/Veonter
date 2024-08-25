@@ -27,6 +27,7 @@ struct disk {
 
 typedef struct disk disk_t;
 
+extern disk_t disks[DISK_COUNT];
 
 // Functions
 

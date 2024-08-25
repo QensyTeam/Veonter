@@ -85,6 +85,7 @@ const char* console_help_content[] = {
         "meminfo - Show memory info.",
         "mousetest - Show button flags and coordinates.",
         "ls - List files",
+        "cat - View file",
         0
 };
 
@@ -204,6 +205,25 @@ void console_process_command(const char* command) {
         } while(ent);
 
         dirclose(orig);
+    } else if(strncmp(command, "cat ", 4) == 0) {
+        char* path = command + 3;
+
+        NFILE* fp = nfopen(path);
+
+        if(!fp) {
+            printf("Invalid path or filesystem error\n");
+            goto end;
+        }
+
+        void* data = calloc(fp->size + 1, 1);
+
+        nfread(data, 1, fp->size, fp);
+
+        printf("%s", data);        
+
+        free(data);
+
+        nfclose(fp);
     } else {
         printf("Unknown command: ");
         printf("%s", command);

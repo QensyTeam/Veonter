@@ -30,6 +30,10 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/disk_manager.o \
+kernel/fs/fat32/fat_utf16_utf8.o \
+kernel/fs/fat32/lfn.o \
+kernel/fs/fat32/fat32.o \
+kernel/fs/fat32/fat32_to_vfs.o \
 kernel/vfs.o \
 kernel/kernel.o \
 

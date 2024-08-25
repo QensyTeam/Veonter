@@ -6,6 +6,7 @@
 #include <string.h> // Для strcmp и других строковых функций
 #include <stdlib.h> // Для strtol
 #include <kernel/drv/ps2_mouse.h>
+#include <kernel/vfs.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -83,6 +84,7 @@ const char* console_help_content[] = {
         "dhv - Disk Hex View (first 1024 bytes).",
         "meminfo - Show memory info.",
         "mousetest - Show button flags and coordinates.",
+        "ls - List files",
         0
 };
 
@@ -181,11 +183,34 @@ void console_process_command(const char* command) {
             }
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
+    } else if(strncmp(command, "ls ", 3) == 0) {
+        char* path = command + 3;
+
+        printf("Listing path `%s`\n", path);
+
+
+        direntry_t* ent = diropen(path);
+
+        if(ent == NULL) {
+            printf("Invalid path or filesystem error.\n");
+            goto end;
+        }
+
+        direntry_t* orig = ent;
+        
+        do {
+            printf("%s\n", ent->name);
+            ent = ent->next;
+        } while(ent);
+
+        dirclose(orig);
     } else {
         printf("Unknown command: ");
         printf("%s", command);
         shell_putchar('\n');
     }
+
+end:
     add_command_to_history(command); // Добавление команды в историю
     printf(PROMPT_STRING);
 }

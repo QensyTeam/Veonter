@@ -21,6 +21,7 @@ void substr(char* dest, const char* src, int start, int length);
 char *strncpy(char*, const char*, size_t);
 int strcpy(char*, const char*);
 char *strcat(char*, const char*);
+char *strncat(char *dest, const char *src, size_t n);
 int strcmp(const char*, const char*);
 bool strcmpn(const char*, const char*);
 long strtol(const char *str, char **endptr, int base);

@@ -63,6 +63,7 @@ string/substr.o \
 string/strncpy.o \
 string/strcpy.o \
 string/strcat.o \
+string/strncat.o \
 string/strcmp.o \
 string/strtoll.o \
 string/strtold.o \

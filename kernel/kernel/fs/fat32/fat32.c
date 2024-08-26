@@ -379,8 +379,8 @@ void fat32_find_free_entry(fs_object_t* obj, fat_t* fat, size_t dir_cluster, siz
     for (size_t i = 0; i < total_entries; i++) {
         char* entry = cluster_data + (i * entry_size);
 
-        if (entry[0] == 0x00 || entry[0] == 0xE5) {
-            size_t cluster_index = i / (fat->cluster_size / entry_size);
+        if (entry[0] == 0x00 || (uint8_t)entry[0] == 0xE5) {
+            //size_t cluster_index = i / (fat->cluster_size / entry_size);
             size_t offset_within_cluster = (i % (fat->cluster_size / entry_size)) * entry_size;
 
             *out_cluster_number = dir_cluster;

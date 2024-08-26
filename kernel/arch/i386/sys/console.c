@@ -185,7 +185,7 @@ void console_process_command(const char* command) {
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else if(strncmp(command, "ls ", 3) == 0) {
-        char* path = command + 3;
+        const char* path = command + 3;
 
         printf("\nListing path `%s`\n", path);
 
@@ -207,7 +207,7 @@ void console_process_command(const char* command) {
         dirclose(orig);
         printf("\n");
     } else if(strncmp(command, "cat ", 4) == 0) {
-        char* path = command + 3;
+        const char* path = command + 3;
 
         NFILE* fp = nfopen(path);
 
@@ -216,7 +216,7 @@ void console_process_command(const char* command) {
             goto end;
         }
 
-        void* data = calloc(fp->size + 1, 1);
+        char* data = calloc(fp->size + 1, 1);
 
         nfread(data, 1, fp->size, fp);
 

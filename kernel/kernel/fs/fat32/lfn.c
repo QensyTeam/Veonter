@@ -1,5 +1,5 @@
 #include <kernel/fs/fat32/lfn.h>
-//#include <ctype.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,7 +22,7 @@ void LFN2SFN(const char* in_filename, char* out_filename) {
 
     const char* temp_end = temp + filename_len - space_count;
 
-    char* extension = strchr(temp, '.');
+    const char* extension = strchr(temp, '.');
     if(extension != NULL) {
         int ext_len = temp_end - extension - 1;
 

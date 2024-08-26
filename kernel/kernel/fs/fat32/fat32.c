@@ -706,3 +706,85 @@ void fat32_get_file_info_coords(fs_object_t* obj, fat_t* fat, uint32_t dir_clust
     *out_cluster = 0;
     *out_offset = 0;
 }
+
+DirectoryEntry_t fat32_read_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const char* file) {
+    size_t out_clust, out_offset;
+    DirectoryEntry_t de = {0};
+
+    fat32_get_file_info_coords(obj, fat, dir_clust, file, &out_clust, &out_offset);
+
+    size_t offset = fat->cluster_base + (out_clust * fat->cluster_size) + out_offset;
+    //fseek(fat->image, offset, SEEK_SET);
+
+    //fread(&de, sizeof(DirectoryEntry_t), 1, fat->image);
+    diskmgr_read(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &de);
+
+    return de; 
+}
+
+void fat32_write_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const char* file, DirectoryEntry_t ent) {
+    size_t out_clust, out_offset;
+
+    fat32_get_file_info_coords(obj, fat, dir_clust, file, &out_clust, &out_offset);
+
+    size_t offset = fat->cluster_base + (out_clust * fat->cluster_size) + out_offset;
+    //fseek(fat->image, offset, SEEK_SET);
+
+    //fwrite(&ent, sizeof(DirectoryEntry_t), 1, fat->image);
+    diskmgr_write(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &ent);
+}
+
+void fat32_write_size(fs_object_t* obj, fat_t* fat, size_t fp_cluster, size_t fp_offset, size_t size) {
+    size_t offset = fat->cluster_base + (fp_cluster * fat->cluster_size) + fp_offset;
+    printf("=====> %x\n", offset);
+    //fseek(fat->image, offset, SEEK_SET);
+
+    DirectoryEntry_t entry;
+    //fread(&entry, sizeof(DirectoryEntry_t), 1, fat->image);
+    
+    diskmgr_read(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &entry);
+
+    //fseek(fat->image, offset, SEEK_SET);
+    
+    entry.file_size = size;
+
+    //fwrite(&entry, sizeof(DirectoryEntry_t), 1, fat->image);
+    diskmgr_write(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &entry);
+}
+
+void fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, size_t size, const char* buffer) {
+    size_t out_file_size;
+
+    size_t cluster = fat32_search(obj, fat, path);
+
+    size_t filesize = fat32_get_file_size(obj, fat, path);
+
+    fat32_write_experimental(obj, fat, cluster, filesize, offset, size, &out_file_size, buffer);
+
+    size_t fcl, fof;
+
+    // TODO: Get directory cluster and filename
+
+    const char* file = path + strlen(path);
+
+    while(*file != '/') {
+        file--;
+    }
+
+    file++;
+
+    
+    char* dirp = calloc((file - path) + 1, 1);
+
+    memcpy(dirp, path, file - path);
+
+    printf("Path: %s\n", dirp);
+    printf("File: %s\n", file);
+
+    size_t dir_cluster = fat32_search(obj, fat, dirp);
+     
+    free(dirp);
+
+    fat32_get_file_info_coords(obj, fat, dir_cluster, file, &fcl, &fof);
+    fat32_write_size(obj, fat, fcl, fof, out_file_size);
+}

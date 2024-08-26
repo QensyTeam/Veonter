@@ -357,3 +357,61 @@ size_t fat32_get_file_size(fs_object_t* obj, fat_t* fat, const char* filename) {
     return sz;
 }
 
+size_t fat32_find_free_cluster(fat_t* fat) {
+    for(int i = 0, sz = fat->fat_size / sizeof(uint32_t); i < sz; i++) {
+        if(fat->fat_chain[i] == 0) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+void fat32_find_free_entry(fs_object_t* obj, fat_t* fat, size_t dir_cluster, size_t* out_cluster_number, size_t* out_offset) {
+    size_t cluster_count = fat32_read_cluster_chain(obj, fat, dir_cluster, true, NULL);
+
+    char* cluster_data = calloc(cluster_count, fat->cluster_size);
+    fat32_read_cluster_chain(obj, fat, dir_cluster, false, cluster_data);
+
+    size_t entry_size = 32;  // Directory entry size is 32 bytes
+    size_t total_entries = (cluster_count * fat->cluster_size) / entry_size;
+
+    for (size_t i = 0; i < total_entries; i++) {
+        char* entry = cluster_data + (i * entry_size);
+
+        if (entry[0] == 0x00 || entry[0] == 0xE5) {
+            size_t cluster_index = i / (fat->cluster_size / entry_size);
+            size_t offset_within_cluster = (i % (fat->cluster_size / entry_size)) * entry_size;
+
+            *out_cluster_number = dir_cluster;
+            *out_offset = offset_within_cluster;
+
+            free(cluster_data);
+            return;
+        }
+    }
+
+    *out_cluster_number = 0;
+    *out_offset = 0;
+    free(cluster_data);
+}
+
+size_t fat32_get_last_cluster_in_chain(fat_t* fat, size_t start_cluster) {
+    if (start_cluster < 2 || start_cluster >= 0x0FFFFFF8) {
+        return 0;  // Invalid start cluster
+    }
+
+    size_t current_cluster = start_cluster;
+
+    while (current_cluster < 0x0FFFFFF8) {
+        size_t next_cluster = fat->fat_chain[current_cluster];
+
+        if (next_cluster >= 0x0FFFFFF8) {
+            break;  // Reached the end of the chain
+        }
+
+        current_cluster = next_cluster;
+    }
+
+    return current_cluster;
+}

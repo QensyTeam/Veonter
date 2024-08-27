@@ -5,7 +5,13 @@
 #include <stdlib.h>
 
 size_t fat32_filewrite(fs_object_t *fs, const void *data, size_t size, size_t count, NFILE *fp) {
-    printf("TODO: FAT32 WRITE IS NOT IMPLEMENTED!\n");
+    printf("TODO: FAT32 WRITE IS NOT TESTED!\n");
+    
+    fat_t* fat = fs->priv_data;
+    
+    printf("PATH: %s; OFF: %d; SIZE: %d; DATA AT: %x\n", fp->path, fp->position, size * count, data);
+
+    fat32_write(fs, fat, fp->path, fp->position, size * count, data);
 
     return 0;
 }

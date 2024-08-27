@@ -2,9 +2,9 @@
 #include <kernel/kernel.h>
 #include <kernel/disk_manager.h>
 #include <bits.h>
+#include <kernel/drv/serial_port.h>
 
-__attribute__((always_inline))
-inline void ata_ide_select_drive(uint8_t bus, bool slave) {
+void ata_ide_select_drive(uint8_t bus, bool slave) {
 	if(bus == PRIMARY) {
 		outb(ATA_PRIMARY_IO + ATA_REG_HDDEVSEL, (0xA0 | ((uint8_t)slave << 4)));
     } else {
@@ -12,16 +12,14 @@ inline void ata_ide_select_drive(uint8_t bus, bool slave) {
     }
 }
 
-__attribute__((always_inline))
-inline void ata_ide_400ns_delay(uint16_t io) {
+void ata_ide_400ns_delay(uint16_t io) {
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
 }
 
-__attribute__((always_inline))
-inline void ata_set_params(uint8_t drive, uint16_t* io, uint8_t* real_drive) {
+void ata_set_params(uint8_t drive, uint16_t* io, uint8_t* real_drive) {
 	uint8_t _io = drive >> 1; // PRIMARY / SECONDARY
 	uint8_t _drv = drive & 1; // MASTER / SLAVE
 
@@ -137,6 +135,8 @@ uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint32_t lba) 
         outw(io + ATA_REG_DATA, *(uint16_t*)(buf + i * 2));
         ata_ide_400ns_delay(io);
     }
+    
+    ata_ide_400ns_delay(io);
 
     outb(io + ATA_REG_COMMAND, ATA_CMD_CACHE_FLUSH);
 
@@ -147,6 +147,7 @@ void ata_pio_write_sectors(disk_t disk, uint8_t *buf, uint32_t lba, size_t secto
     ata_drive_t* drive = disk.priv_data;
 
     for(size_t i = 0; i < sectors; i++) {
+        qemu_log("%d / %d  [BS: %u]", i, sectors, drive->block_size);
         ata_pio_write_raw_sector(disk, buf + (i * drive->block_size), lba + i);
     }
 }
@@ -185,6 +186,8 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf) {
     ata_drive_t* drive = disk.priv_data;
 	
+    qemu_log("Write");
+
     if(!drive->online) {
 		return;
 	}
@@ -195,11 +198,13 @@ void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf)
     
     uint8_t* temp_buf = kmalloc(sector_count * drive->block_size);
 
+    qemu_log("RD");
 	ata_pio_read_sectors(disk, temp_buf, start_sector, sector_count);
     
     size_t start_offset = location % drive->block_size;
     memcpy(temp_buf + start_offset, buf, length);
 
+    qemu_log("WR NOW!");
 	ata_pio_write_sectors(disk, temp_buf, start_sector, sector_count);
     
     kfree(temp_buf);
@@ -343,8 +348,19 @@ bool ata_ide_identify(uint8_t bus, uint8_t drive) {
 	return true;
 }
 
+void ide_primary_irq(__attribute__((unused)) registers_t regs) {
+	inb(ATA_PRIMARY_IO + ATA_REG_STATUS);
+}
+
+void ide_secondary_irq(__attribute__((unused)) registers_t regs) {
+	inb(ATA_SECONDARY_IO + ATA_REG_STATUS);
+}
+
 void ata_init() {
-	ata_ide_identify(PRIMARY, MASTER);
+    install_irq_handler(ATA_PRIMARY_IRQ, ide_primary_irq);
+	install_irq_handler(ATA_SECONDARY_IRQ, ide_secondary_irq);
+
+    ata_ide_identify(PRIMARY, MASTER);
 	ata_ide_identify(PRIMARY, SLAVE);
 	ata_ide_identify(SECONDARY, MASTER);
 	ata_ide_identify(SECONDARY, SLAVE);

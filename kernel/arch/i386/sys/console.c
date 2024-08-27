@@ -86,6 +86,7 @@ const char* console_help_content[] = {
         "mousetest - Show button flags and coordinates.",
         "ls - List files.",
         "cat - View file.",
+        "wr - Write file.",
         0
 };
 
@@ -189,7 +190,6 @@ void console_process_command(const char* command) {
 
         printf("\nListing path `%s`\n", path);
 
-
         direntry_t* ent = diropen(path);
 
         if(ent == NULL) {
@@ -225,6 +225,23 @@ void console_process_command(const char* command) {
         free(data);
 
         nfclose(fp);
+    } else if(strncmp(command, "wr ", 3) == 0) {
+        const char* path = command + 3;
+
+        NFILE* fp = nfopen(path);
+
+        if(!fp) {
+            printf("Invalid path or filesystem error\n");
+            goto end;
+        }
+
+        char* memory = "TEST";
+
+        nfwrite(memory, 1, 4, fp);
+
+        nfclose(fp);
+
+        printf("OK\n");
     } else {
         printf("Unknown command: ");
         printf("%s", command);

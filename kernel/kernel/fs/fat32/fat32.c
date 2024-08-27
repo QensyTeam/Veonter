@@ -53,6 +53,7 @@ bool fat32_init(size_t disk_nr, fs_object_t* obj) {
     qemu_log("FAT: %x", fat);
     qemu_log("Info: %x", fat->fat);
     qemu_log("Root: %d", fat->fat->root_directory_offset_in_clusters);
+    qemu_log("FAT size: %d bytes", fat->fat_size);
 
     return true;
 }
@@ -131,6 +132,7 @@ lfn_next:
                 dirptr->type = (prev->attributes & ATTR_DIRECTORY) ? ENT_DIRECTORY : ENT_FILE;
                 dirptr->size = prev->file_size;
                 dirptr->priv_data = (void*)(size_t)((prev->high_cluster << 16) | prev->low_cluster);
+                printf("LFN ha! Set priv!");
 
                 if(current_offset != 0) {
                     dirptr->next = calloc(1, sizeof(direntry_t));
@@ -154,6 +156,7 @@ lfn_next:
             dirptr->type = (entry->attributes & ATTR_DIRECTORY) ? ENT_DIRECTORY : ENT_FILE;
             dirptr->size = entry->file_size;
             dirptr->priv_data = (void*)(size_t)((entry->high_cluster << 16) | entry->low_cluster);
+            printf("Ei LFN! Set priv!");
 
             if(current_offset != 0) {
                 dirptr->next = calloc(1, sizeof(direntry_t));
@@ -248,13 +251,18 @@ size_t fat32_search_on_cluster(fs_object_t* obj, fat_t* fat, size_t cluster, con
     //fast_traverse(entries);
 
     do {
+        qemu_log("`%s` vs our `%s` --> %d", entries->name, name, strcmp(entries->name, name));
         if(strcmp(entries->name, name) == 0) {
             found_cluster = (uint32_t)(size_t)entries->priv_data;
+
+            printf("Found! (%d)\n", found_cluster);
             break;
         }
 
         entries = entries->next;
     } while(entries);
+
+    qemu_log("Cluster: %d", found_cluster);
 
     // FIXME: KLUDGE! Replace it with `dirclose` when port to Veonter (Other OS)
     do {
@@ -270,7 +278,9 @@ size_t fat32_search(fs_object_t* obj, fat_t* fat, const char* path) {
     // Start at the root directory
     size_t cluster = fat->fat->root_directory_offset_in_clusters;
 
-    qemu_log("Obj: %x; FAT: %x; Info: %x\n", obj, fat, fat->fat);
+    qemu_log("Obj: %x; FAT: %x; Info: %x", obj, fat, fat->fat);
+
+    qemu_log("Path: `%s`", path);
 
     qemu_log("%d / %x", cluster, cluster);
     // Temporary buffer for directory or file names
@@ -303,9 +313,11 @@ size_t fat32_search(fs_object_t* obj, fat_t* fat, const char* path) {
         strncpy(temp_name, path, name_length);
         temp_name[name_length] = '\0';
 
+        qemu_log("Searching `%s` in cluster `%d`", temp_name, cluster);
         // Search for the current segment in the current cluster
         cluster = fat32_search_on_cluster(obj, fat, cluster, temp_name);
         if (cluster == 0) {
+            qemu_log("Not found");
             // If not found, return 0
             return 0;
         }
@@ -546,6 +558,8 @@ size_t fat32_write_experimental(fs_object_t* obj, fat_t* fat, size_t start_clust
         }
     }
 
+    printf("%d okay\n", __LINE__);
+
     if (current_cluster == 0) {
         // Handle file extension if needed
         current_cluster = fat32_find_free_cluster(fat);
@@ -752,20 +766,28 @@ void fat32_write_size(fs_object_t* obj, fat_t* fat, size_t fp_cluster, size_t fp
     diskmgr_write(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &entry);
 }
 
-void fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, size_t size, const char* buffer) {
+size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, size_t size, const char* buffer) {
     size_t out_file_size;
 
     size_t cluster = fat32_search(obj, fat, path);
 
+    if(cluster == 0) {
+        printf("Zero cluster\n");
+        return 0;
+    }
+
     size_t filesize = fat32_get_file_size(obj, fat, path);
+
+    printf("Prev fz: %d\n", filesize);
 
     fat32_write_experimental(obj, fat, cluster, filesize, offset, size, &out_file_size, buffer);
 
     size_t fcl, fof;
 
-    // TODO: Get directory cluster and filename
 
     const char* file = path + strlen(path);
+
+    printf("Parsing filename\n");
 
     while(*file != '/') {
         file--;
@@ -773,6 +795,7 @@ void fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, 
 
     file++;
 
+    printf("Filename parsed\n");
     
     char* dirp = calloc((file - path) + 1, 1);
 

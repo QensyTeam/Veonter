@@ -51,6 +51,7 @@ void ide_poll(uint16_t io) {
 	}
 
 	while(1) {
+        ata_ide_400ns_delay(io);
 		status = inb(io + ATA_REG_STATUS);
 		if(status & ATA_SR_ERR) {
             break;
@@ -90,12 +91,10 @@ uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint32_t lba) {
 
     ide_poll(io);
 
-    uint16_t ata_data_reg = io + ATA_REG_DATA;
-
     uint16_t* buf16 = (uint16_t*)buf;
 
     for(int i = 0; i < 256; i++) {
-        uint16_t data = inw(ata_data_reg);
+        uint16_t data = inw(io);
         *(buf16 + i) = data;
     }
 
@@ -132,8 +131,7 @@ uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint32_t lba) 
     ide_poll(io);
 
     for(int i = 0; i < 256; i++) {
-        outw(io + ATA_REG_DATA, *(uint16_t*)(buf + i * 2));
-        ata_ide_400ns_delay(io);
+        outw(io, *(uint16_t*)(buf + i * 2));
     }
     
     ata_ide_400ns_delay(io);
@@ -147,7 +145,6 @@ void ata_pio_write_sectors(disk_t disk, uint8_t *buf, uint32_t lba, size_t secto
     ata_drive_t* drive = disk.priv_data;
 
     for(size_t i = 0; i < sectors; i++) {
-        qemu_log("%d / %d  [BS: %u]", i, sectors, drive->block_size);
         ata_pio_write_raw_sector(disk, buf + (i * drive->block_size), lba + i);
     }
 }
@@ -185,8 +182,6 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 
 void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf) {
     ata_drive_t* drive = disk.priv_data;
-	
-    qemu_log("Write");
 
     if(!drive->online) {
 		return;
@@ -198,13 +193,11 @@ void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf)
     
     uint8_t* temp_buf = kmalloc(sector_count * drive->block_size);
 
-    qemu_log("RD");
 	ata_pio_read_sectors(disk, temp_buf, start_sector, sector_count);
-    
+   
     size_t start_offset = location % drive->block_size;
     memcpy(temp_buf + start_offset, buf, length);
 
-    qemu_log("WR NOW!");
 	ata_pio_write_sectors(disk, temp_buf, start_sector, sector_count);
     
     kfree(temp_buf);

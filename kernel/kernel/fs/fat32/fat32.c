@@ -132,7 +132,6 @@ lfn_next:
                 dirptr->type = (prev->attributes & ATTR_DIRECTORY) ? ENT_DIRECTORY : ENT_FILE;
                 dirptr->size = prev->file_size;
                 dirptr->priv_data = (void*)(size_t)((prev->high_cluster << 16) | prev->low_cluster);
-                printf("LFN ha! Set priv!");
 
                 if(current_offset != 0) {
                     dirptr->next = calloc(1, sizeof(direntry_t));
@@ -195,6 +194,33 @@ size_t fat32_read_cluster_chain(fs_object_t* obj, fat_t* fat, uint32_t start_clu
     return cluster_count;
 }
 
+size_t fat32_read_cluster_numbers(fat_t* fat, uint32_t start_cluster, uint32_t* out) {
+    uint32_t cluster_count = 0;
+
+    uint32_t cluster = start_cluster;
+    
+    while (cluster < 0x0FFFFFF8) {  // Проверка на последний кластер в цепочке
+        out[cluster_count] = cluster;
+        // Перейти к следующему кластеру
+        cluster = fat->fat_chain[cluster];
+        cluster_count++;
+    }
+
+    out[cluster_count] = cluster_count;
+
+    return cluster_count;
+}
+
+void fat32_read_one_cluster(fs_object_t* obj, fat_t* fat, uint32_t cluster, void* out) {
+    uint32_t cluster_size = fat->cluster_size;
+    if (cluster < 0x0FFFFFF8) {  // Проверка на последний кластер в цепочке
+        uint32_t offset = fat->cluster_base + (cluster * cluster_size);
+
+        diskmgr_read(obj->disk_nr, offset, cluster_size, (char*)out);
+    }
+}
+
+
 // Returns count of read bytes!!!
 size_t fat32_read_cluster_chain_advanced(fs_object_t* obj, fat_t* fat, uint32_t start_cluster, size_t byte_offset, size_t size, bool probe, void* out) {
     uint32_t cluster_size = fat->cluster_size;
@@ -247,8 +273,6 @@ size_t fat32_search_on_cluster(fs_object_t* obj, fat_t* fat, size_t cluster, con
 
     direntry_t* entries = fat32_read_directory(obj, fat, cluster);
     direntry_t* orig = entries;
-
-    //fast_traverse(entries);
 
     do {
         qemu_log("`%s` vs our `%s` --> %d", entries->name, name, strcmp(entries->name, name));
@@ -501,7 +525,7 @@ size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const
         lfn_entry.attribute = ATTR_LONG_FILE_NAME;
         lfn_entry.checksum = lfn_checksum(sfn);
 
-        printf("LFN!\n");
+        qemu_log("LFN!");
 
         lfn_entry.attr_number = (i == lfn_entry_count - 1) ? 0x40 : 0x00; // Set LAST_LONG_ENTRY flag for the last entry
         lfn_entry.attr_number |= (uint8_t)(i + 1); // Set the sequence number
@@ -631,10 +655,14 @@ void fat32_get_file_info_coords(fs_object_t* obj, fat_t* fat, uint32_t dir_clust
 
     while (current_cluster < 0x0FFFFFF8) {
         char* cluster_data = calloc(1, cluster_size);
-        fat32_read_cluster_chain(obj, fat, current_cluster, false, cluster_data);
+        //fat32_read_cluster_chain(obj, fat, current_cluster, false, cluster_data);
+        fat32_read_one_cluster(obj, fat, current_cluster, cluster_data);
+        qemu_log("Current cluster: %d", current_cluster);
 
         for (size_t offset = 0; offset < cluster_size; offset += 32) {
             DirectoryEntry_t* entry = (DirectoryEntry_t*)(cluster_data + offset);
+
+            qemu_log("[%d] Entry %s", offset, (entry->attributes & ATTR_LONG_FILE_NAME) ? "LFN" : "ENTRY");
 
             if (entry->name[0] == 0x00) {
                 // End of directory
@@ -672,7 +700,9 @@ void fat32_get_file_info_coords(fs_object_t* obj, fat_t* fat, uint32_t dir_clust
                     utf16_to_utf8(in_name_buffer, in_name_ptr, (uint8_t*)out_name_buffer);
 
                     // Compare the reconstructed LFN with the target filename
+                    qemu_log("`%s` vs `%s`", out_name_buffer, filename);
                     if (strcmp(out_name_buffer, filename) == 0) {
+                        qemu_log("Clust: %d; Offset: %d", current_cluster, offset);
                         offset += (lfn->attr_number & ~0x40) * 32;
 
                         bool ow = offset / fat->cluster_size;
@@ -719,6 +749,70 @@ void fat32_get_file_info_coords(fs_object_t* obj, fat_t* fat, uint32_t dir_clust
     // If we reach here, the file was not found
     *out_cluster = 0;
     *out_offset = 0;
+}
+
+void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cluster, const char* filename, size_t* out_cluster, size_t* out_offset) {
+    size_t cluster_count = fat32_read_cluster_chain(obj, fat, dir_cluster, true, NULL);
+
+    uint32_t* cluster_nrs = calloc(cluster_count, sizeof(uint32_t));
+    fat32_read_cluster_numbers(fat, dir_cluster, cluster_nrs);
+
+    for(int i = 0; i < cluster_count; i++) {
+        qemu_log("=> %d", cluster_nrs[i]);
+    }
+
+
+    char* all_data = calloc(cluster_count, fat->cluster_size);
+    qemu_log("[%d] DATA AT: %x", dir_cluster, all_data);
+
+    fat32_read_cluster_chain(obj, fat, dir_cluster, false, all_data);
+    
+    for(int i = 0; i < cluster_count * fat->cluster_size; i++) {
+        serial_printf(COM1, "%x", all_data[i]);
+    }
+    
+    int offset = (cluster_count * fat->cluster_size) - 32;
+
+    qemu_log("\nOFFSET: %d", offset);
+    qemu_log("Base: %x", fat->cluster_base);
+
+
+    char in_name[512] = {0};
+    char out_name[512] = {0};
+    size_t in_name_ptr = 0;
+    
+    size_t last_entry_cluster = 0;
+    size_t last_entry_offset = 0;
+    while(offset >= 0) {
+        DirectoryEntry_t* entry = (DirectoryEntry_t*)(all_data + offset);
+
+        qemu_log("Cur offset: %d", offset);
+        qemu_log("Nimi: `%s`", entry->name);
+
+        if(entry->name[0] == 0x00) {
+            qemu_log("Ei nimi!");
+            goto next;
+        }
+
+        if((uint8_t)entry->name[0] == 0xE5) {
+            goto next;
+        }
+
+        if(!(entry->attributes & ATTR_LONG_FILE_NAME)) {
+            size_t cnr = offset / fat->cluster_size;
+            size_t cof = offset % fat->cluster_size;
+
+            last_entry_cluster = cluster_nrs[cnr];
+            last_entry_offset = cof;
+
+            qemu_log("Last: %x; %d", last_entry_cluster, last_entry_offset);
+        }
+next:
+        offset -= 32;
+    }
+
+    free(all_data);
+    free(cluster_nrs);
 }
 
 DirectoryEntry_t fat32_read_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const char* file) {
@@ -772,13 +866,13 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
     size_t cluster = fat32_search(obj, fat, path);
 
     if(cluster == 0) {
-        printf("Zero cluster\n");
+        qemu_log("Zero cluster\n");
         return 0;
     }
 
     size_t filesize = fat32_get_file_size(obj, fat, path);
 
-    printf("Prev fz: %d\n", filesize);
+    qemu_log("Prev fz: %d\n", filesize);
 
     fat32_write_experimental(obj, fat, cluster, filesize, offset, size, &out_file_size, buffer);
 
@@ -787,7 +881,7 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
 
     const char* file = path + strlen(path);
 
-    printf("Parsing filename\n");
+    qemu_log("Parsing filename\n");
 
     while(*file != '/') {
         file--;
@@ -795,19 +889,27 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
 
     file++;
 
-    printf("Filename parsed\n");
+    qemu_log("Filename parsed\n");
     
     char* dirp = calloc((file - path) + 1, 1);
 
     memcpy(dirp, path, file - path);
 
-    printf("Path: %s\n", dirp);
-    printf("File: %s\n", file);
+    qemu_log("Path: `%s`\n", dirp);
+    qemu_log("File: `%s`\n", file);
 
     size_t dir_cluster = fat32_search(obj, fat, dirp);
-     
+
+    qemu_log("Parent directory cluster: %d\n", dir_cluster);
+
     free(dirp);
 
     fat32_get_file_info_coords(obj, fat, dir_cluster, file, &fcl, &fof);
+    fat32_get_file_info_coords_v2(obj, fat, dir_cluster, file, &fcl, &fof);
+
+    qemu_log("Coords: Cluster: %d; Offset: %d", fcl, fof);
+
     fat32_write_size(obj, fat, fcl, fof, out_file_size);
+
+    return 0;
 }

@@ -2,6 +2,7 @@
 #include <kernel/sys/ports.h>
 #include <stdio.h>
 
+__attribute__((noreturn))
 extern void panic(const char *message, const char *file, u32int line)
 {
     asm volatile("cli"); 
@@ -16,6 +17,7 @@ extern void panic(const char *message, const char *file, u32int line)
     for(;;);
 }
 
+__attribute__((noreturn))
 extern void panic_assert(const char *file, u32int line, const char *desc)
 {
     asm volatile("cli"); 

@@ -86,6 +86,8 @@ const char* console_help_content[] = {
         "mousetest - Show button flags and coordinates.",
         "ls - List files.",
         "cat - View file.",
+        "wr - Write file.",
+        "heapdmp - Prints heap chain into COM1",
         0
 };
 
@@ -185,10 +187,9 @@ void console_process_command(const char* command) {
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
     } else if(strncmp(command, "ls ", 3) == 0) {
-        char* path = command + 3;
+        const char* path = command + 3;
 
         printf("\nListing path `%s`\n", path);
-
 
         direntry_t* ent = diropen(path);
 
@@ -207,7 +208,7 @@ void console_process_command(const char* command) {
         dirclose(orig);
         printf("\n");
     } else if(strncmp(command, "cat ", 4) == 0) {
-        char* path = command + 3;
+        const char* path = command + 3;
 
         NFILE* fp = nfopen(path);
 
@@ -216,7 +217,7 @@ void console_process_command(const char* command) {
             goto end;
         }
 
-        void* data = calloc(fp->size + 1, 1);
+        char* data = calloc(fp->size + 1, 1);
 
         nfread(data, 1, fp->size, fp);
 
@@ -225,6 +226,27 @@ void console_process_command(const char* command) {
         free(data);
 
         nfclose(fp);
+    } else if(strncmp(command, "wr ", 3) == 0) {
+        const char* path = command + 3;
+
+        NFILE* fp = nfopen(path);
+
+        if(!fp) {
+            printf("Invalid path or filesystem error\n");
+            goto end;
+        }
+
+        char* memory = "TEST";
+
+        nfwrite(memory, 1, 4, fp);
+
+        nfclose(fp);
+
+        printf("OK\n");
+    } else if(strcmp(command, "heapdmp") == 0) {
+        void kheap_dump();
+
+        kheap_dump();
     } else {
         printf("Unknown command: ");
         printf("%s", command);

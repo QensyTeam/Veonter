@@ -1,28 +1,5 @@
 #include <kernel/kernel.h>
 
-// Функция для получения байта данных с порта ввода-вывода
-uint8_t inb(uint16_t port)
-{
-    // Используем инлайн-ассемблер для выполнения инструкции inb
-    uint8_t result;
-    __asm__ volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
-    return result;
-}
-
-// Функция для получения слова (16 бит) данных с порта ввода-вывода
-uint16_t inw(uint16_t port)
-{
-    // Используем инлайн-ассемблер для выполнения инструкции inw
-    uint16_t result;
-    __asm__ volatile ("inw %1, %0" : "=a"(result) : "Nd"(port));
-    return result;
-}
-
-
-void outw(uint16_t port, uint16_t data) {
-    __asm__ volatile("out %%ax, %%dx" : : "a" (data), "d" (port));
-}
-
 void outl(uint16_t port, uint32_t val) {
     __asm__ volatile ( "outl %0, %1" : : "a"(val), "Nd"(port) );
 }

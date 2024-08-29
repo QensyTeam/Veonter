@@ -1,11 +1,16 @@
 #include "kernel/vfs.h"
 #include <kernel/fs/fat32/fat32_to_vfs.h>
 #include <kernel/fs/fat32/fat32.h>
+#include <kernel/drv/serial_port.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 size_t fat32_filewrite(fs_object_t *fs, const void *data, size_t size, size_t count, NFILE *fp) {
-    printf("TODO: FAT32 WRITE IS NOT IMPLEMENTED!\n");
+    qemu_log("TODO: FAT32 WRITE IS NOT TESTED!\n");
+    
+    fat_t* fat = fs->priv_data;
+    
+    fat32_write(fs, fat, fp->path, fp->position, size * count, data);
 
     return 0;
 }
@@ -23,7 +28,10 @@ direntry_t* fat32_diropen(fs_object_t *obj, const char *path) {
 }
 
 void fat32_dirclose(fs_object_t *obj, direntry_t *dir) {
-    printf("FAT32 directory is closed\n");
+    qemu_log("FAT32 directory is closed");
+
+    (void)obj;
+    (void)dir;
 }
 
 NFILE* fat32_fileopen(fs_object_t *fs, const char* path) {
@@ -53,4 +61,7 @@ size_t fat32_fileread(fs_object_t *fs, void *data, size_t size, size_t count, NF
 
 void fat32_fileclose(fs_object_t *fs, NFILE *fp) {
     // Nothing
+
+    (void)fs;
+    (void)fp;
 }

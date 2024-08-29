@@ -1,6 +1,7 @@
 #include <kernel/disk_manager.h>
 #include <stdint.h>
 #include <string.h>
+#include <kernel/drv/serial_port.h>
 
 disk_t disks[DISK_COUNT] = {0};
 
@@ -41,9 +42,13 @@ void diskmgr_read(int disk_nr, uint64_t offset, uint32_t size, void* out_buffer)
         return;
     }
 
+    qemu_log("Disk: %d; Offset: %x; Size: %d; Buffer: %x", disk_nr, (uint32_t)offset, size, (uint32_t)out_buffer);
+
     disk_t disk = disks[disk_nr];
-    
-    disk.read(disk, offset, size, out_buffer);
+
+    disk.read(disk, (uint32_t)offset, size, out_buffer);
+
+    qemu_log("[%d] READ: offset 0x%x - %d bytes", disk_nr, (uint32_t)offset, size);
 }
 
 void diskmgr_write(int disk_nr, uint64_t offset, uint32_t size, const void* in_buffer) {
@@ -53,7 +58,9 @@ void diskmgr_write(int disk_nr, uint64_t offset, uint32_t size, const void* in_b
 
     disk_t disk = disks[disk_nr];
     
-    disk.write(disk, offset, size, in_buffer);
+    disk.write(disk, (uint32_t)offset, size, in_buffer);
+    
+    qemu_log("[%d] WRITE: offset 0x%x - %d bytes", disk_nr, (uint32_t)offset, size);
 }
 
 uint64_t diskmgr_get_capacity(int disk_nr) {

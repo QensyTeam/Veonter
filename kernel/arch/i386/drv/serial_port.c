@@ -86,6 +86,13 @@ void serial_vprintf(serial_port_t port, char *restrict format, va_list args) {
             case 'x':
                 serial_write_uhex(port, va_arg(args, uint32_t));
                 break;
+            case 'z': {
+                i++;
+                if(format[i] == 'u') {
+                    serial_write_uhex(port, va_arg(args, size_t));
+                    i++;
+                }
+            }
             default:
                 serial_write_char(port, format[i]);
             }

@@ -184,7 +184,7 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf) {
     ata_drive_t* drive = disk.priv_data;
 
-    qemu_log("ATA WRITE");
+    qemu_log("ATA WRITE: loc: %x; len: %d", location, length);
 
     if(!drive->online) {
 		return;

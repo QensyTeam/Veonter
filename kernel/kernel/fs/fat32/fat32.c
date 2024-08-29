@@ -4,7 +4,7 @@
 // Built for Veonter
 
 
-// FIXME: fat_flush() has undefined behaviour (functions calling it will fail for unknown reason)
+// FIXME: fat_flush() has undefined behaviour (functions calling it will fail for unknown reason (it's disk_write))
 // TODO: fat_search() should also return found file or not (empty files usually don't set cluster number defaulting it to 0, so if file exists, but it's empty or file hasn't clusters allocated, fat_search will fail.
 // TODO: File creation by path.
 
@@ -19,13 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-void fast_traverse(direntry_t* dir) {
-    do {
-        printf("T: %d; Name: %s; Size: %zu; (-> %p) (priv: %u)\n", dir->type, dir->name, dir->size, dir->next, dir->priv_data);
-        dir = dir->next;
-    } while(dir);
-}
 
 bool fat32_init(size_t disk_nr, fs_object_t* obj) {
     fat_t* fat = calloc(1, sizeof(FATInfo_t));
@@ -53,8 +46,6 @@ bool fat32_init(size_t disk_nr, fs_object_t* obj) {
     fat->root_directory_offset = tot_cluster * info->bytes_per_sector;
 
     fat->fat_chain = calloc(fat->fat_size, 1);
-    //fseek(fat->image, fat->fat_offset, SEEK_SET);
-    //fread(fat->fat_chain, fat->fat_size, 1, file);
     diskmgr_read(disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
    
     obj->disk_nr = disk_nr;
@@ -902,7 +893,7 @@ void fat32_write_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const
 
 void fat32_write_size(fs_object_t* obj, fat_t* fat, size_t fp_cluster, size_t fp_offset, size_t size) {
     size_t offset = fat->cluster_base + (fp_cluster * fat->cluster_size) + fp_offset;
-    qemu_log("File data: =====> %x\n", offset);
+    qemu_log("File data: =====> %x", offset);
     //fseek(fat->image, offset, SEEK_SET);
 
     DirectoryEntry_t entry;
@@ -928,13 +919,13 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
     size_t cluster = fat32_search(obj, fat, path);
 
     if(cluster == 0) {
-        qemu_log("Zero cluster\n");
+        qemu_log("Zero cluster");
         return 0;
     }
 
     size_t filesize = fat32_get_file_size(obj, fat, path);
 
-    qemu_log("Prev fz: %d\n", filesize);
+    qemu_log("Prev fz: %d", filesize);
 
     size_t result = fat32_write_experimental(obj, fat, cluster, filesize, offset, size, &out_file_size, buffer);
 
@@ -945,7 +936,7 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
 
     const char* file = path + strlen(path);
 
-    qemu_log("Parsing filename\n");
+    qemu_log("Parsing filename");
 
     while(*file != '/') {
         file--;
@@ -953,18 +944,18 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
 
     file++;
 
-    qemu_log("Filename parsed\n");
+    qemu_log("Filename parsed");
     
     char* dirp = calloc((file - path) + 1, 1);
 
     memcpy(dirp, path, file - path);
 
-    qemu_log("Path: `%s`\n", dirp);
-    qemu_log("File: `%s`\n", file);
+    qemu_log("Path: `%s`", dirp);
+    qemu_log("File: `%s`", file);
 
     size_t dir_cluster = fat32_search(obj, fat, dirp);
 
-    qemu_log("Parent directory cluster: %d\n", dir_cluster);
+    qemu_log("Parent directory cluster: %d", dir_cluster);
 
     free(dirp);
 

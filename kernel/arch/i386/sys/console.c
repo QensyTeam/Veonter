@@ -87,6 +87,7 @@ const char* console_help_content[] = {
         "ls - List files.",
         "cat - View file.",
         "wr - Write file.",
+        "heapdmp - Prints heap chain into COM1",
         0
 };
 
@@ -242,6 +243,10 @@ void console_process_command(const char* command) {
         nfclose(fp);
 
         printf("OK\n");
+    } else if(strcmp(command, "heapdmp") == 0) {
+        void kheap_dump();
+
+        kheap_dump();
     } else {
         printf("Unknown command: ");
         printf("%s", command);

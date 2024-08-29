@@ -131,7 +131,7 @@ uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint32_t lba) 
     ide_poll(io);
 
     for(int i = 0; i < 256; i++) {
-        outw(io, *(uint16_t*)(buf + i * 2));
+        outw(io, *(uint16_t*)(buf + (i * 2)));
     }
     
     ata_ide_400ns_delay(io);
@@ -145,6 +145,7 @@ void ata_pio_write_sectors(disk_t disk, uint8_t *buf, uint32_t lba, size_t secto
     ata_drive_t* drive = disk.priv_data;
 
     for(size_t i = 0; i < sectors; i++) {
+        qemu_log("ATA WRITE: LBA: %d", lba + i);
         ata_pio_write_raw_sector(disk, buf + (i * drive->block_size), lba + i);
     }
 }
@@ -183,6 +184,8 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf) {
     ata_drive_t* drive = disk.priv_data;
 
+    qemu_log("ATA WRITE");
+
     if(!drive->online) {
 		return;
 	}
@@ -192,6 +195,8 @@ void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf)
     size_t sector_count = end_sector - start_sector + 1;
     
     uint8_t* temp_buf = kmalloc(sector_count * drive->block_size);
+
+    qemu_log("TEMP IS: %x", temp_buf);
 
 	ata_pio_read_sectors(disk, temp_buf, start_sector, sector_count);
    

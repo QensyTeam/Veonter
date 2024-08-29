@@ -1,6 +1,8 @@
 #pragma once
 
-#define qemu_log(M, ...) serial_printf(0x3f8,"[LOG] (%s:%s:%d) " M "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+extern volatile unsigned int ticks;
+
+#define qemu_log(M, ...) serial_printf(0x3f8, "\x1b[1m[LOG %d.%d] (%s:%s:%d) " M "\x1b[0m\n", ticks / 100, ticks % 100, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 typedef enum {
     COM1 = 0x3f8,

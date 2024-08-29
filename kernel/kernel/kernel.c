@@ -25,8 +25,6 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
     vfs_scan();
 
     multiboot = mbd;
-
-    printf(PROMPT_STRING);
 }
 
 void kernel_main(void) {

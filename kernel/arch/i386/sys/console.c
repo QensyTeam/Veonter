@@ -6,11 +6,14 @@
 #include <string.h> // Для strcmp и других строковых функций
 #include <stdlib.h> // Для strtol
 #include <kernel/drv/ps2_mouse.h>
+#include <kernel/drv/serial_port.h>
 #include <kernel/vfs.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
 extern rgb_color_t main_color;
+
+char console_current_disk = 1;
 
 #define HISTORY_SIZE 10  // Максимальное количество команд в истории
 #define SCREEN_WIDTH 80
@@ -63,7 +66,8 @@ const char* get_next_command() {
 
 void console_initialize() {
     vbe_clear_screen(bg_color);
-    printf(PROMPT_STRING);
+
+    printf("[%d] %s", console_current_disk, PROMPT_STRING);
 }
 
 const char* console_help_content[] = {
@@ -110,6 +114,8 @@ void show_help_menu() {
 }
 
 void console_process_command(const char* command) {
+    qemu_log("-> %s", command);
+
     if (strncmp(command, "echo ", 5) == 0) {  // Проверяем команду echo
         printf("%s\n", command + 5);  // Выводим текст после echo
     } else if (strcmp(command, "clear") == 0) {
@@ -186,12 +192,16 @@ void console_process_command(const char* command) {
             }
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
-    } else if(strncmp(command, "ls ", 3) == 0) {
-        const char* path = command + 3;
+    } else if(strncmp(command, "ls", 3) == 0) {
+        char fpath[256] = {0};
+        itoa(console_current_disk, fpath, 10);
+        strcat(fpath, ":/");
 
-        printf("\nListing path `%s`\n", path);
+        strcat(fpath, command + 3);
 
-        direntry_t* ent = diropen(path);
+        printf("\nListing path `%s`\n", fpath);
+
+        direntry_t* ent = diropen(fpath);
 
         if(ent == NULL) {
             printf("Invalid path or filesystem error.\n");
@@ -208,9 +218,13 @@ void console_process_command(const char* command) {
         dirclose(orig);
         printf("\n");
     } else if(strncmp(command, "cat ", 4) == 0) {
-        const char* path = command + 3;
+        char fpath[256] = {0};
+        itoa(console_current_disk, fpath, 10);
+        strcat(fpath, ":/");
 
-        NFILE* fp = nfopen(path);
+        strcat(fpath, command + 3);
+
+        NFILE* fp = nfopen(fpath);
 
         if(!fp) {
             printf("Invalid path or filesystem error\n");
@@ -227,9 +241,13 @@ void console_process_command(const char* command) {
 
         nfclose(fp);
     } else if(strncmp(command, "wr ", 3) == 0) {
-        const char* path = command + 3;
+        char fpath[256] = {0};
+        itoa(console_current_disk, fpath, 10);
+        strcat(fpath, ":/");
 
-        NFILE* fp = nfopen(path);
+        strcat(fpath, command + 3);
+
+        NFILE* fp = nfopen(fpath);
 
         if(!fp) {
             printf("Invalid path or filesystem error\n");
@@ -255,13 +273,15 @@ void console_process_command(const char* command) {
 
 end:
     add_command_to_history(command); // Добавление команды в историю
-    printf(PROMPT_STRING);
+    printf("[%d] %s", console_current_disk, PROMPT_STRING);
 }
 
 void console_input_loop() {
 	uint16_t c;
 
-	while (1) {
+    printf("[%d] %s", console_current_disk, PROMPT_STRING);
+	
+    while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
         disable_cursor(); // скрываем курсор перед изменением экрана
@@ -269,7 +289,7 @@ void console_input_loop() {
         if (c == '\n') {
             putchar('\n');
             if (command_length == 0) {
-                printf(PROMPT_STRING);
+                printf("[%d] %s", console_current_disk, PROMPT_STRING);
             } else {
                 command_buffer[command_length] = 0;
                 console_process_command((char*)command_buffer);

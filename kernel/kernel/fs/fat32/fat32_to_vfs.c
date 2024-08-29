@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 size_t fat32_filewrite(fs_object_t *fs, const void *data, size_t size, size_t count, NFILE *fp) {
-    printf("TODO: FAT32 WRITE IS NOT TESTED!\n");
+    qemu_log("TODO: FAT32 WRITE IS NOT TESTED!\n");
     
     fat_t* fat = fs->priv_data;
     

@@ -169,22 +169,19 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 	size_t start_sector = location / drive->block_size;
 	size_t end_sector = (location + length - 1) / drive->block_size;
 	size_t sector_count = end_sector - start_sector + 1;
-
 	size_t real_length = sector_count * drive->block_size;
 
 	uint8_t* real_buf = kmalloc(real_length);
 
     ata_pio_read_sectors(disk, real_buf, start_sector, sector_count);
 
-	memcpy(buf, real_buf + (location % drive->block_size), length);
+    memcpy(buf, real_buf + (location % drive->block_size), length);
 
 	kfree(real_buf);
 }
 
 void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf) {
     ata_drive_t* drive = disk.priv_data;
-
-    qemu_log("ATA WRITE: loc: %x; len: %d", location, length);
 
     if(!drive->online) {
 		return;
@@ -195,8 +192,6 @@ void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf)
     size_t sector_count = end_sector - start_sector + 1;
     
     uint8_t* temp_buf = kmalloc(sector_count * drive->block_size);
-
-    qemu_log("TEMP IS: %x", temp_buf);
 
 	ata_pio_read_sectors(disk, temp_buf, start_sector, sector_count);
    

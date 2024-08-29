@@ -4,7 +4,6 @@
 // Built for Veonter
 
 
-// FIXME: fat_flush() has undefined behaviour (functions calling it will fail for unknown reason (it's disk_write))
 // TODO: fat_search() should also return found file or not (empty files usually don't set cluster number defaulting it to 0, so if file exists, but it's empty or file hasn't clusters allocated, fat_search will fail.
 // TODO: File creation by path.
 
@@ -156,7 +155,6 @@ lfn_next:
             dirptr->type = (entry->attributes & ATTR_DIRECTORY) ? ENT_DIRECTORY : ENT_FILE;
             dirptr->size = entry->file_size;
             dirptr->priv_data = (void*)(size_t)((entry->high_cluster << 16) | entry->low_cluster);
-            printf("Ei LFN! Set priv!");
 
             if(current_offset != 0) {
                 dirptr->next = calloc(1, sizeof(direntry_t));
@@ -178,11 +176,17 @@ next:
 size_t fat32_read_cluster_chain(fs_object_t* obj, fat_t* fat, uint32_t start_cluster, bool probe, void* out) {
     uint32_t cluster_count = 0;
 
+    qemu_log("Reading chain for: %d", start_cluster);
+
     uint32_t cluster_size = fat->cluster_size;
     uint32_t cluster = start_cluster;
+
+    qemu_log("Cluster: %d; Cluster size: %d", cluster, cluster_size);
     while (cluster < 0x0FFFFFF8) {  // Проверка на последний кластер в цепочке
         if(!probe) {
             uint32_t offset = fat->cluster_base + (cluster * cluster_size);
+
+            qemu_log("Read from: %x (%d)", offset, cluster_size);
 
             diskmgr_read(obj->disk_nr, offset, cluster_size, ((char*)out) + (cluster_count * cluster_size));
         }
@@ -456,7 +460,8 @@ size_t fat32_get_last_cluster_in_chain(fat_t* fat, size_t start_cluster) {
 
 void fat32_flush(fs_object_t* obj, fat_t* fat) {
     qemu_log("Writing cluster chain data");
-    diskmgr_write(obj->disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
+    //diskmgr_write(obj->disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
+    qemu_log("FUNCTION IS CURRENTLY COMMENTED, AND CAN'T FLUSH RIGHT NOW!");
     qemu_log("OK!");
 }
 
@@ -546,16 +551,11 @@ size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const
         }
 
         entry_offset -= 32; // Move to the position for the LFN entry
-        //fseek(fat->image, entry_offset, SEEK_SET);
-        //fwrite(&lfn_entry, sizeof(LFN_t), 1, fat->image);
         diskmgr_write(obj->disk_nr, entry_offset, sizeof(LFN_t), &lfn_entry);
     }
 
     entry_offset += lfn_entry_count * 32;
     
-    //fseek(fat->image, entry_offset, SEEK_SET);
-    //fwrite(&entry, sizeof(DirectoryEntry_t), 1, fat->image);
-
     diskmgr_write(obj->disk_nr, entry_offset, sizeof(DirectoryEntry_t), &entry);
 
     fat32_flush(obj, fat);
@@ -649,124 +649,15 @@ size_t fat32_write_experimental(fs_object_t* obj, fat_t* fat, size_t start_clust
     // Update the file size if it has grown
     *out_file_size = offset + bytes_written > file_size ? offset + bytes_written : file_size;
 
-    // FIXME: Why fat32_flush causing unexpected behaviour?
-    //fat32_flush(obj, fat);
+    fat32_flush(obj, fat);
 
     return bytes_written;
 }
 
-void fat32_get_file_info_coords(fs_object_t* obj, fat_t* fat, uint32_t dir_cluster, const char* filename, size_t* out_cluster, size_t* out_offset) {
-    uint32_t cluster_size = fat->cluster_size;
-    uint32_t current_cluster = dir_cluster;
-    size_t current_offset = 0;
-
-    // Buffer to store the reconstructed LFN
-    uint16_t in_name_buffer[256] = {0};
-    size_t in_name_ptr = 0;
-    char out_name_buffer[256] = {0};
-
-    while (current_cluster < 0x0FFFFFF8) {
-        char* cluster_data = calloc(1, cluster_size);
-        //fat32_read_cluster_chain(obj, fat, current_cluster, false, cluster_data);
-        fat32_read_one_cluster(obj, fat, current_cluster, cluster_data);
-        qemu_log("Current cluster: %d", current_cluster);
-
-        for (size_t offset = 0; offset < cluster_size; offset += 32) {
-            DirectoryEntry_t* entry = (DirectoryEntry_t*)(cluster_data + offset);
-
-            qemu_log("[%d] Entry %s", offset, (entry->attributes & ATTR_LONG_FILE_NAME) ? "LFN" : "ENTRY");
-
-            if (entry->name[0] == 0x00) {
-                // End of directory
-                free(cluster_data);
-                return;
-            }
-
-            if ((uint8_t)entry->name[0] == 0xE5) {
-                // Deleted entry, skip
-                continue;
-            }
-
-            if (entry->attributes & ATTR_LONG_FILE_NAME) {
-                // Handle LFN entry
-                LFN_t* lfn = (LFN_t*)(cluster_data + offset);
-                in_name_ptr = 0; // Reset the name pointer
-
-                for (int i = 0; i < 5; i++) {
-                    if (lfn->first_name_chunk[i] == 0x0000) break;
-                    in_name_buffer[in_name_ptr++] = lfn->first_name_chunk[i];
-                }
-
-                for (int i = 0; i < 6; i++) {
-                    if (lfn->second_name_chunk[i] == 0x0000) break;
-                    in_name_buffer[in_name_ptr++] = lfn->second_name_chunk[i];
-                }
-
-                for (int i = 0; i < 2; i++) {
-                    if (lfn->third_name_chunk[i] == 0x0000) break;
-                    in_name_buffer[in_name_ptr++] = lfn->third_name_chunk[i];
-                }
-
-                // If this is the last LFN part (indicated by bit 6 of the sequence number), process it
-                if (lfn->attr_number & 0x40) {
-                    utf16_to_utf8(in_name_buffer, in_name_ptr, (uint8_t*)out_name_buffer);
-
-                    // Compare the reconstructed LFN with the target filename
-                    qemu_log("`%s` vs `%s`", out_name_buffer, filename);
-                    if (strcmp(out_name_buffer, filename) == 0) {
-                        qemu_log("Clust: %d; Offset: %d", current_cluster, offset);
-                        offset += (lfn->attr_number & ~0x40) * 32;
-
-                        bool ow = offset / fat->cluster_size;
-                        
-                        if(ow) {
-                            current_cluster++;
-                            offset %= fat->cluster_size;
-                        }
-
-                        *out_cluster = current_cluster;
-                        *out_offset = offset;
-                        free(cluster_data);
-                        return;
-                    }
-
-                    // Reset the buffers for the next file entry
-                    memset(in_name_buffer, 0, sizeof(in_name_buffer));
-                    memset(out_name_buffer, 0, sizeof(out_name_buffer));
-                }
-            } else if (!(entry->attributes & ATTR_LONG_FILE_NAME)) {
-                // Handle short file name (SFN) entries (non-LFN case)
-                char sfn[12] = {0};
-                memcpy(sfn, entry->name, 8);
-                if (entry->ext[0] != ' ') {
-                    strcat(sfn, ".");
-                    strncat(sfn, entry->ext, 3);
-                }
-
-                // Compare the SFN with the target filename
-                if (strcmp(sfn, filename) == 0) {
-                    *out_cluster = current_cluster;
-                    *out_offset = offset;
-                    free(cluster_data);
-                    return;
-                }
-            }
-        }
-
-        // Move to the next cluster in the chain
-        current_cluster = fat->fat_chain[current_cluster];
-        free(cluster_data);
-    }
-
-    // If we reach here, the file was not found
-    *out_cluster = 0;
-    *out_offset = 0;
-}
-
 void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cluster, const char* filename, size_t* out_cluster, size_t* out_offset) {
     size_t cluster_count = fat32_read_cluster_chain(obj, fat, dir_cluster, true, NULL);
-
     uint32_t* cluster_nrs = calloc(cluster_count, sizeof(uint32_t));
+    
     fat32_read_cluster_numbers(fat, dir_cluster, cluster_nrs);
 
     for(int i = 0; i < cluster_count; i++) {
@@ -775,14 +666,9 @@ void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cl
 
 
     char* all_data = calloc(cluster_count, fat->cluster_size);
-    qemu_log("[%d] DATA AT: %x", dir_cluster, all_data);
 
     fat32_read_cluster_chain(obj, fat, dir_cluster, false, all_data);
-    
-    for(int i = 0; i < cluster_count * fat->cluster_size; i++) {
-        serial_printf(COM1, "%x%x ", (all_data[i] >> 4) & 0b1111, all_data[i] & 0b1111);
-    }
-    
+   
     int offset = (cluster_count * fat->cluster_size) - 32;
 
     //qemu_log("\nOFFSET: %d", offset);
@@ -798,8 +684,6 @@ void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cl
     while(offset >= 0) {
         DirectoryEntry_t* entry = (DirectoryEntry_t*)(all_data + offset);
 
-        qemu_log("Cur offset: %d", offset);
-
         if(entry->name[0] == 0x00) {
             goto next;
         }
@@ -814,12 +698,8 @@ void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cl
 
             last_entry_cluster = cluster_nrs[cnr];
             last_entry_offset = cof;
-
-            qemu_log("Last: %x; %d", last_entry_cluster, last_entry_offset);
         } else {
             LFN_t* lfn = (LFN_t*)(all_data + offset);
-
-            qemu_log("LFN!");
 
             for (int i = 0; i < 5; i++) {
                 if (lfn->first_name_chunk[i] == 0x0000 || lfn->first_name_chunk[i] == 0xffff) break;
@@ -837,11 +717,7 @@ void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cl
             }
 
             if(lfn->attr_number & 0x40) {
-                qemu_log("LAST LFN!");
-
                 utf16_to_utf8((const uint16_t*)in_name, in_name_ptr, (uint8_t*)out_name);
-
-                qemu_log("Name: `%s`", out_name);
 
                 if(strcmp(out_name, filename) == 0) {
                     *out_cluster = last_entry_cluster;
@@ -868,7 +744,7 @@ DirectoryEntry_t fat32_read_file_info(fs_object_t* obj, fat_t* fat, size_t dir_c
     size_t out_clust, out_offset;
     DirectoryEntry_t de = {0};
 
-    fat32_get_file_info_coords(obj, fat, dir_clust, file, &out_clust, &out_offset);
+    fat32_get_file_info_coords_v2(obj, fat, dir_clust, file, &out_clust, &out_offset);
 
     size_t offset = fat->cluster_base + (out_clust * fat->cluster_size) + out_offset;
     //fseek(fat->image, offset, SEEK_SET);
@@ -882,7 +758,7 @@ DirectoryEntry_t fat32_read_file_info(fs_object_t* obj, fat_t* fat, size_t dir_c
 void fat32_write_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const char* file, DirectoryEntry_t ent) {
     size_t out_clust, out_offset;
 
-    fat32_get_file_info_coords(obj, fat, dir_clust, file, &out_clust, &out_offset);
+    fat32_get_file_info_coords_v2(obj, fat, dir_clust, file, &out_clust, &out_offset);
 
     size_t offset = fat->cluster_base + (out_clust * fat->cluster_size) + out_offset;
     //fseek(fat->image, offset, SEEK_SET);
@@ -893,7 +769,6 @@ void fat32_write_file_info(fs_object_t* obj, fat_t* fat, size_t dir_clust, const
 
 void fat32_write_size(fs_object_t* obj, fat_t* fat, size_t fp_cluster, size_t fp_offset, size_t size) {
     size_t offset = fat->cluster_base + (fp_cluster * fat->cluster_size) + fp_offset;
-    qemu_log("File data: =====> %x", offset);
     //fseek(fat->image, offset, SEEK_SET);
 
     DirectoryEntry_t entry;
@@ -901,16 +776,12 @@ void fat32_write_size(fs_object_t* obj, fat_t* fat, size_t fp_cluster, size_t fp
     
     diskmgr_read(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &entry);
 
-    qemu_log("Read file size: %d", entry.file_size);
-
     //fseek(fat->image, offset, SEEK_SET);
     
     entry.file_size = size;
 
     //fwrite(&entry, sizeof(DirectoryEntry_t), 1, fat->image);
     diskmgr_write(obj->disk_nr, offset, sizeof(DirectoryEntry_t), &entry);
-
-    qemu_log("File size written! %d", size);
 }
 
 size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, size_t size, const char* buffer) {
@@ -924,9 +795,6 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
     }
 
     size_t filesize = fat32_get_file_size(obj, fat, path);
-
-    qemu_log("Prev fz: %d", filesize);
-
     size_t result = fat32_write_experimental(obj, fat, cluster, filesize, offset, size, &out_file_size, buffer);
 
     qemu_log("Write: Result: %d; Out size is: %d", result, out_file_size);
@@ -965,8 +833,6 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
     qemu_log("Coords: Cluster: %d; Offset: %d", fcl, fof);
 
     fat32_write_size(obj, fat, fcl, fof, out_file_size);
-
-    //fat32_flush(obj, fat);
 
     return 0;
 }

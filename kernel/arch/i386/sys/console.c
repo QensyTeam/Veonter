@@ -222,7 +222,7 @@ void console_process_command(const char* command) {
         itoa(console_current_disk, fpath, 10);
         strcat(fpath, ":/");
 
-        strcat(fpath, command + 3);
+        strcat(fpath, command + 4);
 
         NFILE* fp = nfopen(fpath);
 
@@ -293,6 +293,7 @@ void console_input_loop() {
             } else {
                 command_buffer[command_length] = 0;
                 console_process_command((char*)command_buffer);
+                memset(command_buffer, 0, 256);
                 command_length = 0;
             }
         } else if (c == '\b') {
@@ -319,6 +320,7 @@ void console_input_loop() {
                             command_length--;
                         }
                         printf("%s", previous_command);
+                        memset(command_buffer, 0, 256);
                         strcpy(command_buffer, previous_command);
                         command_length = strlen(previous_command);
                     }
@@ -330,6 +332,7 @@ void console_input_loop() {
                             command_length--;
                         }
                         printf("%s", next_command);
+                        memset(command_buffer, 0, 256);
                         strcpy(command_buffer, next_command);
                         command_length = strlen(next_command);
                     } else {

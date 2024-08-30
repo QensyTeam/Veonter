@@ -18,7 +18,12 @@ if [ -z "$OPTLEVEL" ]; then
     export OPTLEVEL=0
 fi
 
-export CFLAGS="-O${OPTLEVEL} -g"
+export CFLAGS="-O${OPTLEVEL}"
+
+if [ -z "$RELEASE" ]; then
+    export CFLAGS="${CFLAGS} -g"
+fi
+
 export CPPFLAGS=''
 
 # Configure the cross-compiler to use the desired system root.

@@ -1,3 +1,8 @@
+// FAT32 v1.0 driver originally written by /> NDRAEY (c) 2024
+// Modifications and some fixes by Qensy (c) 2024
+//
+// Built for Veonter
+
 #include <kernel/fs/fat32/fat_utf16_utf8.h>
 #include <stddef.h>
 

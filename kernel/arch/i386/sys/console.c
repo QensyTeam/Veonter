@@ -192,7 +192,7 @@ void console_process_command(const char* command) {
             }
             printf("  Buttons: %x; X: %lu; Y: %lu; Wheel: %d   \r", mouse_get_buttons(), mouse_get_x(), mouse_get_y(), mouse_get_wheel());
         }
-    } else if(strncmp(command, "ls", 3) == 0) {
+    } else if(strncmp(command, "ls", 2) == 0) {
         char fpath[256] = {0};
         itoa(console_current_disk, fpath, 10);
         strcat(fpath, ":/");

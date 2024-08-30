@@ -1,3 +1,8 @@
+// FAT32 v1.0 driver originally written by /> NDRAEY (c) 2024
+// Modifications and some fixes by Qensy (c) 2024
+//
+// Built for Veonter
+
 #include "kernel/vfs.h"
 #include <kernel/fs/fat32/fat32_to_vfs.h>
 #include <kernel/fs/fat32/fat32.h>

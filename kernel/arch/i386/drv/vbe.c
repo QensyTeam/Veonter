@@ -8,8 +8,8 @@ uint16_t screen_height;
 uint32_t* framebuffer;
 
 static void vbe_write(uint16_t index, uint16_t data) {
-    asm volatile ("outw %0, %1" : : "a"(index), "Nd"(VBE_DISPI_IOPORT_INDEX));
-    asm volatile ("outw %0, %1" : : "a"(data), "Nd"(VBE_DISPI_IOPORT_DATA));
+    __asm__ volatile ("outw %0, %1" : : "a"(index), "Nd"(VBE_DISPI_IOPORT_INDEX));
+    __asm__ volatile ("outw %0, %1" : : "a"(data), "Nd"(VBE_DISPI_IOPORT_DATA));
 }
 
 void set_video_mode(uint16_t width, uint16_t height, uint16_t bpp, uint32_t* fb_addr) {

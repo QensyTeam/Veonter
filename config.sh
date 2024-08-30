@@ -14,7 +14,11 @@ export BOOTDIR=/boot
 export LIBDIR=$EXEC_PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
 
-export CFLAGS='-O0 -g'
+if [ -z "$OPTLEVEL" ]; then
+    export OPTLEVEL=0
+fi
+
+export CFLAGS="-O${OPTLEVEL} -g"
 export CPPFLAGS=''
 
 # Configure the cross-compiler to use the desired system root.

@@ -69,6 +69,9 @@ typedef size_t (*fileread_fn_t)(fs_object_t* fs, void* data, size_t size, size_t
 typedef size_t (*filewrite_fn_t)(fs_object_t* fs, const void* data, size_t size, size_t count, NFILE* fp);
 typedef void (*fileclose_fn_t)(fs_object_t* fs, NFILE* file);
 
+typedef int (*mkdir_fn_t)(fs_object_t* fs, const char* path);
+typedef int (*touch_fn_t)(fs_object_t* fs, const char* path);
+
 typedef struct filesystem {
     bool valid;
     const char* name;
@@ -79,12 +82,16 @@ typedef struct filesystem {
     fileread_fn_t fileread;
     filewrite_fn_t filewrite;
     fileclose_fn_t fileclose;
+
+    mkdir_fn_t mkdir;
+    touch_fn_t touch;
 } filesystem_t;
 
 int find_free_fs_nr();
 int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
                 fileopen_fn_t fileopen,
-                fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose);
+                fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose,
+                mkdir_fn_t mkdir, touch_fn_t touch);
 int find_free_mountpoint_nr();
 int register_mountpoint(size_t disk_nr, filesystem_t* fs);
 void vfs_scan();
@@ -95,3 +102,7 @@ NFILE* nfopen(const char* path);
 void nfclose(NFILE* file);
 size_t nfread(void* buffer, size_t size, size_t count, NFILE* file);
 size_t nfwrite(const void* buffer, size_t size, size_t count, NFILE* file);
+
+int mkdir(const char* path);
+int touch(const char* path);
+

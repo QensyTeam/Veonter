@@ -265,6 +265,20 @@ void console_process_command(const char* command) {
         void kheap_dump();
 
         kheap_dump();
+    } else if(strncmp(command, "mkdir ", 6) == 0) {
+        char fpath[256] = {0};
+        itoa(console_current_disk, fpath, 10);
+        strcat(fpath, ":/");
+
+        strcat(fpath, command + 6);
+
+        int result = mkdir(fpath);
+
+        if(result == -1) {
+            printf("Error! Make sure that path is valid and you have parent directories created\n");
+        } else {
+            printf("OK\n");
+        }
     } else {
         printf("Unknown command: ");
         printf("%s", command);

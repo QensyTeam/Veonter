@@ -19,7 +19,9 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
             fat32_fileopen,
             fat32_fileread,
             fat32_filewrite,
-            fat32_fileclose
+            fat32_fileclose,
+            fat32_mkdir,
+            fat32_touch
     );
 
     vfs_scan();

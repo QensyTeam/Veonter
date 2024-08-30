@@ -23,7 +23,8 @@ int find_free_fs_nr() {
 
 int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
                 fileopen_fn_t fileopen,
-                fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose) {
+                fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose,
+                mkdir_fn_t mkdir, touch_fn_t touch) {
     int fs_nr = find_free_fs_nr();
 
     if (fs_nr == -1) {
@@ -39,6 +40,9 @@ int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen
     registered_filesystems[fs_nr].fileread = fileread;
     registered_filesystems[fs_nr].filewrite = filewrite;
     registered_filesystems[fs_nr].fileclose = fileclose;
+    
+    registered_filesystems[fs_nr].mkdir = mkdir;
+    registered_filesystems[fs_nr].touch = touch;
 
     return fs_nr;
 }
@@ -224,4 +228,66 @@ size_t nfwrite(const void* buffer, size_t size, size_t count, NFILE* file) {
     return a;
 }
 
+int mkdir(const char* path) {
+    size_t disk_nr;
+    char* div_path;
 
+    vfs_parse_path(path, &disk_nr, &div_path);
+
+    if (disk_nr >= DISK_COUNT) {
+        return NULL;
+    }
+
+    fs_object_t* mt = NULL;
+    
+    for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
+        if(registered_mountpoints[i].disk_nr == disk_nr) {
+            mt = registered_mountpoints + i;
+            break;
+        }
+    }
+
+    if(mt == NULL) {
+        return NULL;
+    }
+
+    if(!mt->valid) {
+        return NULL;
+    }
+
+    int result = mt->filesystem->mkdir(mt, div_path);
+
+    return result;
+}
+
+int touch(const char* path) {
+    size_t disk_nr;
+    char* div_path;
+
+    vfs_parse_path(path, &disk_nr, &div_path);
+
+    if (disk_nr >= DISK_COUNT) {
+        return NULL;
+    }
+
+    fs_object_t* mt = NULL;
+    
+    for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
+        if(registered_mountpoints[i].disk_nr == disk_nr) {
+            mt = registered_mountpoints + i;
+            break;
+        }
+    }
+
+    if(mt == NULL) {
+        return NULL;
+    }
+
+    if(!mt->valid) {
+        return NULL;
+    }
+
+    int result = mt->filesystem->touch(mt, div_path);
+
+    return result;
+}

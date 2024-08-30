@@ -90,7 +90,7 @@ void serial_vprintf(serial_port_t port, char *restrict format, va_list args) {
                 i++;
                 if(format[i] == 'u') {
                     serial_write_uhex(port, va_arg(args, size_t));
-                    i++;
+                    //i++;
                 }
                 break;
             }

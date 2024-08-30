@@ -470,10 +470,13 @@ void fat32_flush(fs_object_t* obj, fat_t* fat) {
 #endif
 }
 
-size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const char* filename, bool is_file) {
+// If is_file set to false it will create a directory.
+size_t fat32_create_object(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const char* filename, bool is_file) {
     if (filename == NULL || strlen(filename) == 0 || strlen(filename) > 255) {
         return 0;
     }
+
+    qemu_log("CREATE `%s`", filename);
 
     size_t out_cluster_number = 0;
     size_t out_offset = 0;    // PIKA PIKA 
@@ -493,7 +496,7 @@ size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const
     char sfn[12] = {0};  // 8.3 format (8 chars + '.' + 3 chars)
     LFN2SFN(filename, sfn);
 
-    printf("SFN: %.11s\n", sfn);
+    qemu_log("SFN: %s\n", sfn);
 
     DirectoryEntry_t entry = {0};
     memset(&entry, 0, sizeof(DirectoryEntry_t));
@@ -514,6 +517,8 @@ size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const
         entry.name[0] = '.';
 
         size_t off = fat->cluster_base + (new_cluster * fat->cluster_size);
+
+        qemu_log("Will create folders on %x and %x", off, off + 32);
 
         //fseek(fat->image, off, SEEK_SET);
         //fwrite(&entry, sizeof(DirectoryEntry_t), 1, fat->image);

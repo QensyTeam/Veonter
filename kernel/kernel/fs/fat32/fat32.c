@@ -71,8 +71,8 @@ direntry_t* fat32_read_directory(fs_object_t* obj, fat_t* fat, uint32_t start_cl
 
     int32_t current_offset = cluster_count * fat->cluster_size - 32;   // We must start from the end.
 
-    uint32_t cluster_size = fat->cluster_size;
-    uint32_t offset = start_cluster * cluster_size;
+    //uint32_t cluster_size = fat->cluster_size;
+    //uint32_t offset = start_cluster * cluster_size;
 
     direntry_t* dir = calloc(1, sizeof(direntry_t));
     direntry_t* dirptr = dir;
@@ -124,7 +124,7 @@ direntry_t* fat32_read_directory(fs_object_t* obj, fat_t* fat, uint32_t start_cl
 
 lfn_next:
             if(lfn->attr_number & 0x40) {
-                utf16_to_utf8(in_name_buffer, in_name_ptr, out_name_buffer);
+                utf16_to_utf8(in_name_buffer, in_name_ptr, (uint8_t*)out_name_buffer);
 
                 dirptr->name = calloc(256, 1);
                 memcpy(dirptr->name, out_name_buffer, 256);
@@ -459,10 +459,15 @@ size_t fat32_get_last_cluster_in_chain(fat_t* fat, size_t start_cluster) {
 }
 
 void fat32_flush(fs_object_t* obj, fat_t* fat) {
+#if 0 
     qemu_log("Writing cluster chain data");
-    //diskmgr_write(obj->disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
-    qemu_log("FUNCTION IS CURRENTLY COMMENTED, AND CAN'T FLUSH RIGHT NOW!");
+    diskmgr_write(obj->disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
     qemu_log("OK!");
+#else
+    (void)obj;
+    (void)fat;
+    qemu_log("FUNCTION IS CURRENTLY COMMENTED, AND CAN'T FLUSH RIGHT NOW!");
+#endif
 }
 
 size_t fat32_create_file(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const char* filename, bool is_file) {
@@ -573,8 +578,8 @@ size_t fat32_write_experimental(fs_object_t* obj, fat_t* fat, size_t start_clust
 
     // Calculate the number of clusters needed for the write
     size_t initial_cluster_offset = offset / cluster_size;
-    size_t end_offset = offset + size;
-    size_t total_clusters_needed = (end_offset + cluster_size - 1) / cluster_size;
+    //size_t end_offset = offset + size;
+    //size_t total_clusters_needed = (end_offset + cluster_size - 1) / cluster_size;
 
     // Traverse to the correct starting cluster based on the initial offset
     for (size_t i = 0; i < initial_cluster_offset; i++) {
@@ -660,7 +665,7 @@ void fat32_get_file_info_coords_v2(fs_object_t* obj, fat_t* fat, uint32_t dir_cl
     
     fat32_read_cluster_numbers(fat, dir_cluster, cluster_nrs);
 
-    for(int i = 0; i < cluster_count; i++) {
+    for(size_t i = 0; i < cluster_count; i++) {
         qemu_log("=> %d", cluster_nrs[i]);
     }
 

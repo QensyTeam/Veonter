@@ -4,3 +4,5 @@
 -I../libc/include/
 -Iinclude
 -ffreestanding
+-std=gnu11
+-m32

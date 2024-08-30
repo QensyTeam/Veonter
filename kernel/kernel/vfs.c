@@ -94,8 +94,6 @@ void vfs_scan() {
     }
 }
 
-
-
 void vfs_parse_path(const char* full_path, size_t* out_disk_nr, char** out_path) {
     char* path = NULL;
 
@@ -121,19 +119,14 @@ direntry_t* diropen(const char* path) {
         return NULL;
     }
 
-    fs_object_t* mt;
+    fs_object_t* mt = NULL;
 
     for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
-        qemu_log("[%d] Regged: %x", i, registered_mountpoints[i].disk_nr);
         if(registered_mountpoints[i].disk_nr == disk_nr && registered_mountpoints[i].valid) {
             mt = registered_mountpoints + i;
-
-            qemu_log("Gotcha! MT is %x (priv: %x)", mt, mt->priv_data);
             break;
         }
     }
-
-    qemu_log("[%x] MT->priv_data: %x\n", mt, mt->priv_data);
 
     if(mt == NULL) {
         return NULL;
@@ -168,7 +161,7 @@ NFILE* nfopen(const char* path) {
         return NULL;
     }
 
-    fs_object_t* mt;
+    fs_object_t* mt = NULL;
     
     for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
         if(registered_mountpoints[i].disk_nr == disk_nr) {
@@ -177,7 +170,7 @@ NFILE* nfopen(const char* path) {
         }
     }
 
-    if(!mt) {
+    if(mt == NULL) {
         return NULL;
     }
 

@@ -48,11 +48,11 @@ void paging_map_page(page_directory_t* directory, uint32_t virtualAddr, uint32_t
 }
 
 void paging_switch_page_directory(page_directory_t* directory) {
-    asm volatile("mov %0, %%cr3" : : "r"(directory->physicalAddr));
+    __asm__ volatile("mov %0, %%cr3" : : "r"(directory->physicalAddr));
     uint32_t cr0;
-    asm volatile("mov %%cr0, %0" : "=r"(cr0));
+    __asm__ volatile("mov %%cr0, %0" : "=r"(cr0));
     cr0 |= 0x80000000; 
-    asm volatile("mov %0, %%cr0" : : "r"(cr0));
+    __asm__ volatile("mov %0, %%cr0" : : "r"(cr0));
 }
 
 void paging_init() {

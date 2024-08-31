@@ -120,14 +120,25 @@ void console_process_command(const char* command) {
         printf("%s\n", command + 5);  // Выводим текст после echo
     } else if (strcmp(command, "clear") == 0) {
         vbe_clear_screen(bg_color);
-    } else if (strncmp(command, "beep ", 5) == 0) {
-        const char* freq_str = command + 5;
-        char* endptr;
-        unsigned int frequency = strtol(freq_str, &endptr, 10);
-        if (*endptr == '\0') {
-            beep(frequency, 100);  // Используем указанную частоту
+    } else if (strncmp(command, "beep", 4) == 0) {
+        const char* freq_str = command + 4;
+
+        // Проверяем, указана ли частота после команды beep
+        while (*freq_str == ' ') {
+            freq_str++;  // Пропуск всех пробелов
+        }
+
+        if (*freq_str == '\0') {
+            // Если после команды beep нет ничего, сообщаем об ошибке
+            printf("Please specify a frequency after the beep command.\n");
         } else {
-            printf("Invalid frequency: %s\n", freq_str);
+            char* endptr;
+            unsigned int frequency = strtol(freq_str, &endptr, 10);
+            if (*endptr == '\0') {
+                beep(frequency, 100);  // Используем указанную частоту
+            } else {
+                printf("Invalid frequency: %s\n", freq_str);
+            }
         }
     } else if (strcmp(command, "help") == 0) {
         printf("\n");
@@ -240,24 +251,44 @@ void console_process_command(const char* command) {
         free(data);
 
         nfclose(fp);
-    } else if(strncmp(command, "wr ", 3) == 0) {
+    } else if (strncmp(command, "wr ", 3) == 0) {
         char fpath[256] = {0};
-        itoa(console_current_disk, fpath, 10);
-        strcat(fpath, ":/");
+        char text_to_write[COMMAND_BUFFER_SIZE] = {0};  // Buffer to store text to be written
+        const char *args = command + 3;  // Skip the "wr " part of the command
 
-        strcat(fpath, command + 3);
+        // Find the first space in args, which separates the file path from the text
+        const char *space_pos = strchr(args, ' ');
+        if (!space_pos) {
+            // If there is no space, the command format is incorrect
+            printf("Usage: wr <file_path> <text>\n");
+            goto end;
+        }
 
-        NFILE* fp = nfopen(fpath);
+        // Copy the file path part into fpath
+        size_t path_len = space_pos - args;
+        strncpy(fpath, args, path_len);
+        fpath[path_len] = '\0';  // Null-terminate the file path string
 
-        if(!fp) {
+        // Combine with the current disk prefix
+        char full_fpath[256] = {0};
+        itoa(console_current_disk, full_fpath, 10);
+        strcat(full_fpath, ":/");
+        strcat(full_fpath, fpath);
+
+        // The text to write starts after the space
+        strcpy(text_to_write, space_pos + 1);
+
+        // Open the file
+        NFILE *fp = nfopen(full_fpath);
+        if (!fp) {
             printf("Invalid path or filesystem error\n");
             goto end;
         }
 
-        char* memory = "TEST";
+        // Write text to the file
+        nfwrite(text_to_write, 1, strlen(text_to_write), fp);
 
-        nfwrite(memory, 1, 4, fp);
-
+        // Close the file
         nfclose(fp);
 
         printf("OK\n");

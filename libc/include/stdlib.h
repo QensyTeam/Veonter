@@ -22,16 +22,17 @@ void lltoa(long long value, char *str, int base);
 void lutoa(unsigned long value, char *str, int base);
 void llutoa(unsigned long long value, char *str, int base);
 void ltoa(long value, char *str, int base);
-void itoa(int value, char* str, int base);
+void itoa(int value, char *buffer, int base);
 void dtoa(double num, char* buffer, size_t precision);
-void gtoa(double value, char* buffer, int precision);
+void gtoa(double value, char *buffer, int precision);
 void etoa(double value, char* buffer, int precision);
 void* malloc(size_t size);
 void* realloc(void* ptr, size_t old_size, size_t new_size);
-char* utoa(unsigned int value, char* str, int base);
+void utoa(unsigned int value, char *buffer, int base);
 void* calloc(size_t num, size_t size);
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

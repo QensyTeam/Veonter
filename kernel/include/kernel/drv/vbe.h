@@ -36,5 +36,4 @@ extern uint16_t screen_height;
 extern uint32_t* framebuffer;
 
 
-
 #endif // VBE_H

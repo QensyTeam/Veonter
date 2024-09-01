@@ -76,7 +76,7 @@ void dhv_program() {
         // Print the chunk in hexadecimal format
         for (unsigned long long i = 0; i < bytes_to_read; i++) {
             if ((i + offset) % 24 == 0) {  // 24 bytes per line
-                printf("\n%015llx: ", offset + i);  // Print the offset address
+                printf("\r%015llx: ", offset + i);  // Print the offset address
             }
 
             uint8_t byte = buffer[i];

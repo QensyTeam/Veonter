@@ -30,6 +30,10 @@ void* malloc(size_t size);
 void* realloc(void* ptr, size_t old_size, size_t new_size);
 void utoa(unsigned int value, char *buffer, int base);
 void* calloc(size_t num, size_t size);
+unsigned long long strtoull(const char* str, char** endptr, int base);
+unsigned long strtoul(const char* str, char** endptr, int base);
+void srand(unsigned int new_seed);
+int rand(void);
 #ifdef __cplusplus
 }
 #endif

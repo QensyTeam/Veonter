@@ -33,6 +33,19 @@ stdio/scanf.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
+ctype/isalnum.o \
+ctype/isalpha.o \
+ctype/iscntrl.o \
+ctype/isdigit.o \
+ctype/isgraph.o \
+ctype/islower.o \
+ctype/isprint.o \
+ctype/ispunct.o \
+ctype/isspace.o \
+ctype/isupper.o \
+ctype/isxdigit.o \
+ctype/tolower.o \
+ctype/toupper.o \
 stdlib/calloc.o \
 stdlib/abort.o \
 stdlib/reverseString.o \
@@ -42,7 +55,6 @@ stdlib/free.o \
 stdlib/realloc.o \
 stdlib/ftoa.o \
 stdlib/lftoa.o \
-stdlib/toupper.o \
 stdlib/lltoa.o \
 stdlib/lutoa.o \
 stdlib/llutoa.o \
@@ -53,6 +65,10 @@ stdlib/etoa.o \
 stdlib/gtoa.o \
 stdlib/intToStr.o \
 stdlib/malloc.o \
+stdlib/strtoul.o \
+stdlib/strtoull.o \
+stdlib/srand.o \
+stdlib/rand.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \
@@ -73,6 +89,17 @@ string/strtol.o \
 string/strchr.o \
 string/strncmp.o \
 string/bzero.o \
+math/fabs.o \
+math/floor.o \
+math/ceil.o \
+math/sqrt.o \
+math/pow.o \
+math/exp.o \
+math/log.o \
+math/log10.o \
+math/sin.o \
+math/cos.o \
+math/tan.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

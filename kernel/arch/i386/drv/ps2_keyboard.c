@@ -7,6 +7,8 @@
 
 #define KEY_UP 0x48
 #define KEY_DOWN 0x50
+#define KEY_LEFT  0x4B
+#define KEY_RIGHT 0x4D
 
 static volatile bool keyboard_ru = false;
 
@@ -40,6 +42,14 @@ void keyboard_handler() {
             keyboard_add_to_buffer('\x1B');
             keyboard_add_to_buffer('[');
             keyboard_add_to_buffer('B'); // Обозначение для стрелки вниз
+        } else if (arrow_key == KEY_LEFT) {
+            keyboard_add_to_buffer('\x1B');
+            keyboard_add_to_buffer('[');
+            keyboard_add_to_buffer('D'); // Обозначение для стрелки влево
+        } else if (arrow_key == KEY_RIGHT) {
+            keyboard_add_to_buffer('\x1B');
+            keyboard_add_to_buffer('[');
+            keyboard_add_to_buffer('C'); // Обозначение для стрелки вправо
         }
     } else if (scancode < 128) {
         uint16_t c;

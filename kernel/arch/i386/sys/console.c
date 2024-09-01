@@ -91,7 +91,8 @@ const char* console_help_content[] = {
         "ls - List files.",
         "cat - View file.",
         "wr - Write file.",
-        "heapdmp - Prints heap chain into COM1",
+        "heapdmp - Prints heap chain into COM1.",
+        "rand - Displays 10 random numbers.",
         0
 };
 
@@ -163,6 +164,13 @@ void console_process_command(const char* command) {
         printf("Shutting down...\n");
         sleep(1000);
         outw(0x604, 0x2000);
+    } else if (strcmp(command, "rand") == 0) {
+        srand(12345); // Установить начальное значение генератора случайных чисел
+
+        // Генерация и вывод 10 случайных чисел
+        for (int i = 0; i < 10; i++) {
+            printf("%d\n", rand());
+        }
     } else if (strcmp(command, "window") == 0) {
         printf("Showing Window...\n");
         Window("My Program", 512, 10, 370, 250);

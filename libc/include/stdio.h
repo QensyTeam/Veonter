@@ -15,7 +15,6 @@ int scanf(const char* format, ...);
 int printf(const char* __restrict, ...) __attribute__((format(printf, 1, 2)));
 int putchar(int);
 int puts(const char*);
-
 #ifdef __cplusplus
 }
 #endif

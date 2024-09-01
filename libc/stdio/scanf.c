@@ -1,9 +1,22 @@
 #include "kernel/sys/pit.h"
 #include <stdio.h>
 #include <kernel/kernel.h>
-#include <stdarg.h>  // Для va_list и связанных функций
+#include <stdarg.h>  // For va_list and related functions
+#include <stdint.h> // For uint8_t
 
 #define COMMAND_BUFFER_SIZE 256
+
+// Helper function to check if a character is whitespace
+static int is_whitespace(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+// Helper function to skip whitespace in the input
+static void skip_whitespace(const char** input) {
+    while (is_whitespace(**input)) {
+        (*input)++;
+    }
+}
 
 int scanf(const char* format, ...) {
     va_list args;
@@ -13,10 +26,10 @@ int scanf(const char* format, ...) {
     size_t length = 0;
     char c;
 
-    // Считывание строки с консоли
+    // Read the input line from the console
     while (1) {
         c = keyboard_get_char();
-        
+
         if (c != '\b') {
             putchar(c);
         }
@@ -42,9 +55,14 @@ int scanf(const char* format, ...) {
     const char* input = input_buffer;
     int matched = 0;
 
-    while (*p && *input) {
+    while (*p) {
+        // Skip any leading whitespace in the format string
+        skip_whitespace(&p);
+
         if (*p == '%') {
             p++;
+            skip_whitespace(&p);
+
             if (*p == 'h') {
                 p++;
                 if (*p == 'h' && *(p + 1) == 'd') {
@@ -68,7 +86,7 @@ int scanf(const char* format, ...) {
                     *long_long_arg = strtoll(input, (char**)&input, 10);
                     matched++;
                     p++;
-                } else if(*p == 'f') {
+                } else if (*p == 'f') {
                     double* double_arg = va_arg(args, double*);
                     *double_arg = strtod(input, (char**)&input);
                     matched++;
@@ -88,22 +106,29 @@ int scanf(const char* format, ...) {
                 matched++;
             } else if (*p == 's') {
                 char* str_arg = va_arg(args, char*);
-                while (*input && *input != ' ') {
+                skip_whitespace(&input);
+                while (*input && !is_whitespace(*input) && length < COMMAND_BUFFER_SIZE - 1) {
                     *str_arg++ = *input++;
                 }
                 *str_arg = '\0';
                 matched++;
             } else if (*p == 'c') {
                 char* char_arg = va_arg(args, char*);
+                skip_whitespace(&input);
                 *char_arg = *input++;
                 matched++;
             }
+            p++;
         } else {
-            if (*p == *input) {
-                input++;
+            // Match literal characters in the format string
+            skip_whitespace(&p);
+            skip_whitespace(&input);
+            if (*p != *input) {
+                break;
             }
+            p++;
+            input++;
         }
-        p++;
     }
 
     va_end(args);

@@ -6,12 +6,14 @@
 #include <string.h>
 #include <kernel/kernel.h>
 
+// Объявляем функции преобразования для поддержки разных типов
 void putint(const size_t i) {
     char res[32];
     itoa(i, res, 0);
     puts(res);
 }
 
+// Обновленная функция printf
 int printf(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -26,6 +28,32 @@ int printf(const char* format, ...) {
                 shell_putchar('%');
                 count++;
             } else {
+                int width = 0;          // Ширина вывода (например, 08 для %08llx)
+                int precision = -1;     // Точность для чисел с плавающей запятой (например, .6 для %.6f)
+                char pad_char = ' ';    // Символ заполнения (по умолчанию пробел)
+
+                // Обрабатываем опции формата
+                if (*format == '0') {
+                    pad_char = '0'; // Если указано %0, то использовать '0' для заполнения
+                    format++;
+                }
+                
+                // Чтение ширины поля
+                while (*format >= '0' && *format <= '9') {
+                    width = width * 10 + (*format - '0');
+                    format++;
+                }
+
+                // Чтение точности
+                if (*format == '.') {
+                    format++;
+                    precision = 0;
+                    while (*format >= '0' && *format <= '9') {
+                        precision = precision * 10 + (*format - '0');
+                        format++;
+                    }
+                }
+
                 switch (*format) {
                     case 'd': // Вывод целого числа
                     {
@@ -58,12 +86,10 @@ int printf(const char* format, ...) {
 
                             if(ch == 0xd0 || ch == 0xd1) {
                                 ch |= (*++str) << 8;
-
                                 count++;
                             }
 
                             shell_putchar(ch);
-
                             str++;
                             count++;
                         }
@@ -87,7 +113,7 @@ int printf(const char* format, ...) {
                         }
                     }
                     break;
-                    case 'x': // Вывод целого числа в шестнадцатеричном формате
+                    case 'x': // Вывод целого числа в шестнадцатеричном формате (нижний регистр)
                     {
                         int value = va_arg(args, int);
                         itoa(value, buffer, 16);
@@ -96,6 +122,44 @@ int printf(const char* format, ...) {
                             shell_putchar(buffer[i]);
                             count++;
                         }
+                    }
+                    break;
+                    case 'X': // Вывод целого числа в шестнадцатеричном формате (верхний регистр)
+                    {
+                        int value = va_arg(args, int);
+                        itoa(value, buffer, 16);
+                        for (size_t i = 0; i < strlen(buffer); i++) {
+                            shell_putchar(toupper(buffer[i])); // Преобразование в верхний регистр
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'o': // Вывод целого числа в восьмеричном формате
+                    {
+                        unsigned int value = va_arg(args, unsigned int);
+                        utoa(value, buffer, 8); // Преобразуем число в строку в восьмеричном формате
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            shell_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'b': // Вывод целого числа в двоичном формате
+                    {
+                        unsigned int value = va_arg(args, unsigned int);
+                        utoa(value, buffer, 2); // Преобразуем число в строку в двоичном формате
+                        size_t len = strlen(buffer);
+                        for (size_t i = 0; i < len; i++) {
+                            shell_putchar(buffer[i]);
+                            count++;
+                        }
+                    }
+                    break;
+                    case 'n': // Сохранение количества выведенных символов
+                    {
+                        int* pcount = va_arg(args, int*);
+                        *pcount = count;
                     }
                     break;
                     case 'z': // Вывод size_t
@@ -120,7 +184,8 @@ int printf(const char* format, ...) {
                     case 'f': // Вывод числа с плавающей запятой
                     {
                         double value = va_arg(args, double);
-                        ftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                        int prec = (precision == -1) ? 6 : precision; // Используем точность по умолчанию 6, если не указана
+                        ftoa(value, buffer, prec);  // Используем указанную точность
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
                             shell_putchar(buffer[i]);
@@ -131,7 +196,8 @@ int printf(const char* format, ...) {
                     case 'e': // Вывод числа в экспоненциальном формате
                     {
                         double value = va_arg(args, double);
-                        etoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                        int prec = (precision == -1) ? 6 : precision; // Используем точность по умолчанию 6, если не указана
+                        etoa(value, buffer, prec);  // Используем указанную точность
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
                             shell_putchar(buffer[i]);
@@ -142,7 +208,8 @@ int printf(const char* format, ...) {
                     case 'g': // Вывод числа в кратчайшем формате
                     {
                         double value = va_arg(args, double);
-                        gtoa(value, buffer, 6);  // Используем точность 6 цифр
+                        int prec = (precision == -1) ? 6 : precision; // Используем точность по умолчанию 6, если не указана
+                        gtoa(value, buffer, prec);  // Используем указанную точность
                         size_t len = strlen(buffer);
                         for (size_t i = 0; i < len; i++) {
                             shell_putchar(buffer[i]);
@@ -171,16 +238,31 @@ int printf(const char* format, ...) {
                                     shell_putchar(buffer[i]);
                                     count++;
                                 }
-                            } else if(*format == 'u') {
+                            } else if(*format == 'u') { // %llu - unsigned long long
                                 unsigned long long value = va_arg(args, unsigned long long);
-
                                 llutoa(value, buffer, 10);
-
                                 size_t len = strlen(buffer);
                                 for (size_t i = 0; i < len; i++) {
                                     shell_putchar(buffer[i]);
                                     count++;
-                                } 
+                                }
+                            } else if (*format == 'x') { // %llx - long long в шестнадцатеричном формате
+                                unsigned long long value = va_arg(args, unsigned long long);
+                                llutoa(value, buffer, 16);
+                                size_t len = strlen(buffer);
+                                
+                                // Для формата %08llx добавляем ведущие нули
+                                if (width > len) {
+                                    for (size_t i = 0; i < width - len; i++) {
+                                        shell_putchar(pad_char);
+                                        count++;
+                                    }
+                                }
+
+                                for (size_t i = 0; i < len; i++) {
+                                    shell_putchar(buffer[i]);
+                                    count++;
+                                }
                             } else {
                                 shell_putchar('%');
                                 shell_putchar('l');
@@ -190,13 +272,14 @@ int printf(const char* format, ...) {
                             }
                         } else if (*format == 'f') { // long double
                             long double value = va_arg(args, long double);
-                            lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                            int prec = (precision == -1) ? 6 : precision; // Используем точность по умолчанию 6, если не указана
+                            lftoa(value, buffer, prec);  // Используем указанную точность
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
                                 shell_putchar(buffer[i]);
                                 count++;
                             }
-                        } else if(*format == 'u') {
+                        } else if(*format == 'u') { // %lu - unsigned long
                             unsigned long value = va_arg(args, unsigned long);
                             lutoa(value, buffer, 10);
                             size_t len = strlen(buffer);
@@ -204,7 +287,6 @@ int printf(const char* format, ...) {
                                 shell_putchar(buffer[i]);
                                 count++;
                             }
-
                         } else if (*format == 'x') { // %lx - unsigned long в шестнадцатеричном формате
                             unsigned long value = va_arg(args, unsigned long);
                             lutoa(value, buffer, 16);
@@ -226,7 +308,8 @@ int printf(const char* format, ...) {
                         format++;
                         if (*format == 'f') {
                             long double value = va_arg(args, long double);
-                            lftoa(value, buffer, 6);  // Используем точность 6 цифр после запятой
+                            int prec = (precision == -1) ? 6 : precision; // Используем точность по умолчанию 6, если не указана
+                            lftoa(value, buffer, prec);  // Используем указанную точность
                             size_t len = strlen(buffer);
                             for (size_t i = 0; i < len; i++) {
                                 shell_putchar(buffer[i]);
@@ -252,7 +335,6 @@ int printf(const char* format, ...) {
 
             if(ch == 0xd0 || ch == 0xd1) {
                 ch |= (*(uint8_t*)(++format)) << 8;
-
                 count++;
             }
 

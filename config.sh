@@ -4,9 +4,27 @@ PROJECTS="libc kernel"
 export MAKE=${MAKE:-make}
 export HOST=${HOST:-$(./default-host.sh)}
 
-export AR=${HOST}-ar
+if [ -z "$AR" ]; then
+    export AR=${HOST}-ar
+fi
+
 export AS=${HOST}-as
-export CC=${HOST}-gcc
+
+if [ -z "$CC" ]; then
+    export CC=${HOST}-gcc
+fi
+
+if [ -z "$OBJCOPY" ]; then
+    export OBJCOPY=objcopy
+fi
+
+if [ -z "$OBJCOPY_OUT_FMT" ]; then
+    export OBJCOPY_OUT_FMT="elf32-i386"
+fi
+
+if [ -z "$OBJCOPY_ARCH" ]; then
+    export OBJCOPY_ARCH="i386"
+fi
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX

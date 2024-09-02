@@ -235,7 +235,7 @@ int mkdir(const char* path) {
     vfs_parse_path(path, &disk_nr, &div_path);
 
     if (disk_nr >= DISK_COUNT) {
-        return NULL;
+        return -1;
     }
 
     fs_object_t* mt = NULL;
@@ -248,11 +248,11 @@ int mkdir(const char* path) {
     }
 
     if(mt == NULL) {
-        return NULL;
+        return -1;
     }
 
     if(!mt->valid) {
-        return NULL;
+        return -1;
     }
 
     int result = mt->filesystem->mkdir(mt, div_path);
@@ -267,7 +267,7 @@ int touch(const char* path) {
     vfs_parse_path(path, &disk_nr, &div_path);
 
     if (disk_nr >= DISK_COUNT) {
-        return NULL;
+        return -1;
     }
 
     fs_object_t* mt = NULL;
@@ -280,11 +280,11 @@ int touch(const char* path) {
     }
 
     if(mt == NULL) {
-        return NULL;
+        return -1;
     }
 
     if(!mt->valid) {
-        return NULL;
+        return -1;
     }
 
     int result = mt->filesystem->touch(mt, div_path);

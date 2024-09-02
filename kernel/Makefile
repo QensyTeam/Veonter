@@ -13,8 +13,8 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -mno-red-zone -fno-stack-protector -std=gnu11
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -fno-stack-protector -std=gnu11
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -I../libc/include/
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
@@ -35,7 +35,9 @@ kernel/fs/fat32/lfn.o \
 kernel/fs/fat32/fat32.o \
 kernel/fs/fat32/fat32_to_vfs.o \
 kernel/vfs.o \
+kernel/kheap.o \
 kernel/kernel.o \
+kernel/font.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \
@@ -43,7 +45,6 @@ $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
-$(ARCHDIR)/font.o \
 
 LINK_LIST=\
 $(LDFLAGS) \
@@ -53,7 +54,6 @@ $(KERNEL_OBJS) \
 $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
-$(ARCHDIR)/font.o \
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S 
@@ -62,10 +62,11 @@ all: Veonter.kernel
 
 Veonter.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot Veonter.kernel || grub2-file --is-x86-multiboot Veonter.kernel
+	# TODO: Detect ARM or X86 to disable grub-file on ARM platforms
+	#grub-file --is-x86-multiboot Veonter.kernel || grub2-file --is-x86-multiboot Veonter.kernel
 
-$(ARCHDIR)/font.o: $(ARCHDIR)/font.psf
-	cd $(ARCHDIR) && objcopy -I binary -O elf32-i386 -B i386 font.psf font.o
+kernel/font.o: kernel/font.psf
+	cd kernel && $(OBJCOPY) -I binary -O $(OBJCOPY_OUT_FMT) -B $(OBJCOPY_ARCH) font.psf font.o
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@

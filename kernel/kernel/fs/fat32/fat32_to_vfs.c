@@ -9,6 +9,7 @@
 #include <kernel/drv/serial_port.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 size_t fat32_filewrite(fs_object_t *fs, const void *data, size_t size, size_t count, NFILE *fp) {
     qemu_log("TODO: FAT32 WRITE IS NOT TESTED!\n");
@@ -69,4 +70,45 @@ void fat32_fileclose(fs_object_t *fs, NFILE *fp) {
 
     (void)fs;
     (void)fp;
+}
+
+int fat32_mkdir(fs_object_t* fs, const char* path) {
+    fat_t* fat = fs->priv_data;
+    
+    char* fpath = calloc(strlen(path) + 1, 1);
+    strcpy(fpath, path);
+    
+    char* end = fpath + strlen(fpath);
+
+    while(*end != '/') {
+        end--;
+    }
+
+    fpath[end - fpath] = 0; // Divide path by inserting zero where path ends and where dirname begins.
+    
+    end++;
+
+    qemu_log("%s", end);
+
+
+    int result = -1;
+    size_t entry = fat32_search(fs, fat, fpath);
+
+    if(entry != 0) {
+        qemu_log("Entry found");
+    } else {
+        qemu_log("Entry WAS NOT found");
+        goto end;
+    }
+
+    fat32_create_object(fs, fat, entry, end, false);
+
+    result = 0;
+end:
+    free(fpath);
+    return result;
+}
+
+int fat32_touch(fs_object_t* fs, const char* path) {
+    return 0;
 }

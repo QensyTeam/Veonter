@@ -46,9 +46,8 @@ void diskmgr_read(int disk_nr, uint64_t offset, uint32_t size, void* out_buffer)
 
     disk_t disk = disks[disk_nr];
 
-    disk.read(disk, (uint32_t)offset, size, out_buffer);
-
     qemu_log("[%d] READ: offset 0x%x - %d bytes", disk_nr, (uint32_t)offset, size);
+    disk.read(disk, (uint32_t)offset, size, out_buffer);
 }
 
 void diskmgr_write(int disk_nr, uint64_t offset, uint32_t size, const void* in_buffer) {
@@ -58,9 +57,8 @@ void diskmgr_write(int disk_nr, uint64_t offset, uint32_t size, const void* in_b
 
     disk_t disk = disks[disk_nr];
     
-    disk.write(disk, (uint32_t)offset, size, in_buffer);
-    
     qemu_log("[%d] WRITE: offset 0x%x - %d bytes", disk_nr, (uint32_t)offset, size);
+    disk.write(disk, (uint32_t)offset, size, in_buffer);
 }
 
 uint64_t diskmgr_get_capacity(int disk_nr) {

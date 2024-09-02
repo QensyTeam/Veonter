@@ -3,5 +3,5 @@ set -e
 . ./headers.sh
 
 for PROJECT in $PROJECTS; do
-	(cd $PROJECT && DESTDIR="$SYSROOT" $MAKE install -j$(nproc))
+	(DESTDIR="$SYSROOT" $MAKE install -C $PROJECT -j$(nproc))
 done

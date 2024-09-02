@@ -40,8 +40,8 @@ inline uint16_t inw(uint16_t port)
 
 __attribute__((always_inline))
 inline void outw(uint16_t port, uint16_t data) {
-    //__asm__ volatile ("outw %1, %0" :: "Nd" (port), "a" (data));
-    __asm__ volatile ("outw %0, %1" :: "a" (data), "Nd" (port));
+    __asm__ volatile ("outw %1, %0" :: "Nd" (port), "a" (data));
+    //__asm__ volatile ("outw %0, %1" :: "a" (port), "Nd" (data));
 }
 
 

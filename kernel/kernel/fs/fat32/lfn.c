@@ -10,7 +10,7 @@
 
 void LFN2SFN(const char* in_filename, char* out_filename) {
     int filename_len = strlen(in_filename);
-    char* temp = calloc(filename_len, 1);
+    char* temp = calloc(filename_len + 1, 1);
 
     memset(out_filename, ' ', 11);
 
@@ -42,6 +42,8 @@ void LFN2SFN(const char* in_filename, char* out_filename) {
         } else {
             memcpy(out_filename, temp, name_len);
         }
+    } else {
+            memcpy(out_filename, temp, strlen(temp));
     }
 
     free(temp);

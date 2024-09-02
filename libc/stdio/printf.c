@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <ctype.h>
 #include <kernel/kernel.h>
 
 // Объявляем функции преобразования для поддержки разных типов

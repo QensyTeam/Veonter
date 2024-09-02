@@ -3,6 +3,10 @@
 #include <kernel/disk_manager.h>
 #include <bits.h>
 #include <kernel/drv/serial_port.h>
+#include <stdint.h>
+
+//volatile bool ide_primary_fired = false;
+//volatile bool ide_secondary_fired = false;
 
 void ata_ide_select_drive(uint8_t bus, bool slave) {
 	if(bus == PRIMARY) {
@@ -12,6 +16,7 @@ void ata_ide_select_drive(uint8_t bus, bool slave) {
     }
 }
 
+__attribute__((always_inline))
 void ata_ide_400ns_delay(uint16_t io) {
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
@@ -39,35 +44,26 @@ void ata_ide_soft_reset(size_t io) {
 }
 
 void ide_poll(uint16_t io) {
-	ata_ide_400ns_delay(io);
-
-	uint8_t status = inb(io + ATA_REG_STATUS);
-	
 	while(1) {
-		status = inb(io + ATA_REG_STATUS);
+		uint8_t status = inb(io + ATA_REG_STATUS);
+        /*qemu_log("Status: %x (BSY: %d; DRQ: %d; ERR: %d; DF: %d)", status,
+                status & ATA_SR_BSY,
+                status & ATA_SR_DRQ,
+                status & ATA_SR_ERR,
+                status & ATA_SR_DF);*/
 
-		if(!(status & ATA_SR_BSY))
+		if(!(status & ATA_SR_BSY) && (status & ATA_SR_DRQ)) {
 			break;
-	}
-
-	while(1) {
-        ata_ide_400ns_delay(io);
-		status = inb(io + ATA_REG_STATUS);
-		if(status & ATA_SR_ERR) {
+        } else if ((status & ATA_SR_ERR) || (status & ATA_SR_DF)) {
             break;
-        }
-		
-		if(status & ATA_SR_DRQ) {
-			break;
         }
 	}
 }
 
-
-uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint32_t lba) {
+uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint64_t lba) {
     ata_drive_t* drive = disk.priv_data;
     // Only 28-bit LBA supported!
-    lba &= 0x00FFFFFF;
+    //lba &= 0x00FFFFFF;
 
     uint16_t io = 0;
     uint8_t rdv = 0;
@@ -78,18 +74,27 @@ uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint32_t lba) {
 
     ata_set_params(drive->drive_id, &io, &rdv);
 
-    uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    // For 24-bit LBA
+    //uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    // For 48-bit LBA
+    uint8_t cmd = (rdv == MASTER ? 0x40 : 0x50);
     uint8_t slavebit = (rdv == MASTER ? 0x00 : 0x01);
 
-    outb(io + ATA_REG_HDDEVSEL, (cmd | (slavebit << 4) | (uint8_t)(lba >> 24 & 0x0F)));
-    outb(io + 1, 0x00);
+    outb(io + ATA_REG_HDDEVSEL, cmd | (slavebit << 4));
+    //outb(io + 1, 0x00);
+    outb(io + ATA_REG_SECCOUNT0, 0);
+    outb(io + ATA_REG_LBA0, (uint8_t)((lba) >> 24));
+    outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 32));
+    outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 48));
     outb(io + ATA_REG_SECCOUNT0, 1);
     outb(io + ATA_REG_LBA0, (uint8_t)((lba)));
     outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
     outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
-    outb(io + ATA_REG_COMMAND, ATA_CMD_READ_PIO);
+
+    outb(io + ATA_REG_COMMAND, ATA_CMD_READ_PIO_EXT);
 
     ide_poll(io);
+    //ide_poll_irq(io);
 
     uint16_t* buf16 = (uint16_t*)buf;
 
@@ -103,10 +108,10 @@ uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint32_t lba) {
     return 1;
 }
 
-uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint32_t lba) {
+uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint64_t lba) {
     ata_drive_t* drive = disk.priv_data;
     // Only 28-bit LBA supported!
-    lba &= 0x00FFFFFF;
+    //lba &= 0x00FFFFFF;
 
     uint16_t io = 0;
     uint8_t rdv = 0;
@@ -117,18 +122,28 @@ uint8_t ata_pio_write_raw_sector(disk_t disk, const uint8_t *buf, uint32_t lba) 
 
     ata_set_params(drive->drive_id, &io, &rdv);
 
-    uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    // For 24-bit LBA
+    //uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    // For 48-bit LBA
+    uint8_t cmd = (rdv == MASTER ? 0x40 : 0x50);
     uint8_t slavebit = (rdv == MASTER ? 0x00 : 0x01);
 
-    outb(io + ATA_REG_HDDEVSEL, (cmd | (slavebit << 4) | (uint8_t)((lba >> 24 & 0x0F))));
-    outb(io + 1, 0x00);
+    outb(io + ATA_REG_HDDEVSEL, cmd | (slavebit << 4));
+    //outb(io + 1, 0x00);
+    outb(io + ATA_REG_SECCOUNT0, 0);
+    outb(io + ATA_REG_LBA0, (uint8_t)((lba) >> 24));
+    outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 32));
+    outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 48));
     outb(io + ATA_REG_SECCOUNT0, 1);
     outb(io + ATA_REG_LBA0, (uint8_t)((lba)));
     outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
     outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
-    outb(io + ATA_REG_COMMAND, ATA_CMD_WRITE_PIO);
+
+    qemu_log("Featuring command...");
+    outb(io + ATA_REG_COMMAND, ATA_CMD_WRITE_PIO_EXT);
 
     ide_poll(io);
+    //ide_poll_irq(io);
 
     for(int i = 0; i < 256; i++) {
         outw(io, *(uint16_t*)(buf + (i * 2)));
@@ -166,6 +181,8 @@ void ata_read(disk_t disk, uint64_t location, uint32_t length, void* buf) {
 		return;
 	}
 
+    qemu_log("Read: Disk: %d", drive->drive_id);
+
 	size_t start_sector = location / drive->block_size;
 	size_t end_sector = (location + length - 1) / drive->block_size;
 	size_t sector_count = end_sector - start_sector + 1;
@@ -186,6 +203,8 @@ void ata_write(disk_t disk, uint64_t location, uint32_t length, const void* buf)
     if(!drive->online) {
 		return;
 	}
+    
+    qemu_log("Write: Disk: %d", drive->drive_id);
 	
 	size_t start_sector = location / drive->block_size;
     size_t end_sector = (location + length - 1) / drive->block_size;
@@ -343,15 +362,19 @@ bool ata_ide_identify(uint8_t bus, uint8_t drive) {
 
 void ide_primary_irq(__attribute__((unused)) registers_t regs) {
 	inb(ATA_PRIMARY_IO + ATA_REG_STATUS);
+    //qemu_log("ATA PRIMARY IRQ");
+    //ide_primary_fired = true;
 }
 
 void ide_secondary_irq(__attribute__((unused)) registers_t regs) {
 	inb(ATA_SECONDARY_IO + ATA_REG_STATUS);
+    //qemu_log("ATA SECONDARY IRQ");
+    //ide_secondary_fired = true;
 }
 
 void ata_init() {
-    install_irq_handler(ATA_PRIMARY_IRQ, ide_primary_irq);
-	install_irq_handler(ATA_SECONDARY_IRQ, ide_secondary_irq);
+    //install_irq_handler(ATA_PRIMARY_IRQ, ide_primary_irq);
+	//install_irq_handler(ATA_SECONDARY_IRQ, ide_secondary_irq);
 
     ata_ide_identify(PRIMARY, MASTER);
 	ata_ide_identify(PRIMARY, SLAVE);

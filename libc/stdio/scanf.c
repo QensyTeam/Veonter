@@ -1,8 +1,11 @@
-#include "kernel/sys/pit.h"
 #include <stdio.h>
-#include <kernel/kernel.h>
 #include <stdarg.h>  // For va_list and related functions
 #include <stdint.h> // For uint8_t
+
+#if __is_libk
+#include <kernel/kernel.h>
+#include "kernel/sys/pit.h"
+#endif
 
 #define COMMAND_BUFFER_SIZE 256
 

@@ -134,7 +134,8 @@ void idt_init(uint16_t code_selector) {
 
     set_isrs(code_selector);
  
-	__asm__( "lidt (%0)" :: "m" (_idtr) );
+	//__asm__( "lidt (%0)" :: "m" (_idtr) );
+	__asm__( "lidt %0" :: "m" (_idtr) );
 
     check();
     printf("IDT initialization completed successfully!\n");

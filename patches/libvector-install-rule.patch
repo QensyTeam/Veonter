@@ -1,9 +1,37 @@
-diff '--color=auto' -crB /home/ndraey/libvector/Makefile libvector/Makefile
-*** ../libvector/Makefile	Wed Sep  4 13:08:44 2024
---- libvector/Makefile	Wed Sep  4 13:14:41 2024
+File ../libvector/.git is a directory while file libvector/.git is a regular file
+diff '--color=auto' -crB ../libvector/Makefile libvector/Makefile
+*** ../libvector/Makefile	Wed Sep  4 14:51:07 2024
+--- libvector/Makefile	Wed Sep  4 19:00:10 2024
 ***************
-*** 12,17 ****
---- 12,21 ----
+*** 2,17 ****
+  OBJS = $(SRC:%.c=%.o)
+  OUT = libvector.a
+  
+! CFLAGS ?= -Wall -Wextra -ggdb3 -O0
+  
+  all: $(OUT)
+  
+  $(OUT): $(OBJS)
+  	ar rcs $(OUT) $(OBJS)
+  
+  $(OBJS): %.o: %.c
+  	$(CC) $(CFLAGS) $< -c -o $@
+  
+  clean:
+  	-rm $(OBJS)
+  	-rm $(OUT)
+--- 2,22 ----
+  OBJS = $(SRC:%.c=%.o)
+  OUT = libvector.a
+  
+! CFLAGS:=$(CFLAGS) -Wall -Wextra -O0 $(ARCH_CFLAGS) -ffreestanding -D__is_kernel -D__is_libc -Iinclude
+  
+  all: $(OUT)
+  
+  $(OUT): $(OBJS)
++ 	echo $(shell pwd)
+  	ar rcs $(OUT) $(OBJS)
+  
   $(OBJS): %.o: %.c
   	$(CC) $(CFLAGS) $< -c -o $@
   
@@ -14,3 +42,5 @@ diff '--color=auto' -crB /home/ndraey/libvector/Makefile libvector/Makefile
   clean:
   	-rm $(OBJS)
   	-rm $(OUT)
+Only in libvector/: libvector.a
+Only in libvector/src: vector.o

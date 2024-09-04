@@ -2,6 +2,7 @@
 -Wall
 -Wextra
 -I../libc/include/
+-I../libvector/include/
 -Iinclude
 -ffreestanding
 -std=gnu11

@@ -14,9 +14,9 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -fno-stack-protector -std=gnu11
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -I../libc/include/
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -I../libc/include/ -I ../libvector/include
 LDFLAGS:=$(LDFLAGS)
-LIBS:=$(LIBS) -nostdlib -lk -lgcc
+LIBS:=$(LIBS) -nostdlib -lvector -lk -lgcc
 
 ARCHDIR=arch/$(HOSTARCH)
 

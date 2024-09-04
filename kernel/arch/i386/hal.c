@@ -3,6 +3,7 @@
 #include <kernel/kernel.h>
 #include <kernel/drv/memdisk.h>
 #include <kernel/drv/ata_pio.h>
+#include <kernel/drv/pci.h>
 #include <kernel/drv/ps2.h>
 #include <kernel/drv/ps2_mouse.h>
 #include <kernel/drv/serial_port.h>
@@ -40,7 +41,7 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     check();
     printf("PC Speaker testing!\n");
 
-    void pci_scan_everything();
+    pci_init();
     pci_scan_everything();
 
     memdisk_init(1 << 17);

@@ -19,7 +19,8 @@ int gdt_init() {
     gdt[3] = create_descriptor(0, COARSE_LIMIT, (GDT_CODE_PL3));
     gdt[4] = create_descriptor(0, COARSE_LIMIT, (GDT_DATA_PL3));
 
-	__asm__( "lgdt (%0)" :: "m" (gdtr) );
+	//__asm__( "lgdt (%0)" :: "m" (gdtr) );
+	__asm__( "lgdt %0" :: "m" (gdtr) );
     gdt_flush();
 	check();
     printf("GDT initialization completed successfully!\n");

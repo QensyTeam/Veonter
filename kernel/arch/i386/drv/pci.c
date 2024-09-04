@@ -2,20 +2,10 @@
 #include <kernel/sys/ports.h>
 #include <stdlib.h>
 #include <kernel/drv/serial_port.h>
+#include <kernel/drv/pci.h>
+#include <vector.h>
 
-#define PCI_ADDRESS_PORT 0xCF8      /// Точка входа || Адрес конфигурации, который требуется для доступа
-#define PCI_DATA_PORT 0xCFC         /// Пароль входа || Генерирует доступ к конфигурации и будет передавать данные в или из регистра
-
-typedef struct {
-    uint16_t vendor_id;
-    uint16_t device_id;
-    uint16_t klass;
-    uint16_t subclass;
-    uint16_t bus;
-    uint16_t slot;
-    uint16_t func;
-    uint16_t hdrtype;
-} pci_device_t;
+vector_t* pci_devices = NULL;
 
 uint16_t pci_read_confspc_word(uint8_t bus, uint8_t slot, uint8_t function, uint8_t offset) {
     uint32_t addr;
@@ -93,7 +83,13 @@ inline uint16_t pci_get_device(uint8_t bus, uint8_t slot, uint8_t function) {
     return pci_read_confspc_word(bus, slot, function, 2);
 }
 
+void pci_init() {
+    pci_devices = vector_new();
+}
+
 void pci_scan_everything() {
+    vector_erase_all(pci_devices);
+
     for (uint32_t bus = 0; bus < 256; bus++) {
         for (uint8_t slot = 0; slot < 32; slot++) {
             uint32_t func = 0;
@@ -118,8 +114,7 @@ void pci_scan_everything() {
                 dev->device_id = device;
 
                 qemu_log("%d.%d [%d:%d:%d] %x:%x", dev->klass, dev->subclass, dev->bus, dev->slot, dev->func, dev->vendor_id, dev->device_id);
-
-                free(dev);
+                vector_push_back(pci_devices, (size_t)dev);
             }
 
             if ((hdrtype & 0x80) == 0) {
@@ -142,8 +137,7 @@ void pci_scan_everything() {
                         dev->device_id = device;
 
                         qemu_log("%d.%d [%d:%d:%d] %x:%x", dev->klass, dev->subclass, dev->bus, dev->slot, dev->func, dev->vendor_id, dev->device_id);
-                        
-                        free(dev);
+                        vector_push_back(pci_devices, (size_t)dev);
                     }
                 }
             }

@@ -26,8 +26,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     // Инициализируем кучу
     kheap_init((void*)HEAP_START_ADDRESS, heap_size);
 
-    set_video_mode(1080, 720, 32, (uint32_t*)framebuffer_address); 
-    //psf_init();
+    set_video_mode(800, 600, 32, (uint32_t*)framebuffer_address); 
+    
     psf_v1_init();
 
     irq_disable();

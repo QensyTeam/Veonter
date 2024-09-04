@@ -39,6 +39,10 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     beep(6, 100);
     check();
     printf("PC Speaker testing!\n");
+
+    void pci_scan_everything();
+    pci_scan_everything();
+
     memdisk_init(1 << 17);
     ata_init();
     printf("\n");

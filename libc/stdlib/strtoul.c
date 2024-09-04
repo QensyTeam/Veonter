@@ -5,7 +5,7 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
     const char* s = str;
     unsigned long result = 0;
     unsigned long prev_result = 0;
-    int sign = 1;
+    //int sign = 1;
 
     // Пропускаем начальные пробельные символы
     while (isspace(*s)) {
@@ -16,7 +16,7 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
     if (*s == '+') {
         s++;
     } else if (*s == '-') {
-        sign = -1; // Для unsigned long мы игнорируем знак, но отмечаем для целостности логики
+        //sign = -1; // Для unsigned long мы игнорируем знак, но отмечаем для целостности логики
         s++;
     }
 

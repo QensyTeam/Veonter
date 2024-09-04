@@ -12,7 +12,7 @@
 .long CHECKSUM
 .long 0, 0, 0, 0, 0
 .long 0
-.long 1024, 768, 32
+.long 800, 600, 32
 
 .section .bootstrap_stack, "aw", @nobits
 stack_bottom:

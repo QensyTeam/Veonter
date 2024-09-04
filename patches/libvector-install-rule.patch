@@ -1,0 +1,16 @@
+diff '--color=auto' -crB /home/ndraey/libvector/Makefile libvector/Makefile
+*** ../libvector/Makefile	Wed Sep  4 13:08:44 2024
+--- libvector/Makefile	Wed Sep  4 13:14:41 2024
+***************
+*** 12,17 ****
+--- 12,21 ----
+  $(OBJS): %.o: %.c
+  	$(CC) $(CFLAGS) $< -c -o $@
+  
++ install: $(OUT)
++ 	mkdir -p $(DESTDIR)$(LIBDIR)
++ 	cp $(OUT) $(DESTDIR)$(LIBDIR)
++ 	
+  clean:
+  	-rm $(OBJS)
+  	-rm $(OUT)

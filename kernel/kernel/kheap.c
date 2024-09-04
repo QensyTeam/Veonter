@@ -7,17 +7,6 @@
 #define HEAP_MIN_SIZE 0x400000
 #define HEAP_SIZE_PERCENTAGE 75
 
-typedef struct header {
-    size_t size;
-    unsigned int magic;
-    struct header* next;
-} header_t;
-
-typedef struct {
-    size_t size;
-    unsigned int magic;
-} footer_t;
-
 static void* heap_start;
 size_t heap_size;
 static header_t* free_list;

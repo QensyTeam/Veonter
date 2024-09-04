@@ -1,9 +1,9 @@
-#include "kernel/drv/speaker.h"
 #include "kernel/sys/console.h"
 #include <kernel/vfs.h>
 #include <kernel/fs/fat32/fat32.h>
 #include <kernel/fs/fat32/fat32_to_vfs.h>
 #include <kernel/kernel.h>
+#include <math.h>
 
 multiboot_info_t* multiboot = 0;
 

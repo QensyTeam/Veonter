@@ -1,7 +1,11 @@
 #include <kernel/kernel.h>
+#include <kernel/sys/kheap.h>
 
 // Функция my_realloc
-void* realloc(void* ptr, size_t old_size, size_t new_size) {
+void* realloc(void* ptr, size_t new_size) {
+    header_t* header = (header_t*)((char*)ptr - sizeof(header_t));
+    size_t old_size = header->size;
+
     // Если новый размер равен 0, то поведение функции должно быть аналогично free
     if (new_size == 0) {
         free(ptr);

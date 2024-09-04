@@ -17,7 +17,7 @@ void ata_ide_select_drive(uint8_t bus, bool slave) {
 }
 
 __attribute__((always_inline))
-void ata_ide_400ns_delay(uint16_t io) {
+inline void ata_ide_400ns_delay(uint16_t io) {
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);
 	inb(io + ATA_REG_ALTSTATUS);

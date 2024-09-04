@@ -173,7 +173,7 @@ void console_process_command(const char* command) {
         }
     } else if (strcmp(command, "window") == 0) {
         printf("Showing Window...\n");
-        Window("My Program", 512, 10, 370, 250);
+        Window("My Program", 400, 10, 270, 250);
     } else if (strcmp(command, "reboot") == 0) {
         printf("Rebooting...\n");
         sleep(1000);

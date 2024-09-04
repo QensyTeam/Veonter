@@ -4,6 +4,17 @@
 #include <stddef.h>
 #include "../multiboot.h"
 
+typedef struct header {
+    size_t size;
+    unsigned int magic;
+    struct header* next;
+} header_t;
+
+typedef struct {
+    size_t size;
+    unsigned int magic;
+} footer_t;
+
 void kheap_init(void* start, size_t size);
 void* kmalloc(size_t size);
 void kfree(void* ptr);

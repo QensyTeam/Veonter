@@ -1,0 +1,3 @@
+[submodule "libvector"]
+	path = libvector
+	url = https://github.com/NDRAEY/libvector

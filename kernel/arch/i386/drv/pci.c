@@ -9,7 +9,6 @@ vector_t* pci_devices = NULL;
 
 uint16_t pci_read_confspc_word(uint8_t bus, uint8_t slot, uint8_t function, uint8_t offset) {
     uint32_t addr;
-    // uint32_t bus32 = bus;
     uint32_t slot32 = slot;
     uint32_t func32 = function;
     
@@ -23,63 +22,27 @@ uint16_t pci_read_confspc_word(uint8_t bus, uint8_t slot, uint8_t function, uint
 
 __attribute__((always_inline))
 inline uint8_t pci_get_class(uint8_t bus, uint8_t slot, uint8_t function) {
-    /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return (uint8_t) (pci_read_confspc_word(bus, slot, function, 10) >> 8);
 }
 
-/**
- * @brief [PCI] Получение под-категории устройства
- *
- * @param bus  Шина
- * @param slot  Слот
- * @param function  Функция
- * @return uint8_t Подкатегория устройства
- */
 __attribute__((always_inline))
 inline uint8_t pci_get_subclass(uint8_t bus, uint8_t slot, uint8_t function) {
     /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return (uint8_t) pci_read_confspc_word(bus, slot, function, 10);
 }
 
-/**
- * @brief [PCI] Получение HDR-тип устройства
- *
- * @param bus  Шина
- * @param slot  Слот
- * @param function  Функция
- * @return uint8_t HDR-тип
- */
 __attribute__((always_inline))
 inline uint8_t pci_get_hdr_type(uint8_t bus, uint8_t slot, uint8_t function) {
-    /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return (uint8_t) pci_read_confspc_word(bus, slot, function, 7);
 }
 
-/**
- * @brief [PCI] Получение ID-поставщика
- *
- * @param bus  Шина
- * @param slot  Слот
- * @param function  Функция
- * @return ID-поставщика
- */
 __attribute__((always_inline))
 inline uint16_t pci_get_vendor(uint8_t bus, uint8_t slot, uint8_t function) {
-    /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return pci_read_confspc_word(bus, slot, function, 0);
 }
 
-/**
- * @brief [PCI] Получение ID-Устройства
- *
- * @param bus  Шина
- * @param slot  Слот
- * @param function  Функция
- * @return ID-Устройства
- */
 __attribute__((always_inline))
 inline uint16_t pci_get_device(uint8_t bus, uint8_t slot, uint8_t function) {
-    /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return pci_read_confspc_word(bus, slot, function, 2);
 }
 

@@ -459,7 +459,7 @@ size_t fat32_get_last_cluster_in_chain(fat_t* fat, size_t start_cluster) {
 }
 
 void fat32_flush(fs_object_t* obj, fat_t* fat) {
-#if 0 
+#if 1 
     qemu_log("Writing cluster chain data");
     diskmgr_write(obj->disk_nr, fat->fat_offset, fat->fat_size, fat->fat_chain);
     qemu_log("OK!");

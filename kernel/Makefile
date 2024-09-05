@@ -36,6 +36,7 @@ kernel/fs/fat32/fat32.o \
 kernel/fs/fat32/fat32_to_vfs.o \
 kernel/vfs.o \
 kernel/kheap.o \
+kernel/time.o \
 kernel/kernel.o \
 kernel/font.o \
 

@@ -7,6 +7,8 @@
 #include <kernel/drv/ps2.h>
 #include <kernel/drv/ps2_mouse.h>
 #include <kernel/drv/serial_port.h>
+#include <kernel/time.h>
+#include <kernel/drv/rtc.h>
 
 extern rgb_color_t fg_color;
 extern rgb_color_t bg_color;
@@ -22,6 +24,8 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
 
 // Рассчитываем размер кучи
     size_t heap_size = calculate_heap_size(multiboot_info);
+    
+    serial_port_init(COM1);
 
     // Инициализируем кучу
     kheap_init((void*)HEAP_START_ADDRESS, heap_size);
@@ -31,12 +35,19 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     psf_v1_init();
 
     irq_disable();
+    
     initialize_screen();  // Инициализируем экранные параметры
+    
     gdt_init();
     idt_init(GDT_CODE_SEL_1);
+    
     pic_init();
     timer_init();
+    
+    set_time_provider(rtc_time_provider);
+
     irq_enable();
+
     beep(6, 100);
     check();
     printf("PC Speaker testing!\n");
@@ -63,9 +74,10 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     ps2_keyboard_init();
     ps2_mouse_init();
 
-    serial_port_init(COM1);
-    serial_write_string(COM1, "Pika-pika-pikachu!\n");
-    qemu_log("KERNEL RUNNING");
+
+    time_t t = get_time();
+    printf("Current time: %02d:%02d:%02d\n", t.hour, t.minute, t.second);
+
 
     return 0;
 }

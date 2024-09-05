@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 void utoa(unsigned int value, char *buffer, int base) {
-    char temp[32];
+    //char temp[32];
     int i = 0;
 
     if (value == 0) {

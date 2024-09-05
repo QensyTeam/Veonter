@@ -101,11 +101,11 @@ typedef enum {
 
 typedef struct {
 	uint8_t drive_id;
-    bool online;
     unsigned long long capacity;
 
     bool is_packet;
     bool is_medium_inserted;
+    bool is_lba48_supported;
 
     uint16_t block_size;
 

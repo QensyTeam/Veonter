@@ -1,9 +1,11 @@
 #include <stdint.h>
 #include <kernel/sys/ports.h>
 #include <stdlib.h>
+#include <string.h>
 #include <kernel/drv/serial_port.h>
 #include <kernel/drv/pci.h>
 #include <vector.h>
+#include <veo.h>
 
 vector_t* pci_devices = NULL;
 
@@ -27,7 +29,6 @@ inline uint8_t pci_get_class(uint8_t bus, uint8_t slot, uint8_t function) {
 
 __attribute__((always_inline))
 inline uint8_t pci_get_subclass(uint8_t bus, uint8_t slot, uint8_t function) {
-    /* Сдвигаем, чтобы оставить только нужные данные в переменной */
     return (uint8_t) pci_read_confspc_word(bus, slot, function, 10);
 }
 
@@ -48,6 +49,39 @@ inline uint16_t pci_get_device(uint8_t bus, uint8_t slot, uint8_t function) {
 
 void pci_init() {
     pci_devices = vector_new();
+}
+
+finite_pointer_t pci_find_devices_by_ven_dev(uint16_t vendor, uint16_t device) {
+    finite_pointer_t result = {};
+    size_t found = 0;
+
+    for(size_t i = 0; i < pci_devices->size; i++) {
+        pci_device_t* dev = (void*)vector_get(pci_devices, i).element;
+
+        if(dev->vendor_id == vendor && dev->device_id == device) {
+            found++;
+        }
+    }
+
+    if(found == 0) {
+        return result;
+    }
+
+    pci_device_t* devs = calloc(found, sizeof(pci_device_t));
+    size_t current_index = 0;
+
+    for(size_t i = 0; i < pci_devices->size; i++) {
+        pci_device_t* dev = (void*)vector_get(pci_devices, i).element;
+
+        if(dev->vendor_id == vendor && dev->device_id == device) {
+            devs[current_index++] = *dev;
+        }
+    }
+
+    result.data = devs;
+    result.size = found;
+    
+    return result;
 }
 
 void pci_scan_everything() {

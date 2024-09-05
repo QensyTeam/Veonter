@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <veo.h>
 
 #define PCI_ADDRESS_PORT 0xCF8  
 #define PCI_DATA_PORT 0xCFC
@@ -18,3 +19,4 @@ typedef struct {
 
 void pci_init();
 void pci_scan_everything();
+finite_pointer_t pci_find_devices_by_ven_dev(uint16_t vendor, uint16_t device);

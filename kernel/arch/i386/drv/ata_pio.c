@@ -193,7 +193,6 @@ uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint64_t lba) {
     outb(io + ATA_REG_COMMAND, ATA_CMD_READ_PIO_EXT);
 
     ide_poll(io);
-    //ide_poll_irq(io);
 
     uint16_t* buf16 = (uint16_t*)buf;
 
@@ -259,7 +258,11 @@ void ata_pio_write_sectors(disk_t disk, uint8_t *buf, uint32_t lba, size_t secto
 
     for(size_t i = 0; i < sectors; i++) {
         //qemu_log("ATA WRITE: LBA: %d", lba + i);
-        ata_pio_write_raw_sector(disk, buf + (i * drive->block_size), lba + i);
+        if(drive->is_lba48_supported) {
+            ata_pio_write_raw_sector(disk, buf + (i * drive->block_size), lba + i);
+        } else {
+            ata_pio_write_raw_sector_24lba(disk, buf + (i * (drive->block_size)), lba + i);
+        }
     }
 }
 
@@ -268,7 +271,11 @@ void ata_pio_read_sectors(disk_t disk, uint8_t *buf, uint32_t lba, uint32_t nums
     uint8_t* rbuf = buf;
 
     for(size_t i = 0; i < numsects; i++) {
-        ata_pio_read_sector(disk, rbuf, lba + i);
+        if(drive->is_lba48_supported) {
+            ata_pio_read_sector(disk, rbuf, lba + i);
+        } else {
+            ata_pio_read_sector_24lba(disk, rbuf, lba + i);
+        }
         rbuf += drive->block_size;
     }
 }
@@ -444,7 +451,7 @@ bool ata_ide_identify(uint8_t bus, uint8_t drive) {
         printf("\nModel: %s\nSerial: %s\nFirmware version: %s\n", (char*)model_name, (char*)serial, (char*)fwver);
 
         // REGISTER HERE
-        
+
         diskmgr_add_disk(drive_info, ata_attach, ata_read, ata_write, ata_get_capacity, ata_detach);
 	} else {
         kfree(ide_buf);

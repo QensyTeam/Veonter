@@ -1,3 +1,4 @@
+#include "kernel/sys/console.h"
 #include "kernel/drv/keyboard_buffer.h"
 #include <kernel/kernel.h>
 #include <kernel/mini_programs/mini_programs.h>
@@ -20,7 +21,7 @@ char console_current_disk = 1;
 
 // Структура для истории команд
 typedef struct {
-    char commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
+    uint16_t commands[HISTORY_SIZE][COMMAND_BUFFER_SIZE];
     int current_index;
     int total_commands;
     int history_index;  // Индекс для навигации по истории
@@ -28,23 +29,24 @@ typedef struct {
 
 static CommandHistory history = { .current_index = 0, .total_commands = 0, .history_index = -1 };
 
+static uint16_t raw_buffer[COMMAND_BUFFER_SIZE * sizeof(uint16_t)];
 static char command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
 
-void add_command_to_history(const char* command) {
+void add_command_to_history(const uint16_t* command, size_t length) {
     if (history.total_commands < HISTORY_SIZE) {
-        strcpy(history.commands[history.total_commands++], command);
+        memcpy(history.commands[history.total_commands++], command, length * sizeof(uint16_t));
     } else {
         for (int i = 1; i < HISTORY_SIZE; i++) {
-            strcpy(history.commands[i - 1], history.commands[i]);
+            memcpy(history.commands[i - 1], history.commands[i], COMMAND_BUFFER_SIZE);
         }
-        strcpy(history.commands[HISTORY_SIZE - 1], command);
+        memcpy(history.commands[HISTORY_SIZE - 1], command, COMMAND_BUFFER_SIZE);
     }
     history.current_index = history.total_commands;
     history.history_index = -1;
 }
 
-const char* get_previous_command() {
+const uint16_t* get_previous_command() {
     if (history.total_commands == 0 || history.history_index == 0) {
         return NULL;
     }
@@ -56,7 +58,7 @@ const char* get_previous_command() {
     return history.commands[history.history_index];
 }
 
-const char* get_next_command() {
+const uint16_t* get_next_command() {
     if (history.history_index == -1 || history.history_index == history.total_commands - 1) {
         return NULL;
     }
@@ -325,15 +327,45 @@ void console_process_command(const char* command) {
     }
 
 end:
-    add_command_to_history(command); // Добавление команды в историю
     printf("[%d] %s", console_current_disk, PROMPT_STRING);
 }
 
+void console_reset() {
+    memset(raw_buffer, 0, 256);
+    memset(command_buffer, 0, 256);
+
+    command_length = 0;
+}
+
+size_t console_rawbuf_actual_length() {
+    size_t a = 0;
+
+    while(raw_buffer[a++]) {}
+
+    return a;
+}
+
+void console_raw_to_command() {
+    for(size_t i = 0, j = 0; i < command_length; i++) {
+        if(raw_buffer[i] > 0xff) {
+            command_buffer[j++] = (char)(raw_buffer[i] & 0xff);
+            command_buffer[j] = (char)(raw_buffer[i] >> 8);
+        } else {
+            command_buffer[j] = (char)raw_buffer[i];
+        }
+
+        j++;
+    }
+}
+
+ 
 void console_input_loop() {
 	uint16_t c;
 
     printf("[%d] %s", console_current_disk, PROMPT_STRING);
 	
+    console_reset();
+
     while (1) {
         enable_cursor(); // показываем курсор в текущем положении
         c = keyboard_get_char();
@@ -344,17 +376,19 @@ void console_input_loop() {
             if (command_length == 0) {
                 printf("[%d] %s", console_current_disk, PROMPT_STRING);
             } else {
-                command_buffer[command_length] = 0;
+                raw_buffer[command_length] = 0;
+
+                console_raw_to_command();
+                
+                add_command_to_history(raw_buffer, command_length); // Добавление команды в историю
+
                 console_process_command((char*)command_buffer);
-                memset(command_buffer, 0, 256);
-                command_length = 0;
+
+                console_reset();
             }
         } else if (c == '\b') {
             if (command_length > 0) {
                 if (vbe_getcolumn() > PROMPT_LENGTH) {
-                    if(command_buffer[command_length - 1] & 0b10000000) {
-                        command_length--;
-                    }
                     command_length--;
                     putchar('\b'); // Удаление символа с экрана
                 }
@@ -365,29 +399,46 @@ void console_input_loop() {
             if (c == '[') {
                 c = keyboard_get_char();
                 if (c == 'A') { // Стрелка вверх
-                    const char* previous_command = get_previous_command();
+                    const uint16_t* previous_command = get_previous_command();
+                    qemu_log("PREV: %x", previous_command);
                     if (previous_command) {
                         // Очистка текущей строки
                         while (command_length > 0) {
                             shell_putchar('\b');
                             command_length--;
                         }
-                        printf("%s", previous_command);
-                        memset(command_buffer, 0, 256);
-                        strcpy(command_buffer, previous_command);
-                        command_length = strlen(previous_command);
+                        
+                        console_reset();
+
+                        memcpy(raw_buffer, previous_command, 256 * sizeof(uint16_t));
+                        
+                        command_length = console_rawbuf_actual_length();
+
+                        console_raw_to_command();
+
+                        printf("%s", command_buffer);
+                        
+                        command_length = strlen(command_buffer);
                     }
                 } else if (c == 'B') { // Стрелка вниз
-                    const char* next_command = get_next_command();
+                    const uint16_t* next_command = get_next_command();
                     if (next_command) {
                         while (command_length > 0) {
                             shell_putchar('\b');
                             command_length--;
                         }
-                        printf("%s", next_command);
-                        memset(command_buffer, 0, 256);
-                        strcpy(command_buffer, next_command);
-                        command_length = strlen(next_command);
+                        
+                        console_reset();
+
+                        memcpy(raw_buffer, next_command, 256 * sizeof(uint16_t));
+                        
+                        command_length = console_rawbuf_actual_length();
+
+                        console_raw_to_command();
+
+                        printf("%s", command_buffer);
+                        
+                        command_length = strlen(command_buffer);
                     } else {
                         while (command_length > 0) {
                             shell_putchar('\b');
@@ -398,12 +449,7 @@ void console_input_loop() {
             }
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
-                if(c <= 0xff) {
-                    command_buffer[command_length++] = (char)c;
-                } else {
-                    command_buffer[command_length++] = (char)(c & 0xff);
-                    command_buffer[command_length++] = (char)(c >> 8);
-                }
+                raw_buffer[command_length++] = c;
                 putchar(c); // Отображение символа на экране
             }
         }

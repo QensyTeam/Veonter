@@ -89,6 +89,80 @@ bool ide_poll_bsy(uint16_t io) {
 	}
 }
 
+uint8_t ata_pio_read_sector_24lba(disk_t disk, uint8_t *buf, uint64_t lba) {
+    ata_drive_t* drive = disk.priv_data;
+    // Only 28-bit LBA supported!
+    lba &= 0x00FFFFFF;
+
+    uint16_t io = 0;
+    uint8_t rdv = 0;
+
+    ata_set_params(drive->drive_id, &io, &rdv);
+
+    // For 24-bit LBA
+    uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    uint8_t slavebit = (rdv == MASTER ? 0x00 : 0x01);
+
+    outb(io + ATA_REG_HDDEVSEL, cmd | (slavebit << 4));
+    //outb(io + 1, 0x00);
+    outb(io + ATA_REG_LBA0, (uint8_t)((lba)));
+    outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
+    outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
+    outb(io + ATA_REG_SECCOUNT0, 1);
+
+    outb(io + ATA_REG_COMMAND, ATA_CMD_READ_PIO_EXT);
+
+    ide_poll(io);
+
+    uint16_t* buf16 = (uint16_t*)buf;
+
+    for(int i = 0; i < 256; i++) {
+        uint16_t data = inw(io);
+        *(buf16 + i) = data;
+    }
+
+    ata_ide_400ns_delay(io);
+
+    return 1;
+}
+
+uint8_t ata_pio_write_raw_sector_24lba(disk_t disk, const uint8_t *buf, uint64_t lba) {
+    ata_drive_t* drive = disk.priv_data;
+    // Only 24-bit LBA supported!
+    lba &= 0x00FFFFFF;
+
+    uint16_t io = 0;
+    uint8_t rdv = 0;
+
+    ata_set_params(drive->drive_id, &io, &rdv);
+
+    // For 24-bit LBA
+    uint8_t cmd = (rdv == MASTER ? 0xE0 : 0xF0);
+    uint8_t slavebit = (rdv == MASTER ? 0x00 : 0x01);
+
+    outb(io + ATA_REG_HDDEVSEL, cmd | (slavebit << 4));
+    outb(io + 1, 0x00);
+    outb(io + ATA_REG_SECCOUNT0, 1);
+    outb(io + ATA_REG_LBA0, (uint8_t)((lba)));
+    outb(io + ATA_REG_LBA1, (uint8_t)((lba) >> 8));
+    outb(io + ATA_REG_LBA2, (uint8_t)((lba) >> 16));
+    outb(io + ATA_REG_COMMAND, ATA_CMD_WRITE_PIO_EXT);
+
+    ide_poll_drq(io);
+
+    for(int i = 0; i < 256; i++) {
+        outw(io, *(uint16_t*)(buf + (i * 2)));
+    }
+    
+    ata_ide_400ns_delay(io);
+
+    outb(io + ATA_REG_COMMAND, ATA_CMD_CACHE_FLUSH);
+
+    ide_poll_bsy(io);
+    
+    return 1;
+}
+
 uint8_t ata_pio_read_sector(disk_t disk, uint8_t *buf, uint64_t lba) {
     ata_drive_t* drive = disk.priv_data;
     // Only 28-bit LBA supported!

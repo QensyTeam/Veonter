@@ -19,11 +19,11 @@ char* Version = "\t\t\t\t\t\t\t\t\t\t\t\t\t\tVersion: 0.0.1 Wolf(Pre-Alpha)\n\n"
 void logo() {
     main_color = fg_color;
     shell_text_color(RGB(140, 0, 255));
-    printf(title);
+    printf("%s", title);
     shell_text_color(RGB(0, 252, 29));
 	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome!\n");
 	shell_text_color(RGB(112, 112, 112));
-	printf(Version);
+	printf("%s", Version);
 	shell_text_color(main_color);
 }
 

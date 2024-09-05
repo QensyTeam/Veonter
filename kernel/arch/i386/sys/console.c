@@ -400,7 +400,6 @@ void console_input_loop() {
                 c = keyboard_get_char();
                 if (c == 'A') { // Стрелка вверх
                     const uint16_t* previous_command = get_previous_command();
-                    qemu_log("PREV: %x", previous_command);
                     if (previous_command) {
                         // Очистка текущей строки
                         while (command_length > 0) {

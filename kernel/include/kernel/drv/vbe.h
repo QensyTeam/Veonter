@@ -29,6 +29,7 @@ typedef struct {
 
 void set_video_mode(uint16_t width, uint16_t height, uint16_t bpp, uint32_t* fb_addr);
 void putpixel(int x, int y, rgb_color_t color);
+uint32_t getpixel(int x, int y);
 void fill_screen(rgb_color_t color);
 
 extern uint16_t screen_width;

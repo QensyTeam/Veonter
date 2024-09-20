@@ -3,3 +3,4 @@
 sysroot
 **/Veonter.kernel
 *.img
+isodir/boot/test.elf

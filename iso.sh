@@ -27,6 +27,7 @@ set menu_color_highlight=white/magenta
 
 menuentry "Veonter - 0.0.1 Wolf(Pre-Alpha)" {
  	multiboot /boot/Veonter.kernel
+ 	module /boot/test.elf
 }
 
 # Добавить записи для перезагрузки и выключения

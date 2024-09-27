@@ -2,7 +2,11 @@
 #define SHELL_H
 
 #include <stdint.h>
-#include <kernel/kernel.h>
+#include <kernel/drv/vbe.h>
+#include <stddef.h>
+
+extern volatile int cursor_x;  // Текущая x-координата курсора
+extern volatile int cursor_y;  // Текущая y-координата курсора
 
 void shell_putchar(unsigned short int c);
 void shell_text_color(rgb_color_t color);

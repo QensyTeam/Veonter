@@ -13,10 +13,11 @@
 volatile unsigned int ticks = 0;
 BOOL should_run = TRUE;
 extern bool cursor_visible;
+volatile bool cursor_update = true;
 
 void timer_irq_handler(__attribute__ ((unused)) registers_t r) {
     ticks++;
-    if (ticks % (TIMER_FREQUENCY / 2) == 0) { // курсор мигает раз в 0.5 секунды
+    if ((ticks % (TIMER_FREQUENCY / 2) == 0) && cursor_update) { // курсор мигает раз в 0.5 секунды
         if (cursor_visible) {
             disable_cursor();
         } else {

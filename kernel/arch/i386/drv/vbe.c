@@ -31,6 +31,16 @@ void putpixel(int x, int y, rgb_color_t color) {
     }
 }
 
+uint32_t getpixel(int x, int y) {
+    if (x >= 0 && x < screen_width && y >= 0 && y < screen_height) {
+        uint32_t pixel_offset = y * screen_width + x;
+        return framebuffer[pixel_offset];
+    }
+
+    return 0;
+}
+
+
 void fill_screen(rgb_color_t color) {
     for (int y = 0; y < screen_height; y++) {
         for (int x = 0; x < screen_width; x++) {

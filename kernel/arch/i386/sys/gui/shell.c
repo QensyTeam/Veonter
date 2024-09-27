@@ -1,3 +1,4 @@
+#include "kernel/drv/vbe.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -19,11 +20,11 @@ char* Version = "\t\t\t\t\t\t\t\t\t\t\t\t\t\tVersion: 0.0.1 Wolf(Pre-Alpha)\n\n"
 void logo() {
     main_color = fg_color;
     shell_text_color(RGB(140, 0, 255));
-    printf(title);
+    printf("%s", title);
     shell_text_color(RGB(0, 252, 29));
 	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome!\n");
 	shell_text_color(RGB(112, 112, 112));
-	printf(Version);
+	printf("%s", Version);
 	shell_text_color(main_color);
 }
 
@@ -96,9 +97,9 @@ void colors_program() {
     }
 }
 
-int cursor_x = -1;  // Текущая x-координата курсора
-int cursor_y = -1;  // Текущая y-координата курсора
-bool cursor_visible = true; // Видимость курсора
+volatile int cursor_x = -1;  // Текущая x-координата курсора
+volatile int cursor_y = -1;  // Текущая y-координата курсора
+volatile bool cursor_visible = true; // Видимость курсора
 
 uint16_t max_cols; // Максимальное количество символов в строке
 uint16_t max_rows; // Максимальное количество строк на экране

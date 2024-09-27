@@ -72,4 +72,4 @@ bash qemu.sh
 
 ## Авторы
 
-Разработка Veonter осуществляется **QensyTeam** и **NDRAEY**, а также при помощи **pimnik98**.
+Разработка Veonter осуществляется **Qensy** и **NDRAEY**, а также при помощи **pimnik98**.

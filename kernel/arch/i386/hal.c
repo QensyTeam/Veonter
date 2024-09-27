@@ -17,6 +17,7 @@ extern rgb_color_t bg_color;
 
 void irq_disable();
 void irq_enable();
+void test_elf(uint32_t *addr, uint32_t count);
 
 int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     vbe_mode_info_t* vbe_mode_info = (vbe_mode_info_t*) multiboot_info->vbe_mode_info;
@@ -77,6 +78,7 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
 
     time_t t = get_time();
     printf("Current time: %02d:%02d:%02d\n", t.hour, t.minute, t.second);
+    test_elf(multiboot_info->mods_addr, multiboot_info->mods_count);
 
 
     return 0;

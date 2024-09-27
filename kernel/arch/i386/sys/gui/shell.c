@@ -1,3 +1,4 @@
+#include "kernel/drv/vbe.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -96,9 +97,9 @@ void colors_program() {
     }
 }
 
-int cursor_x = -1;  // Текущая x-координата курсора
-int cursor_y = -1;  // Текущая y-координата курсора
-bool cursor_visible = true; // Видимость курсора
+volatile int cursor_x = -1;  // Текущая x-координата курсора
+volatile int cursor_y = -1;  // Текущая y-координата курсора
+volatile bool cursor_visible = true; // Видимость курсора
 
 uint16_t max_cols; // Максимальное количество символов в строке
 uint16_t max_rows; // Максимальное количество строк на экране

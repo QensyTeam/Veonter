@@ -1,5 +1,6 @@
 #include "kernel/sys/console.h"
 #include "kernel/drv/keyboard_buffer.h"
+#include "kernel/sys/gui/shell.h"
 #include <kernel/kernel.h>
 #include <kernel/mini_programs/mini_programs.h>
 #include <stdint.h>
@@ -32,6 +33,7 @@ static CommandHistory history = { .current_index = 0, .total_commands = 0, .hist
 static uint16_t raw_buffer[COMMAND_BUFFER_SIZE * sizeof(uint16_t)];
 static char command_buffer[COMMAND_BUFFER_SIZE];
 static size_t command_length = 0;
+static size_t command_position = 0;
 
 void add_command_to_history(const uint16_t* command, size_t length) {
     if (history.total_commands < HISTORY_SIZE) {
@@ -335,6 +337,7 @@ void console_reset() {
     memset(command_buffer, 0, 256);
 
     command_length = 0;
+    command_position = 0;
 }
 
 size_t console_rawbuf_actual_length() {
@@ -358,7 +361,9 @@ void console_raw_to_command() {
     }
 }
 
- 
+extern volatile bool cursor_update;
+extern volatile bool cursor_visible;
+
 void console_input_loop() {
 	uint16_t c;
 
@@ -367,9 +372,9 @@ void console_input_loop() {
     console_reset();
 
     while (1) {
-        enable_cursor(); // показываем курсор в текущем положении
-        c = keyboard_get_char();
         disable_cursor(); // скрываем курсор перед изменением экрана
+        c = keyboard_get_char();
+        enable_cursor(); // показываем курсор в текущем положении
 
         if (c == '\n') {
             putchar('\n');
@@ -444,11 +449,24 @@ void console_input_loop() {
                             command_length--;
                         }
                     }
+                } else if(c == 'D') {
+                    if(command_position > 0) {
+                        command_position--;
+                        cursor_x--;
+                        qemu_log("Vasen %d/%d", command_position, command_length);
+                    }
+                } else if(c == 'C') {
+                    if(command_position < command_length) {
+                        command_position++;
+                        cursor_x++;
+                        qemu_log("Oikea %d/%d", command_position, command_length);
+                    }
                 }
             }
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
                 raw_buffer[command_length++] = c;
+                command_position++;
                 putchar(c); // Отображение символа на экране
             }
         }

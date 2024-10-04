@@ -62,8 +62,13 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
     shell_text_color(RGB(150, 150, 150));
     detect_cpu();
     meminfo_program();
+    test_elf(multiboot_info->mods_addr, multiboot_info->mods_count);
     shell_text_color(RGB(255, 255, 255));
+    sleep(1000);
+    vbe_clear_screen(bg_color);
+    printf("\n");
     logo();
+    printf("\n");
 
     ps2_init();
     ps2_keyboard_preinit();
@@ -74,12 +79,5 @@ int init_hal(__attribute__((unused)) multiboot_info_t* multiboot_info) {
 
     ps2_keyboard_init();
     ps2_mouse_init();
-
-
-    time_t t = get_time();
-    printf("Current time: %02d:%02d:%02d\n", t.hour, t.minute, t.second);
-    test_elf(multiboot_info->mods_addr, multiboot_info->mods_count);
-
-
     return 0;
 }

@@ -44,13 +44,14 @@ mv disk.img /mnt/c/Veonter/disk.img
 # Запуск qemu с использованием перемещённого ISO-образа и виртуального диска
 "/mnt/c/Program Files/qemu/qemu-system-i386.exe" \
     -m 64M \
-    -hda "C:\\Veonter\\disk.img" \
     -audiodev dsound,id=audio0 \
     -M pcspk-audiodev=audio0 \
     -cdrom "C:\\Veonter\\Veonter.iso" \
     -serial mon:stdio \
     -name "Veonter DEV WSL MODE" \
-    -boot d
+    -boot d \
+    -drive file="C:\\Veonter\\disk.img",index=0,if=ide,format=raw \
+    -rtc base=localtime 
 
 # Очистка папки Veonter на диске C:
 rm -rf /mnt/c/Veonter/*

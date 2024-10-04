@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <kernel/kernel.h>
+#include <kernel/time.h>
+#include <kernel/drv/rtc.h>
 
 rgb_color_t fg_color = RGB(255, 255, 255);
 rgb_color_t bg_color = RGB(0, 0, 0);
@@ -21,11 +23,16 @@ void logo() {
     main_color = fg_color;
     shell_text_color(RGB(140, 0, 255));
     printf("%s", title);
+    shell_text_color(RGB(255, 255, 255));
+    printf("\t\t\t\t\t\t\t\t    Made by the Qensy Team\n\n");
     shell_text_color(RGB(0, 252, 29));
 	printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tWelcome!\n");
 	shell_text_color(RGB(112, 112, 112));
 	printf("%s", Version);
 	shell_text_color(main_color);
+    printf("\tType <help> to see all possible commands for using this console.\n\n\n");
+    time_t t = get_time();
+    printf("Current time: %02d:%02d:%02d\n", t.hour, t.minute, t.second);
 }
 
 void shell_text_color(rgb_color_t color) {
@@ -105,12 +112,12 @@ uint16_t max_cols; // Максимальное количество символ
 uint16_t max_rows; // Максимальное количество строк на экране
 
 void enable_cursor() {
-    draw_Rectangle(cursor_x * CHAR_WIDTH, cursor_y * CHAR_HEIGHT, CHAR_WIDTH, CHAR_HEIGHT, fg_color);
+    draw_Rectangle(cursor_x * CHAR_WIDTH, cursor_y * CHAR_HEIGHT, 2, CHAR_HEIGHT, fg_color);
 }
 
 void disable_cursor() {
     if (cursor_x != -1 && cursor_y != -1) {
-        draw_Rectangle(cursor_x * CHAR_WIDTH, cursor_y * CHAR_HEIGHT, CHAR_WIDTH, CHAR_HEIGHT, bg_color);
+        draw_Rectangle(cursor_x * CHAR_WIDTH, cursor_y * CHAR_HEIGHT, 2, CHAR_HEIGHT, bg_color);
     }
 }
 

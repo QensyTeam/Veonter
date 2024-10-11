@@ -12,7 +12,7 @@ void calculator(void) {
     
     // Check if the input was successfully read
     if (items != 3) {
-        printf("Invalid input. Please enter in the format: number operator number\n");
+        printf("\nInvalid input. Please enter in the format: number operator number\n");
         return;// 1;
     }
 
@@ -31,15 +31,15 @@ void calculator(void) {
             if (num2 != 0) {
                 result = num1 / num2;
             } else {
-                printf("Error: Division by zero.\n");
+                printf("\nError: Division by zero.\n");
                 return;// 1;
             }
             break;
         default:
-            printf("Invalid operator. Please use +, -, *, or /.\n");
+            printf("\nInvalid operator. Please use +, -, *, or /.\n");
             return;// 1;
     }
 
     // Print the result
-    printf("Result: %.2f\n", result);
+    printf("\nResult: %.2f\n", result);
 }

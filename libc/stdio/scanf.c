@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <stdarg.h>  // For va_list and related functions
 #include <stdint.h> // For uint8_t
-
-#if __is_libk
 #include <kernel/kernel.h>
 #include "kernel/sys/pit.h"
-#endif
+#include <kernel/drv/serial_port.h>
 
 #define COMMAND_BUFFER_SIZE 256
 
@@ -33,23 +31,37 @@ int scanf(const char* format, ...) {
     while (1) {
         c = keyboard_get_char();
 
-        if (c != '\b') {
-            putchar(c);
+        // Обработка клавиш стрелок
+        if (c == '\x1B') { // Начало escape-последовательности
+            c = keyboard_get_char(); // Читаем следующий символ после ESC
+            if (c == '[') {
+                c = keyboard_get_char();
+                if (c == 'D' || c == 'C' || c == 'B' || c == 'A') { // Стрелка влево или вправо
+                    // Игнорируем стрелки
+                    continue;
+                }
+            }
         }
 
-        if (c == '\n' || c == '\r') {
-            if (length < COMMAND_BUFFER_SIZE) {
-                input_buffer[length] = '\0';
-                break;
-            }
-        } else if (c == '\b') {
+        // Обработка удаления символа
+        if (c == '\b') {
             if (length > 0) {
                 length--;
                 putchar('\b');
             }
-        } else {
+        }
+        // Обработка завершения ввода (Enter)
+        else if (c == '\n' || c == '\r') {
+            if (length < COMMAND_BUFFER_SIZE) {
+                input_buffer[length] = '\0'; // Завершаем строку
+                break;
+            }
+        }
+        // Добавление обычных символов в буфер
+        else {
             if (length < COMMAND_BUFFER_SIZE - 1) {
                 input_buffer[length++] = c;
+                putchar(c);
             }
         }
     }

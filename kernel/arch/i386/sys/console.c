@@ -365,16 +365,16 @@ extern volatile bool cursor_update;
 extern volatile bool cursor_visible;
 
 void console_input_loop() {
-	uint16_t c;
+    uint16_t c;
 
     printf("[%d] %s", console_current_disk, PROMPT_STRING);
-	
     console_reset();
 
     while (1) {
         disable_cursor(); // скрываем курсор перед изменением экрана
         c = keyboard_get_char();
-        //enable_cursor(); // показываем курсор в текущем положении
+        qemu_log("Command position: %u; Cursor X: %u", command_position, cursor_x);
+        
         disable_cursor(); // скрываем курсор перед изменением экрана
         if (c == '\n') {
             disable_cursor(); // скрываем курсор перед изменением экрана
@@ -385,17 +385,14 @@ void console_input_loop() {
                 raw_buffer[command_length] = 0;
 
                 console_raw_to_command();
-                
                 add_command_to_history(raw_buffer, command_length); // Добавление команды в историю
-
                 console_process_command((char*)command_buffer);
-
                 console_reset();
             }
         } else if (c == '\b') {
             if (command_length > 0) {
                 if (vbe_getcolumn() > PROMPT_LENGTH) {
-                    //console_reset();
+                    qemu_log("Command position: %u; Cursor X: %u", command_position, cursor_x);
                     command_position--;
                     command_length--;
 
@@ -418,83 +415,93 @@ void console_input_loop() {
                         cursor_x--;
                     }
 
-                    // Обновляем экранное положение курсора
-                    cursor_x = command_position + (strlen(PROMPT_STRING) * 2);
+                    cursor_x = command_position + (strlen(PROMPT_STRING) * 2) - 1;
                 }
             }
         } else if (c == '\x1B') {
             qemu_log("Command position: %u; Cursor X: %u", command_position, cursor_x);
 
-            // Обработка специального символа для стрелок
-            c = keyboard_get_char();
+            c = keyboard_get_char(); // Читаем следующий символ после ESC
             if (c == '[') {
                 c = keyboard_get_char();
                 if (c == 'A') { // Стрелка вверх
                     const uint16_t* previous_command = get_previous_command();
                     if (previous_command) {
                         // Очистка текущей строки
-                        while (command_length > 0) {
-                            shell_putchar('\b');
-                            command_length--;
+                        for (size_t i = 0; i < command_length; i++) {
+                            shell_putchar('\b'); // Удаляем символы обратно
                         }
-                        
-                        console_reset();
+
+                        for (size_t i = 0; i < command_length; i++) {
+                            putchar(' '); // Перерисовываем строку пробелами
+                        }
+
+                        // Возвращаем курсор на начальную позицию после очистки
+                        for (size_t i = 0; i < command_length; i++) {
+                            shell_putchar('\b'); // Возвращаем курсор назад
+                        }
+
+                        console_reset(); // Сброс консоли
 
                         memcpy(raw_buffer, previous_command, 256 * sizeof(uint16_t));
-                        
-                        command_length = console_rawbuf_actual_length();
 
+                        command_length = console_rawbuf_actual_length();
                         console_raw_to_command();
 
                         printf("%s", command_buffer);
-                        
                         command_length = strlen(command_buffer);
-
                         command_position = command_length;
+                        cursor_x = command_position + (strlen(PROMPT_STRING) * 2) - 1;
                     }
                 } else if (c == 'B') { // Стрелка вниз
                     const uint16_t* next_command = get_next_command();
                     if (next_command) {
-                        while (command_length > 0) {
+                        for (size_t i = 0; i < command_length; i++) {
                             shell_putchar('\b');
-                            command_length--;
                         }
-                        
+
+                        for (size_t i = 0; i < command_length; i++) {
+                            putchar(' ');
+                        }
+
+                        for (size_t i = 0; i < command_length; i++) {
+                            shell_putchar('\b');
+                        }
+
                         console_reset();
 
                         memcpy(raw_buffer, next_command, 256 * sizeof(uint16_t));
-                        
-                        command_length = console_rawbuf_actual_length();
 
+                        command_length = console_rawbuf_actual_length();
                         console_raw_to_command();
 
                         printf("%s", command_buffer);
-                        
                         command_length = strlen(command_buffer);
                         command_position = command_length;
+                        cursor_x = command_position + (strlen(PROMPT_STRING) * 2) - 1;
                     } else {
                         while (command_length > 0) {
                             shell_putchar('\b');
                             command_length--;
                         }
                     }
-                } else if(c == 'D') {
+                } else if (c == 'D') { // Стрелка влево
                     disable_cursor();
-                    if(command_position > 0) {
+                    if (command_position > 0) {
                         command_position--;
                         cursor_x--;
-                        qemu_log("Vasen %d/%d", command_position, command_length);
+                        qemu_log("Left %d/%d", command_position, command_length);
                     }
-                } else if(c == 'C') {
+                } else if (c == 'C') { // Стрелка вправо
                     disable_cursor();
-                    if(command_position < command_length) {
+                    if (command_position < command_length) {
                         command_position++;
                         cursor_x++;
-                        qemu_log("Oikea %d/%d", command_position, command_length);
+                        qemu_log("Right %d/%d", command_position, command_length);
                     }
                 }
             }
-        } else {
+        } else { // Ввод обычных символов
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
                 // Вставка символа и сдвиг символов вправо
                 for (size_t i = command_length; i > command_position; i--) {
@@ -505,7 +512,6 @@ void console_input_loop() {
 
                 // Перерисовка строки с новой позиции
                 for (size_t i = command_position - 1; i < command_length; i++) {
-                    //cursor_x = i; // Обновляем позицию курсора
                     shell_putchar(raw_buffer[i]);
                 }
 

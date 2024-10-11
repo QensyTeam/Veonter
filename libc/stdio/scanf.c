@@ -53,6 +53,7 @@ int scanf(const char* format, ...) {
         // Обработка завершения ввода (Enter)
         else if (c == '\n' || c == '\r') {
             if (length < COMMAND_BUFFER_SIZE) {
+                putchar('\n');
                 input_buffer[length] = '\0'; // Завершаем строку
                 break;
             }

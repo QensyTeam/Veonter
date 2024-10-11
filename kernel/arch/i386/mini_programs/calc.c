@@ -1,12 +1,16 @@
 #include <stdio.h>
+#include <kernel/drv/keyboard_buffer.h>
+#include <string.h>
+#include <math.h> // Для работы со степенями
 
 void calculator(void) {
     char operator;
     double num1, num2;
     double result;
 
-    printf("Enter an expression (e.g., 3 + 4): ");
-    
+    printf("\t1. Basic operations: 3 + 4\n");
+    printf("\t2. Exponentiation: 2 ^ 3\n\n");
+    printf("Enter an expression: ");
     // Read the input expression
     int items = scanf("%lf %c %lf", &num1, &operator, &num2);
     
@@ -16,7 +20,7 @@ void calculator(void) {
         return;// 1;
     }
 
-    // Perform the calculation based on the operator
+    // Выполнение вычисления на основе оператора
     switch (operator) {
         case '+':
             result = num1 + num2;
@@ -31,15 +35,18 @@ void calculator(void) {
             if (num2 != 0) {
                 result = num1 / num2;
             } else {
-                printf("\nError: Division by zero.\n");
-                return;// 1;
+                printf("Error: Division by zero.\n");
+                return; // 1;
             }
             break;
+        case '^': // Добавляем поддержку степени
+            result = pow(num1, num2);
+            break;
         default:
-            printf("\nInvalid operator. Please use +, -, *, or /.\n");
-            return;// 1;
+            printf("Invalid operator. Please use +, -, *, /, or ^.\n");
+            return; // 1;
     }
 
-    // Print the result
-    printf("\nResult: %.2f\n", result);
+    // Печать результата
+    printf("Result: %.2f\n", result);
 }

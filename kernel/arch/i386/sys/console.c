@@ -89,7 +89,7 @@ const char* console_help_content[] = {
         "beep <frequency> - Allows you to hear a beep with the specified frequency.",
         "vbe_test - Checking the operation of VBE graphics mode.",
         "disks - Show disk list available in system.",
-        "dhv - Disk Hex View (first 1024 bytes).",
+        "dhv - Disk Hex View.",
         "meminfo - Show memory info.",
         "mousetest - Show button flags and coordinates.",
         "ls - List files.",

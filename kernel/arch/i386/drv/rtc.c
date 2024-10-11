@@ -23,7 +23,7 @@ time_t rtc_time_provider() {
     uint8_t cmos_hour = get_RTC_register(0x04);
     uint8_t cmos_day = get_RTC_register(0x07);
     uint8_t cmos_month = get_RTC_register(0x08);
-    uint8_t cmos_year = get_RTC_register(0x09);
+    uint16_t cmos_year = get_RTC_register(0x09);
 
     uint8_t registerB = get_RTC_register(0x0B);
 

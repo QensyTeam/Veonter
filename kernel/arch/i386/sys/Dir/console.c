@@ -365,19 +365,18 @@ extern volatile bool cursor_update;
 extern volatile bool cursor_visible;
 
 void console_input_loop() {
-	uint16_t c;
+    uint16_t c;
 
     printf("[%d] %s", console_current_disk, PROMPT_STRING);
-	
+
     console_reset();
 
     while (1) {
         disable_cursor(); // скрываем курсор перед изменением экрана
         c = keyboard_get_char();
-        //enable_cursor(); // показываем курсор в текущем положении
-        disable_cursor(); // скрываем курсор перед изменением экрана
+        enable_cursor(); // показываем курсор в текущем положении
+
         if (c == '\n') {
-            disable_cursor(); // скрываем курсор перед изменением экрана
             putchar('\n');
             if (command_length == 0) {
                 printf("[%d] %s", console_current_disk, PROMPT_STRING);
@@ -385,7 +384,7 @@ void console_input_loop() {
                 raw_buffer[command_length] = 0;
 
                 console_raw_to_command();
-                
+
                 add_command_to_history(raw_buffer, command_length); // Добавление команды в историю
 
                 console_process_command((char*)command_buffer);
@@ -393,34 +392,14 @@ void console_input_loop() {
                 console_reset();
             }
         } else if (c == '\b') {
-            if (command_length > 0) {
-                if (vbe_getcolumn() > PROMPT_LENGTH) {
-                    console_reset();
-                    command_position--;
-                    command_length--;
-
-                    // Удаляем символ на текущей позиции
-                    for (size_t i = command_position; i < command_length; i++) {
-                        raw_buffer[i] = raw_buffer[i + 1]; // Сдвигаем символы влево
-                    }
-
-                    // Перерисовываем строку после удаления символа
-                    cursor_x--;
-                    for (size_t i = command_position; i < command_length; i++) {
-                        shell_putchar(raw_buffer[i]); // Печатаем оставшиеся символы
-                    }
-
-                    // Очищаем последний символ, который остаётся в конце строки
-                    putchar(' ');
-
-                    // Возвращаем курсор в правильную позицию
-                    for (size_t i = command_length; i > command_position; i--) {
-                        cursor_x--;
-                    }
-
-                    // Обновляем экранное положение курсора
-                    cursor_x = command_position + 8;
-                }
+            if (command_length > 0 && command_position > 0) {
+                command_position--;
+                command_length--;
+                // Стираем последний символ
+                shell_putchar('\b'); // Удаление символа с экрана
+                // Перемещаем курсор назад
+                putchar(' '); // Стираем символ на экране
+                putchar('\b'); // Возврат курсора назад
             }
         } else if (c == '\x1B') {
             // Обработка специального символа для стрелок
@@ -435,18 +414,17 @@ void console_input_loop() {
                             shell_putchar('\b');
                             command_length--;
                         }
-                        
+
                         console_reset();
 
                         memcpy(raw_buffer, previous_command, 256 * sizeof(uint16_t));
-                        
+
                         command_length = console_rawbuf_actual_length();
+                        command_position = command_length; // Обновляем позицию курсора
 
                         console_raw_to_command();
 
                         printf("%s", command_buffer);
-                        
-                        command_length = strlen(command_buffer);
                     }
                 } else if (c == 'B') { // Стрелка вниз
                     const uint16_t* next_command = get_next_command();
@@ -455,58 +433,51 @@ void console_input_loop() {
                             shell_putchar('\b');
                             command_length--;
                         }
-                        
+
                         console_reset();
 
                         memcpy(raw_buffer, next_command, 256 * sizeof(uint16_t));
-                        
+
                         command_length = console_rawbuf_actual_length();
+                        command_position = command_length; // Обновляем позицию курсора
 
                         console_raw_to_command();
 
                         printf("%s", command_buffer);
-                        
-                        command_length = strlen(command_buffer);
                     } else {
                         while (command_length > 0) {
                             shell_putchar('\b');
                             command_length--;
                         }
                     }
-                } else if(c == 'D') {
+                } else if (c == 'D') { // Стрелка влево
                     disable_cursor();
-                    if(command_position > 0) {
+                    if (command_position > 0) {
                         command_position--;
+                        // Перемещаем курсор влево
                         cursor_x--;
-                        qemu_log("Vasen %d/%d", command_position, command_length);
+                        //shell_putchar('\b');
                     }
-                } else if(c == 'C') {
+                } else if (c == 'C') { // Стрелка вправо
                     disable_cursor();
-                    if(command_position < command_length) {
+                    if (command_position < command_length) {
+                        shell_putchar(command_buffer[command_position]);
                         command_position++;
-                        cursor_x++;
-                        qemu_log("Oikea %d/%d", command_position, command_length);
                     }
                 }
             }
         } else {
             if (command_length < COMMAND_BUFFER_SIZE - 1) {
-                // Вставка символа и сдвиг символов вправо
+                // Вставка символа
                 for (size_t i = command_length; i > command_position; i--) {
-                    raw_buffer[i] = raw_buffer[i - 1]; // Сдвиг существующих символов вправо
+                    raw_buffer[i] = raw_buffer[i - 1]; // Сдвиг вправо
                 }
                 raw_buffer[command_position++] = c; // Вставка нового символа
                 command_length++;
-
-                // Перерисовка строки с новой позиции
-                for (size_t i = command_position - 1; i < command_length; i++) {
-                    //cursor_x = i; // Обновляем позицию курсора
-                    shell_putchar(raw_buffer[i]);
-                }
-
-                cursor_x = command_position + 8;
+                putchar(c); // Отображение символа на экране
             }
         }
         enable_cursor(); // показываем курсор после изменения экрана
     }
 }
+

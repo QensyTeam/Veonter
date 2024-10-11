@@ -169,7 +169,7 @@ void shell_putchar(unsigned short int c) {
             }
             break;
     }
-    //update_cursor_position(); // Обновляем позицию курсора после вывода символа
+    update_cursor_position(); // Обновляем позицию курсора после вывода символа
 }
 
 void vbe_clear_screen(rgb_color_t color) {

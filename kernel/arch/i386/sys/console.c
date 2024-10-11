@@ -395,7 +395,7 @@ void console_input_loop() {
         } else if (c == '\b') {
             if (command_length > 0) {
                 if (vbe_getcolumn() > PROMPT_LENGTH) {
-                    console_reset();
+                    //console_reset();
                     command_position--;
                     command_length--;
 
@@ -419,10 +419,12 @@ void console_input_loop() {
                     }
 
                     // Обновляем экранное положение курсора
-                    cursor_x = command_position + 8;
+                    cursor_x = command_position + (strlen(PROMPT_STRING) * 2);
                 }
             }
         } else if (c == '\x1B') {
+            qemu_log("Command position: %u; Cursor X: %u", command_position, cursor_x);
+
             // Обработка специального символа для стрелок
             c = keyboard_get_char();
             if (c == '[') {
@@ -447,6 +449,8 @@ void console_input_loop() {
                         printf("%s", command_buffer);
                         
                         command_length = strlen(command_buffer);
+
+                        command_position = command_length;
                     }
                 } else if (c == 'B') { // Стрелка вниз
                     const uint16_t* next_command = get_next_command();
@@ -467,6 +471,7 @@ void console_input_loop() {
                         printf("%s", command_buffer);
                         
                         command_length = strlen(command_buffer);
+                        command_position = command_length;
                     } else {
                         while (command_length > 0) {
                             shell_putchar('\b');
@@ -504,7 +509,7 @@ void console_input_loop() {
                     shell_putchar(raw_buffer[i]);
                 }
 
-                cursor_x = command_position + 8;
+                cursor_x = command_position + (strlen(PROMPT_STRING) * 2) - 1;
             }
         }
         enable_cursor(); // показываем курсор после изменения экрана

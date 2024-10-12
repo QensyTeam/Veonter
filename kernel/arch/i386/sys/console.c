@@ -97,8 +97,11 @@ const char* console_help_content[] = {
         "wr - Write file.",
         "heapdmp - Prints heap chain into COM1.",
         "rand - Displays 10 random numbers.",
+        "mkfile <file_path> - Create a file at the specified path.",
+        "mkdir <directory_path> - Create a directory at the specified path.",
         0
 };
+
 
 void show_help_menu() {
     int content_lines = 0;
@@ -321,6 +324,22 @@ void console_process_command(const char* command) {
             printf("Error! Make sure that path is valid and you have parent directories created\n");
         } else {
             printf("OK\n");
+        }
+    } else if (strncmp(command, "mkfile ", 7) == 0) {
+        // Извлекаем путь к файлу из команды
+        char fpath[256] = {0};
+        itoa(console_current_disk, fpath, 10); // Добавляем номер диска в путь
+        strcat(fpath, ":/");
+        
+        strcat(fpath, command + 7); // Добавляем путь к файлу после команды "mkfile"
+        
+        // Вызываем функцию создания файла
+        int result = touch(fpath);
+        
+        if (result == 0) {
+            printf("File created successfully: %s\n", fpath);
+        } else {
+            printf("Error creating file: %s\n", fpath);
         }
     } else {
         printf("Unknown command: ");

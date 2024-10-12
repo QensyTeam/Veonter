@@ -110,5 +110,38 @@ end:
 }
 
 int fat32_touch(fs_object_t* fs, const char* path) {
-    return 0;
+    fat_t* fat = fs->priv_data;
+    
+    char* fpath = calloc(strlen(path) + 1, 1);
+    strcpy(fpath, path);
+    
+    char* end = fpath + strlen(fpath);
+
+    while(*end != '/') {
+        end--;
+    }
+
+    fpath[end - fpath] = 0; // Divide path by inserting zero where path ends and where dirname begins.
+    
+    end++;
+
+    qemu_log("%s", end);
+
+
+    int result = -1;
+    size_t entry = fat32_search(fs, fat, fpath);
+
+    if(entry != 0) {
+        qemu_log("Entry found");
+    } else {
+        qemu_log("Entry WAS NOT found");
+        goto end;
+    }
+
+    fat32_create_object(fs, fat, entry, end, true);
+
+    result = 0;
+end:
+    free(fpath);
+    return result;
 }

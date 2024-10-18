@@ -91,6 +91,18 @@ direntry_t* fat32_read_directory(fs_object_t* obj, fat_t* fat, uint32_t start_cl
         }
 
         if ((uint8_t)entry->name[0] == 0xE5) {
+            // FIXME: HERE!
+            qemu_log("DELETED FILE! `%c%c%c%c`", entry->name[1], entry->name[2], entry->name[3], entry->name[4]);
+
+            current_offset -= 32;
+            entry = (DirectoryEntry_t*)(cluster_data + current_offset);
+            while(entry->attributes & ATTR_LONG_FILE_NAME) {
+                entry = (DirectoryEntry_t*)(cluster_data + current_offset);
+
+                current_offset -= 32;
+            }
+
+//            current_offset += 32;
             // Удалённый файл
             goto next;
         }
@@ -128,6 +140,8 @@ lfn_next:
 
                 dirptr->name = calloc(256, 1);
                 memcpy(dirptr->name, out_name_buffer, 256);
+
+                qemu_log("Name: `%s`", dirptr->name);
 
                 dirptr->type = (prev->attributes & ATTR_DIRECTORY) ? ENT_DIRECTORY : ENT_FILE;
                 dirptr->size = prev->file_size;
@@ -303,7 +317,7 @@ size_t fat32_search_on_cluster(fs_object_t* obj, fat_t* fat, size_t cluster, con
     return found_cluster;
 }
 
-
+// Returns 0 if not found!
 size_t fat32_search(fs_object_t* obj, fat_t* fat, const char* path) {
     // Start at the root directory
     size_t cluster = fat->fat->root_directory_offset_in_clusters;
@@ -843,6 +857,58 @@ size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset
     qemu_log("Coords: Cluster: %d; Offset: %d", fcl, fof);
 
     fat32_write_size(obj, fat, fcl, fof, out_file_size);
+
+    return 0;
+}
+
+int fat32_remove_anything(fs_object_t* obj, fat_t* fat, const char* filepath) {
+    const char* file = filepath + strlen(filepath);
+
+    qemu_log("Parsing filename");
+
+    while(*file != '/') {
+        file--;
+    }
+
+    file++;
+
+    qemu_log("Filename parsed");
+
+    char* dirp = calloc((file - filepath) + 1, 1);
+
+    memcpy(dirp, filepath, file - filepath);
+
+    qemu_log("Path: `%s`", dirp);
+    qemu_log("File: `%s`", file);
+
+    size_t cluster = fat32_search(obj, fat, dirp);
+
+    if(cluster == 0) {
+        free(dirp);
+        return -1;
+    }
+
+    DirectoryEntry_t data = fat32_read_file_info(obj, fat, cluster, file);
+
+    data.name[0] = 0xE5;
+
+    // TODO: Find and zero' clusters!
+
+
+    fat32_write_file_info(obj, fat, cluster, file, data);
+
+    cluster = fat32_search(obj, fat, filepath);
+    do {
+        qemu_log("Cluster: %x", cluster);
+        auto _cluster = fat->fat_chain[cluster];
+        fat->fat_chain[cluster] = 0;
+        cluster = _cluster;
+        qemu_log("Next cluster: %x", cluster);
+    } while(cluster < 0x0FFFFFF8 && (cluster != 0));
+
+    free(dirp);
+
+    fat32_flush(obj, fat);
 
     return 0;
 }

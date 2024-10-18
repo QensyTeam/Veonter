@@ -91,3 +91,4 @@ size_t fat32_get_file_size(fs_object_t* obj, fat_t* fat, const char* filename);
 size_t fat32_read_cluster_chain_advanced(fs_object_t* obj, fat_t* fat, uint32_t start_cluster, size_t byte_offset, size_t size, bool probe, void* out);
 size_t fat32_write(fs_object_t* obj, fat_t* fat, const char* path, size_t offset, size_t size, const char* buffer);
 size_t fat32_create_object(fs_object_t* obj, fat_t* fat, size_t dir_cluster, const char* filename, bool is_file);
+int fat32_remove_anything(fs_object_t* obj, fat_t* fat, const char* filepath);

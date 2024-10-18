@@ -145,3 +145,9 @@ end:
     free(fpath);
     return result;
 }
+
+int fat32_remove(fs_object_t* fs, const char* path) {
+    fat_t* fat = fs->priv_data;
+
+    return fat32_remove_anything(fs, fat, path);
+}

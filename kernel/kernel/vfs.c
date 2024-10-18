@@ -1,5 +1,3 @@
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -24,7 +22,8 @@ int find_free_fs_nr() {
 int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen, dirclose_fn_t dirclose,
                 fileopen_fn_t fileopen,
                 fileread_fn_t fileread, filewrite_fn_t filewrite, fileclose_fn_t fileclose,
-                mkdir_fn_t mkdir, touch_fn_t touch) {
+                mkdir_fn_t mkdir, touch_fn_t touch,
+                remove_fn_t remove) {
     int fs_nr = find_free_fs_nr();
 
     if (fs_nr == -1) {
@@ -43,6 +42,8 @@ int register_filesystem(const char* name, probe_fn_t probe, diropen_fn_t diropen
     
     registered_filesystems[fs_nr].mkdir = mkdir;
     registered_filesystems[fs_nr].touch = touch;
+
+    registered_filesystems[fs_nr].remove = remove;
 
     return fs_nr;
 }
@@ -271,7 +272,7 @@ int touch(const char* path) {
     }
 
     fs_object_t* mt = NULL;
-    
+
     for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
         if(registered_mountpoints[i].disk_nr == disk_nr) {
             mt = registered_mountpoints + i;
@@ -288,6 +289,40 @@ int touch(const char* path) {
     }
 
     int result = mt->filesystem->touch(mt, div_path);
+
+    return result;
+}
+
+int remove(const char* path) {
+    qemu_log("Remove");
+
+    size_t disk_nr;
+    char* div_path;
+
+    vfs_parse_path(path, &disk_nr, &div_path);
+
+    if (disk_nr >= DISK_COUNT) {
+        return -1;
+    }
+
+    fs_object_t* mt = NULL;
+
+    for(int i = 0; i < MOUNTPOINTS_MAX_COUNT; i++) {
+        if(registered_mountpoints[i].disk_nr == disk_nr) {
+            mt = registered_mountpoints + i;
+            break;
+        }
+    }
+
+    if(mt == NULL) {
+        return -1;
+    }
+
+    if(!mt->valid) {
+        return -1;
+    }
+
+    int result = mt->filesystem->remove(mt, div_path);
 
     return result;
 }

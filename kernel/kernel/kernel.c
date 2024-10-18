@@ -24,7 +24,8 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
             fat32_filewrite,
             fat32_fileclose,
             fat32_mkdir,
-            fat32_touch
+            fat32_touch,
+            fat32_remove
     );
 
     // 8086:7010
@@ -42,6 +43,12 @@ void kernel_early(__attribute__((unused)) multiboot_info_t* mbd, __attribute__((
     // free(devs.data);
 
     vfs_scan();
+
+//    qemu_log("Remove result: %d", remove("1:/a"));
+//    qemu_log("Remove result: %d", remove("1:/b"));
+//    qemu_log("Remove result: %d", remove("1:/c"));
+//    qemu_log("Remove result: %d", remove("1:/123"));
+//    qemu_log("Remove result: %d", remove("1:/LongfileHelloWorld"));
 
     multiboot = mbd;
 }

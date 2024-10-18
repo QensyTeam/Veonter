@@ -11,3 +11,4 @@ void fat32_fileclose(fs_object_t* fs, NFILE* fp);
 
 int fat32_mkdir(fs_object_t* fs, const char* path);
 int fat32_touch(fs_object_t* fs, const char* path);
+int fat32_remove(fs_object_t* fs, const char* path);

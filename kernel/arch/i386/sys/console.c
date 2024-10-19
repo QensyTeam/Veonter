@@ -237,6 +237,7 @@ void console_process_command(const char* command) {
         direntry_t* orig = ent;
         
         do {
+            qemu_log("[%x] Name: `%s`; Next: `%x`", ent, ent->name, ent->next);
             printf("%s\n", ent->name);
             ent = ent->next;
         } while(ent);

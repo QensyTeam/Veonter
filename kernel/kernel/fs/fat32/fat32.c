@@ -76,6 +76,7 @@ direntry_t* fat32_read_directory(fs_object_t* obj, fat_t* fat, uint32_t start_cl
 
     direntry_t* dir = calloc(1, sizeof(direntry_t));
     direntry_t* dirptr = dir;
+    direntry_t* prevdir = NULL;
 
     // HINT: Both LFN and directory entry are 32 bytes long.
     DirectoryEntry_t* prev = (DirectoryEntry_t*)(cluster_data + cluster_count);
@@ -99,12 +100,15 @@ direntry_t* fat32_read_directory(fs_object_t* obj, fat_t* fat, uint32_t start_cl
             while(entry->attributes & ATTR_LONG_FILE_NAME) {
                 entry = (DirectoryEntry_t*)(cluster_data + current_offset);
 
+                qemu_log("SKIPPING LFN");
+
                 current_offset -= 32;
             }
 
-//            current_offset += 32;
+            current_offset += 32;
             // Удалённый файл
-            goto next;
+            //goto next;
+            continue;
         }
 
         if (entry->attributes & ATTR_LONG_FILE_NAME) {
@@ -147,10 +151,13 @@ lfn_next:
                 dirptr->size = prev->file_size;
                 dirptr->priv_data = (void*)(size_t)((prev->high_cluster << 16) | prev->low_cluster);
 
+                qemu_log("OFFSET: %d", current_offset);
+
                 if(current_offset != 0) {
                     dirptr->next = calloc(1, sizeof(direntry_t));
+                    prevdir = dirptr;
                     dirptr = dirptr->next;
-                }
+                } 
 
                 memset(in_name_buffer, 0, 512);
                 memset(out_name_buffer, 0, 256);
@@ -172,6 +179,7 @@ lfn_next:
 
             if(current_offset != 0) {
                 dirptr->next = calloc(1, sizeof(direntry_t));
+                prevdir = dirptr;
                 dirptr = dirptr->next;
             }
         }
@@ -180,6 +188,9 @@ next:
 
         prev = entry;
     } while (current_offset >= 0); 
+
+    free(dirptr);
+    prevdir->next = 0;
 
     free(cluster_data);
 
